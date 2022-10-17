@@ -41,7 +41,11 @@ namespace Assets.Environment {
         public Layer(int w, int h, float[,] m, float[,] values) {
             InitVariables(w, h, m);
 
-            this.values = values;
+            for (int y = 0; y < h; y++) {
+                for (int x = 0; x < w; x++) {
+                    this.values[x + (mW / 2), y + (mH / 2)] = values[x,y];
+                }
+            }
             LoopMatrix();
         }
         public Layer(int w, int h, float[,] m, Func<int, int, float> gen) {

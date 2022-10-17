@@ -1,13 +1,11 @@
 using Assets.Environment;
 using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.UI;
+using UnityEditor;
 
 public class LayerEditor : MonoBehaviour {
-    [SerializeField] Sprite displaySprite;    
-    [SerializeField] TMP_InputField inputField;
+    [SerializeField] Sprite displaySprite;
 
     private Dictionary<Vector2, (GameObject, float)> points;
     private int width = 0;
@@ -37,6 +35,10 @@ public class LayerEditor : MonoBehaviour {
         if (float.TryParse(value, out val)) {
             this.value = val;
         }
+    }
+    public void SaveLayer() {
+        string path = EditorUtility.SaveFilePanel("Save Layer", "C:\\Users\\philipc\\Documents\\Personal\\UnityStuff\\CellAgentModeling", "", ".txt");
+        GenerateLayer().SaveValues(path);
     }
 
     public void AddPoint(Vector2 p, float value) {
@@ -70,7 +72,7 @@ public class LayerEditor : MonoBehaviour {
     }
 
     private Layer GenerateLayer() {
-        float[,] values = new float[width, height];
+        float[,] values = new float[width + 1, height + 1];
         float[,] m = {
             { 1f, 1f, 1f },
             { 1f, 1.05f, 1f },
