@@ -7,9 +7,10 @@ using UnityEngine;
 
 namespace Assets.Environment {
     public class EnvTester : MonoBehaviour {
-        Layer layer;
-        GameObject[,] displayLayer;
-        GameObject[,] debugLayer;
+        private Layer layer;
+        [SerializeField] Sprite displaySprite;
+        private GameObject[,] displayLayer;
+        private GameObject[,] debugLayer;
 
         private int w = 100, h = 100;
         private float[,] m = {
@@ -67,9 +68,11 @@ namespace Assets.Environment {
         private void InitLayerDisplay(Vector2 offset, GameObject[,] display) {
             for (int i = 0; i < display.GetLength(0); i++) {
                 for (int j = 0; j < display.GetLength(1); j++) {
-                    GameObject go = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                    GameObject go = new GameObject();
+                    SpriteRenderer sr =  go.AddComponent<SpriteRenderer>();
+                    sr.sprite = displaySprite;
                     go.transform.position = offset + new Vector2(j, i);                    
-                    display[i, j] = go;
+                    display[j, i] = go;
                 }
             }
         }
@@ -79,9 +82,9 @@ namespace Assets.Environment {
                 for (int j = 0; j < display.GetLength(1); j++) { 
                     float val = values[i, j];
                     if (val < 0) {
-                        display[i, j].GetComponent<Renderer>().material.color = new Color(0, 0, 0);
+                        display[i, j].GetComponent<SpriteRenderer>().material.color = new Color(0, 0, 0);                        
                     } else {
-                        display[i, j].GetComponent<Renderer>().material.color = new Color(val, 1 - val, 0.5f);
+                        display[i, j].GetComponent<SpriteRenderer>().material.color = Color.HSVToRGB(Mathf.Min(val, 1), 1, 1);
                     }
                 }
             }
