@@ -1,3 +1,4 @@
+using Assets.Environment;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -12,8 +13,7 @@ public class LayerEditor : MonoBehaviour {
     private int width = 0;
     private int height = 0;
     private Vector2 prevMouse = Vector2.zero;
-    private float value = 0f;
-    private bool mouseOver = false;
+    private float value = 0f;    
 
     private void Start() {
         points = new Dictionary<Vector2, (GameObject, float)>();
@@ -67,5 +67,34 @@ public class LayerEditor : MonoBehaviour {
         sr.sprite = displaySprite;
         sr.color = Color.HSVToRGB(value, 1, 1);
         return go;
+    }
+
+    private Layer GenerateLayer() {
+        float[,] values = new float[width, height];
+        float[,] m = {
+            { 1f, 1f, 1f },
+            { 1f, 1.05f, 1f },
+            { 1f, 1f, 1f }
+        };
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                values[x, y] = 0f;
+            }
+        }
+        foreach (Vector2 key in points.Keys) {
+            int x = (int)key.x;
+            int y = (int)key.y;
+            values[x, y] = points[key].Item2;
+        }
+
+        return new Layer(width, height, m, values);
+    }
+
+    private class IVector2 {
+        public int x, y;
+        public IVector2(int x, int y) {
+            this.x = x; this.y = y;
+        }
     }
 }
