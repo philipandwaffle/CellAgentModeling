@@ -5,13 +5,14 @@ using UnityEngine.EventSystems;
 using UnityEditor;
 
 public class LayerEditor : MonoBehaviour {
+
     [SerializeField] Sprite displaySprite;
 
     private Dictionary<Vector2, (GameObject, float)> points;
     private int width = 0;
     private int height = 0;
     private Vector2 prevMouse = Vector2.zero;
-    private float value = 0f;    
+    private float value = 0.5f;
 
     private void Start() {
         points = new Dictionary<Vector2, (GameObject, float)>();
@@ -20,7 +21,10 @@ public class LayerEditor : MonoBehaviour {
     private void Update() {
         if (Input.GetMouseButton(0) && !EventSystem.current.IsPointerOverGameObject()) {
             Vector2 curMouse = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            curMouse = new Vector2((int)curMouse.x + .5f, (int)curMouse.y + .5f);
+            if (curMouse.x < 0 || curMouse.y < 0) {
+                return;
+            }
+            curMouse = new Vector2((int)curMouse.x, (int)curMouse.y);
             if (prevMouse != curMouse) {
                 prevMouse = curMouse;
                 AddPoint(new Vector2(curMouse.x, curMouse.y), value);
@@ -37,7 +41,11 @@ public class LayerEditor : MonoBehaviour {
         }
     }
     public void SaveLayer() {
-        string path = EditorUtility.SaveFilePanel("Save Layer", "C:\\Users\\philipc\\Documents\\Personal\\UnityStuff\\CellAgentModeling", "", ".txt");
+        string path = EditorUtility.SaveFilePanel(
+            "Save Layer", 
+            "C:\\Users\\philipc\\Documents\\Personal\\UnityStuff\\CellAgentModeling", 
+            "", 
+            "txt");
         GenerateLayer().SaveValues(path);
     }
 
@@ -75,7 +83,7 @@ public class LayerEditor : MonoBehaviour {
         float[,] values = new float[width + 1, height + 1];
         float[,] m = {
             { 1f, 1f, 1f },
-            { 1f, 1.05f, 1f },
+            { 1f, 1f, 1f },
             { 1f, 1f, 1f }
         };
 
@@ -90,13 +98,6 @@ public class LayerEditor : MonoBehaviour {
             values[x, y] = points[key].Item2;
         }
 
-        return new Layer(width, height, m, values);
-    }
-
-    private class IVector2 {
-        public int x, y;
-        public IVector2(int x, int y) {
-            this.x = x; this.y = y;
-        }
+        return new Layer(width + 1, height + 1, m, values);
     }
 }

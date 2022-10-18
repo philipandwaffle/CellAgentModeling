@@ -15,7 +15,7 @@ namespace Assets.Environment {
         private int w = 100, h = 100;
         private float[,] m = {
             { 1f, 1f, 1f },
-            { 1f, 1.05f, 1f },
+            { 1f, 1f, 1f },
             { 1f, 1f, 1f }
         };
 
@@ -30,7 +30,7 @@ namespace Assets.Environment {
             
             for (int i = 0; i < m.GetLength(0); i++) {
                 for (int j = 0; j < m.GetLength(1); j++) {
-                    m[i, j] = m[i, j] / 9;
+                    m[i, j] = m[i, j] / 100f;
                 }
             }
             

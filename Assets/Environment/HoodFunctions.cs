@@ -6,7 +6,7 @@ namespace Assets.Environment {
             int w = hood.GetLength(0);
             int h = hood.GetLength(1);
 
-            float avg = w * h;
+            float avg = (w * h);
             float total = 0;
 
             if (hood[w / 2, h / 2] < 0) {
@@ -15,7 +15,7 @@ namespace Assets.Environment {
 
             for (int x = 0; x < w; x++) {
                 for (int y = 0; y < h; y++) {
-                    if (hood[x, y] < 0) {
+                    if (hood[x, y] == -1) {
                         avg -= 1f;
                     } else {
                         total += hood[x, y];

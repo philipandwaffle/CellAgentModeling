@@ -112,7 +112,7 @@ namespace Assets.Environment {
                 // left, left into right
                 int lLR = (mW / 2) + i;
                 
-                for (int y = 0; y < tW; y++) {
+                for (int y = 0; y < tH; y++) {
                     // right colunn into left
                     values[lRL, y] = values[rRL, y];
 
@@ -190,20 +190,23 @@ namespace Assets.Environment {
 
         public void SaveValues(string path) {
             using (StreamWriter sw = File.CreateText(path)) {
+                // dimensions of the layer 
                 sw.WriteLine(w + "," + h + "," + mW + "," + mH + "," + tW + "," + tH);
 
+                // write the mask
                 string[] row = new string[mW];
-                for (int y = mH - 1; y >= 0; y--) {
-                    
+                for (int y = mH - 1; y >= 0; y--) {                    
                     for (int x = 0; x < mW; x++) {
-                        row[x] = m[y, x] + "";
+                        row[x] = m[x, y] + "";
                     }
                     sw.WriteLine(String.Join(',', row));
                 }
+                
+                // write the values
                 row = new string[tW];
                 for (int y = tH - 1; y >= 0; y--) {
                     for (int x = 0; x < tW; x++) {
-                        row[x] = values[y, x] + "";
+                        row[x] = values[x, y] + "";
                     }
                     sw.WriteLine(String.Join(',', row));
                 }
