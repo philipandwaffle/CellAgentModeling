@@ -20,6 +20,7 @@ namespace Assets.Environment {
         }
 
         private GameObject[,] d;
+
         public void SetD(int w, int h) {
             d = new GameObject[w, h];
 
@@ -49,11 +50,23 @@ namespace Assets.Environment {
         public void LoadLayer() {
             string path = EditorUtility.OpenFilePanel(
                 "Load Layer",
-                "C:\\Users\\philipc\\Documents\\Personal\\UnityStuff\\CellAgentModeling",
+                Application.dataPath,
                 "txt");
             Layer l = new Layer(path);
             l.SetHoodFn(HoodFunctions.BoundedAvgSpread);
             SetLayer(l);
+        }
+        public void SaveLayer() {
+            string path = EditorUtility.SaveFilePanel(
+                "Save Layer",
+                Application.dataPath,
+                "",
+                "txt");
+            if (!path.Equals("")) {
+                l.SaveValues(path);
+            } else {
+                Debug.Log("Empty file path, exiting");
+            }
         }
 
         private void ConvolveLayer() {

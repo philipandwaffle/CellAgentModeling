@@ -40,13 +40,17 @@ public class LayerEditor : MonoBehaviour {
             this.value = val;
         }
     }
-    public void SaveLayer() {
+    public void SaveLayer() {        
         string path = EditorUtility.SaveFilePanel(
-            "Save Layer", 
-            "C:\\Users\\philipc\\Documents\\Personal\\UnityStuff\\CellAgentModeling", 
+            "Save Layer",
+            Application.dataPath,
             "", 
             "txt");
-        GenerateLayer().SaveValues(path);
+        if (!path.Equals("")) {
+            GenerateLayer().SaveValues(path);
+        } else {
+            Debug.Log("Empty file path, exiting");
+        }
     }
 
     public void AddPoint(Vector2 p, float value) {
@@ -64,10 +68,6 @@ public class LayerEditor : MonoBehaviour {
             }
             points.Add(p, (SpawnSprite(p, value), value));
         }        
-    }
-    private void RemoveValue(Vector2 p) {
-        Destroy(points[p].Item1);
-        points.Remove(p);
     }
 
     private GameObject SpawnSprite(Vector2 p, float value) {
