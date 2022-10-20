@@ -7,19 +7,20 @@ using UnityEngine.EventSystems;
 
 namespace Assets.Environment {
     public class CAEditor : MonoBehaviour {
-        int w, h;
+        [SerializeField] int w, h;
         float[,] m = {
             {1f, 1f, 1f },
             {1f, 1f, 1f },
             {1f, 1f, 1f }
         };
         CAController cac;
-        float curVal;
+        float brushVal = -1;
         private Vector2Int prevMouse = new Vector2Int(-1, -1);
 
         // Use this for initialization
         void Start() {
             cac = gameObject.GetComponent<CAController>();
+            cac.SetLayer(new Layer(w, h, m));
         }
 
         // Update is called once per frame
@@ -43,10 +44,18 @@ namespace Assets.Environment {
                 }
             }
         }
-
-        public void SetLayerValue(int x, int y) {
-            cac.l.SetValue(x, y, curVal);
+        private void SetLayerValue(int x, int y) {
+            cac.SetPoint(x, y, brushVal);
         }
+
+        public void SetBrushValue(string value) {
+            Debug.Log(value);
+            float val;
+            if (float.TryParse(value, out val)) {
+                brushVal = val;
+            }
+        }
+
         public void Play() {
             cac.ResumeSim();
         }
@@ -59,8 +68,14 @@ namespace Assets.Environment {
         public void LoadLayer() {
             string path = EditorUtility.OpenFilePanel(
                 "Load Layer",
-                Application.dataPath,
+                Application.dataPath + "/Layers",
                 "txt");
+
+            if (path.Equals("")) {
+                Debug.Log("Empty file path, exiting");
+                return;
+            }
+
             Layer l = new Layer(path);
             l.SetHoodFn(HoodFunctions.BoundedAvgSpread);
             cac.SetLayer(l);
@@ -68,7 +83,7 @@ namespace Assets.Environment {
         public void SaveLayer() {
             string path = EditorUtility.SaveFilePanel(
                 "Save Layer",
-                Application.dataPath,
+                Application.dataPath + "/Layers",
                 "",
                 "txt");
             if (!path.Equals("")) {

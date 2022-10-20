@@ -51,9 +51,9 @@ namespace Assets.Environment {
         public Layer(int w, int h, float[,] m, float val = 0) {
             InitVariables(w, h, m);
 
-            for (int y = 0; y < h; y++) {
-                for (int x = 0; x < w; x++) {
-                    values[x + (mW / 2), y + (mH / 2)] = val;
+            for (int y = 0; y < tH; y++) {
+                for (int x = 0; x < tW; x++) {
+                    values[x, y] = val;
                 }
             }
             LoopMatrix();
@@ -190,6 +190,16 @@ namespace Assets.Environment {
                 }
             }
             SetNewValues(newValues);
+            return newValues;
+        }
+
+        public float[,] GetValues() {
+            float[,] newValues = new float[w, h];
+            for (int y = 0; y < h; y++) {
+                for (int x = 0; x < w; x++) {
+                    newValues[x, y] = values[x + (mW / 2), y + (mH / 2)];
+                }
+            }
             return newValues;
         }
 

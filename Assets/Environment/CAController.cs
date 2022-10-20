@@ -13,7 +13,9 @@ namespace Assets.Environment {
 
         public void SetLayer(Layer l) {
             this.l = l;
+            l.SetHoodFn(HoodFunctions.BoundedAvgSpread);
             SetD(l.w, l.h);
+            UpdateDisplay(l.GetValues());
         }
         public void SetPoint(int x, int y, float val) {
             int lX = l.mW / 2 + x;
@@ -57,7 +59,8 @@ namespace Assets.Environment {
         private void UpdateDisplay(float[,] values) {
             for (int y = 0; y < l.h; y++) {
                 for (int x = 0; x < l.w; x++) {
-                    d[x, y].GetComponent<SpriteRenderer>().color = GenColor(values[x, y]);
+                    d[x, y].GetComponent<SpriteRenderer>().color =
+                        GenColor(values[x, y]);
                 }
             }
         }
