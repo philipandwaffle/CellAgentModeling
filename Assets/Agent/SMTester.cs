@@ -41,42 +41,22 @@ namespace Assets.Agent {
                 Debug.Log("coining");
                 sms.Coin();
             }
-            /*if (Input.GetMouseButton(0) && !EventSystem.current.IsPointerOverGameObject()) {
-                // Get the current mouse position in the world
-                Vector2 mPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-
-                // Guard clause if mouse is outside of bounds
-                if (mPos.x < 0 || mPos.x > w || mPos.y < 0 || mPos.y > h) {
-                    return;
-                }
-
-                // Convert mouse position to an integer
-                Vector2Int curMouse = new Vector2Int((int)mPos.x, (int)mPos.y);
-
-                // If the mouse has moved
-                if (prevMouse != curMouse) {
-                    prevMouse = curMouse;
-                    SetLayerValue(curMouse.x, curMouse.y);
-                }
-            }*/
         }        
 
         State locked = new State("locked", () => Debug.Log("I'm locked"));
-        State open = new State("locked", () => Debug.Log("I'm open"));
+        State open = new State("open", () => Debug.Log("I'm open"));
 
         Input coin = new Input(
             "coin", 
-            (go) => { 
+            (go) => {
                 StateMachineSensor sms = go.GetComponent<StateMachineSensor>();                
-                Debug.Log("checking coin");
                 return sms.coin;
             } 
         );
         Input push = new Input(
             "push",
             (go) => {
-                StateMachineSensor sms = go.GetComponent<StateMachineSensor>();
-                Debug.Log("checking push");
+                StateMachineSensor sms = go.GetComponent<StateMachineSensor>();                
                 return sms.push;
             }
         );

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEditor.UI;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -41,13 +42,13 @@ namespace Assets.Agent {
                     newStates.Add(transition.Item2);
                 }
             }
-            Debug.Log(newStates.Count);
+            
             // Pick new state from possible ones
-            if (newStates.Count != 0) {
-                int foo = newStates[Random.Range(0, newStates.Count)];
-                Debug.Log("new state: " + states[foo].name);
-                curState = foo;
+            if (newStates.Count != 0) {                
+                curState = newStates[Random.Range(0, newStates.Count)];
+                states[curState].Act();
             }
+            Debug.Log("Current state: " + states[curState].name);
         }
     } 
 
