@@ -5,12 +5,16 @@ using UnityEngine;
 namespace Assets.Agent {
     public class SMTester : MonoBehaviour {        
         [SerializeField] Sprite displaySprite;
+        [SerializeField] int count = 100;
+        [SerializeField] float tickRate = 0.001f;
 
-        private StateMachine[] runners = new StateMachine[100];
-        private GameObject[] runnerSensors = new GameObject[100];
+        private StateMachine[] runners;
+        private GameObject[] runnerSensors;
 
         // Use this for initialization
-        void Start() {           
+        void Start() {
+            runners = new StateMachine[count];
+            runnerSensors = new GameObject[count];
 
             for (int i = 0; i < runners.Length; i++) {
                 StateMachine runner = new StateMachine(
@@ -30,7 +34,7 @@ namespace Assets.Agent {
             }
             StateMachineSensor.sensors = FindObjectsOfType<StateMachineSensor>();
 
-            InvokeRepeating(nameof(Advance), 0, 0.01f);
+            InvokeRepeating(nameof(Advance), 0, tickRate);
         }
 
         private void Advance() {
