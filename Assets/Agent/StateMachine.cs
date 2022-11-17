@@ -7,7 +7,7 @@ using Random = UnityEngine.Random;
 
 namespace Assets.Agent {
     public class StateMachine {
-        private int curState;
+        public int curState;
         private State[] states;
         private Input[] inputs;
         
@@ -29,8 +29,7 @@ namespace Assets.Agent {
             this.transitions = transitions;
         }        
 
-        public void Advance(GameObject go) {
-            Debug.Log("advancing");
+        public void Advance(GameObject agent) {
             (int, int)[] t = transitions[curState];
             List<int> newStates = new List<int>();
 
@@ -38,7 +37,7 @@ namespace Assets.Agent {
             for (int i = 0; i < t.Length; i++) {
                 (int, int) transition = t[i];                
                 // If transition requirements are met
-                if (inputs[transition.Item1].Check(go)) {
+                if (inputs[transition.Item1].Check(agent)) {
                     newStates.Add(transition.Item2);
                 }
             }
@@ -46,23 +45,23 @@ namespace Assets.Agent {
             // Pick new state from possible ones
             if (newStates.Count != 0) {                
                 curState = newStates[Random.Range(0, newStates.Count)];
-                states[curState].Act();
             }
-            Debug.Log("Current state: " + states[curState].name);
+            states[curState].Act(agent);
+            //Debug.Log("Current state: " + states[curState].name);
         }
     } 
 
     public class State {
         public string name;
-        private Action act;
+        private Action<GameObject> act;
 
-        public State(string name, Action act) {
+        public State(string name, Action<GameObject> act) {
             this.name = name;
             this.act = act;
         }
 
-        public void Act() {
-            act();
+        public void Act(GameObject agent) {
+            act(agent);
         }
     }
     public class Input{
@@ -74,8 +73,8 @@ namespace Assets.Agent {
             this.check = check;
         }
         
-        public bool Check(GameObject go) {
-            return check(go);
+        public bool Check(GameObject agent) {
+            return check(agent);
         }
     }
 }
