@@ -48,6 +48,16 @@ namespace Assets.Environment {
             }
             LoopMatrix();
         }
+        public Layer(int w, int h, float[,] m, float val = 0) {
+            InitVariables(w, h, m);
+
+            for (int y = 0; y < tH; y++) {
+                for (int x = 0; x < tW; x++) {
+                    values[x, y] = val;
+                }
+            }
+            LoopMatrix();
+        }
         public Layer(int w, int h, float[,] m, Func<int, int, float> gen) {
             InitVariables(w, h, m);
 
@@ -78,6 +88,10 @@ namespace Assets.Environment {
             tH = h + 2*(mH/2);
 
             values = new float[tW,tH];
+        }
+
+        public void SetValue(int x, int y, float val) {
+            values[x, y] = val;
         }
 
         public void LoopMatrix() {
@@ -176,6 +190,16 @@ namespace Assets.Environment {
                 }
             }
             SetNewValues(newValues);
+            return newValues;
+        }
+
+        public float[,] GetValues() {
+            float[,] newValues = new float[w, h];
+            for (int y = 0; y < h; y++) {
+                for (int x = 0; x < w; x++) {
+                    newValues[x, y] = values[x + (mW / 2), y + (mH / 2)];
+                }
+            }
             return newValues;
         }
 
