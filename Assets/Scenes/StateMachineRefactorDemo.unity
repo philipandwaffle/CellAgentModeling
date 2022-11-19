@@ -252,5 +252,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   agentSprite: {fileID: 7482667652216324306, guid: bf6ff723533ce5d48b8cf8e676680fd5, type: 3}
-  agentCount: 25
+  agentCount: 200
   tickRate: 0.01

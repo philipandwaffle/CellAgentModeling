@@ -23,22 +23,19 @@ namespace Assets.Agent.Refactor {
             (s) => {
                 float dist = 0.5f;
 
-                /*int peerIndex = s.GetClosestPeer();
-                if (peerIndex != -1) {
-                    Vector3 dir = new Vector2(Random.Range(-1, 1), Random.Range(-1, 1));
+                int peerIndex = s.GetClosestPeer();
+
+                Vector2 dir = new Vector2();
+                if (peerIndex == -1) {
+                    dir = new(Random.Range(-dist, dist), Random.Range(-dist, dist));                    
                 } else {
-
+                    dir = s.transform.position - SMSensor.peers[peerIndex].transform.position;
+                    dir.Normalize();
+                    dir *= dist;
                 }
+                s.transform.Translate(dir);
 
-
-                Vector3 closest = SMSensor.peers[s.GetClosestPeer()].transform.position;
-                if (closest.magnitude == 0f) {
-                    closest = new(Random.Range(-1, 1), Random.Range(-1, 1));
-                }
-                Vector3 dir = s.transform.position - closest;
-                dir = dir.normalized;
-                s.transform.Translate(dir * dist);*/
-                s.transform.Translate(new(Random.Range(-dist, dist), Random.Range(-dist, dist)));
+                //s.transform.Translate(new(Random.Range(-dist, dist), Random.Range(-dist, dist)));
                 s.gameObject.GetComponent<SpriteRenderer>().color = Color.red;
             }
         );

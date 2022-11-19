@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Assets.Agent.Refactor {
     public class SMSensor : MonoBehaviour {
         public int curState { get; set; }
-        public int id { get; private set; }
+        public int id;
         private static int nextId = 0;
 
         public static SMSensor[] peers;
@@ -26,7 +26,7 @@ namespace Assets.Agent.Refactor {
                 Debug.LogWarning("Calling closest may cause problems when peers <= 1");
                 return index;
             } else {                
-                float maxDist = 0;                
+                float minDist = float.PositiveInfinity;
 
                 for (int i = 0; i < peers.Length; i++) {
                     if (id == peers[i].id) {
@@ -34,10 +34,14 @@ namespace Assets.Agent.Refactor {
                     }
 
                     float dist = Vector3.Distance(gameObject.transform.position, peers[i].transform.position);
-                    if (maxDist <= dist) {
-                        maxDist = dist;
+                    if (minDist > dist) {
+                        minDist = dist;
                         index = i;
                     }
+                }
+
+                if (minDist == 0) {
+                    return -1;
                 }
             }
 
