@@ -4,10 +4,10 @@ using UnityEngine;
 namespace Assets.Agent.Refactor {
     public class SMSensor : MonoBehaviour {
         public int curState { get; set; }
-        private int id;
+        public int id { get; private set; }
         private static int nextId = 0;
 
-        private static SMSensor[] peers;
+        public static SMSensor[] peers;
 
         // Use this for initialization
         void Start() {
@@ -19,25 +19,29 @@ namespace Assets.Agent.Refactor {
             peers = FindObjectsOfType<SMSensor>();
         }
 
-        public Vector3 GetClosestPos() {
-            Vector3 closest = Vector3.zero;
+        public int GetClosestPeer() {
+            int index = -1;
 
-            if (peers.Length == 0) {
-                return Vector3.zero;
-            } else {
-                int iClosest;
+            if (peers.Length == 0 || peers.Length == 1) {
+                Debug.LogWarning("Calling closest may cause problems when peers <= 1");
+                return index;
+            } else {                
                 float maxDist = 0;                
 
-                for (int i = 0; i < peers.Length; i++) {                    
+                for (int i = 0; i < peers.Length; i++) {
+                    if (id == peers[i].id) {
+                        continue;
+                    }
+
                     float dist = Vector3.Distance(gameObject.transform.position, peers[i].transform.position);
                     if (maxDist <= dist) {
                         maxDist = dist;
-                        closest = peers[i].transform.position;
+                        index = i;
                     }
                 }
             }
 
-            return closest;
+            return index;
         }
     }
 }

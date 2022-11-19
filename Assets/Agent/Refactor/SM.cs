@@ -19,6 +19,12 @@ namespace Assets.Agent.Refactor {
             this.deterministic = deterministic;
         }
 
+        public void AdvanceSensors(ref T[] sensors) {
+            for (int i = 0; i < sensors.Length; i++) {
+                AdvanceSensor(sensors[i]);
+            }
+        }
+
         public void AdvanceSensor(T sensor) {
             (int, int)[] possibleTrans = transitions[sensor.curState];
 
