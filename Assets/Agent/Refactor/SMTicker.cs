@@ -17,7 +17,7 @@ namespace Assets.Agent.Refactor {
         [SerializeField] Sprite agentSprite;
         [SerializeField] int agentCount = 100;
         [SerializeField] float tickRate = 0.001f;
-        //[SerializeField] int batchSize = 50;
+        [SerializeField] int batchCount = 10;
 
         State<SMSensor> panic = new(
             (s) => {
@@ -35,7 +35,6 @@ namespace Assets.Agent.Refactor {
                 }
                 s.transform.Translate(dir);
 
-                //s.transform.Translate(new(Random.Range(-dist, dist), Random.Range(-dist, dist)));
                 s.gameObject.GetComponent<SpriteRenderer>().color = Color.red;
             }
         );
@@ -46,30 +45,12 @@ namespace Assets.Agent.Refactor {
         );
         Input<SMSensor> far = new(
             (s) => {
-                for (int i = 0; i < SMSensor.peers.Length; i++) {
-                    SMSensor peer = SMSensor.peers[i];
-                    if (s.id == peer.id) {
-                        continue;
-                    }
-                    if (Vector3.Distance(s.transform.position, peer.transform.position) <= 2) {
-                        return false;
-                    }
-                }
-                return true;
+                return s.colliders.Count == 0;
             }
         );
         Input<SMSensor> close = new(
             (s) => {
-                for (int i = 0; i < SMSensor.peers.Length; i++) {
-                    SMSensor peer = SMSensor.peers[i];
-                    if (s.id == peer.id) {
-                        continue;
-                    }
-                    if (Vector3.Distance(s.transform.position, peer.transform.position) < 2) {
-                        return true;
-                    }
-                }
-                return false;
+                return s.colliders.Count != 0;
             }
         );
 
@@ -84,17 +65,24 @@ namespace Assets.Agent.Refactor {
                         { 1, new (int, int)[] { (1, 0) } }
                 }
             );
+            sms = new SM<SMSensor>[batchCount];
+            for (int i = 0; i < batchCount; i++) {
+                sms[i] = sm;
+            }
 
-            //sms = new SM<SMSensor>[] { sm, sm, sm, sm, sm, sm, sm, sm, sm, sm, sm, sm, sm, sm, sm, sm, sm, sm, sm, sm };
-            sms = new SM<SMSensor>[] { sm };
-            sensors = new SMSensor[sms.Length][];            
+            sensors = new SMSensor[batchCount][];
 
+            float spawnRange = 50f;
             for (int i = 0; i < sensors.Length; i++) {
                 sensors[i] = new SMSensor[agentCount];
                 for (int j = 0; j < agentCount; j++) {
                     GameObject go = new GameObject();
+
+                    go.transform.position = new Vector2(Random.Range(-spawnRange, spawnRange), Random.Range(-spawnRange, spawnRange));
                     go.AddComponent<SpriteRenderer>().sprite = agentSprite;
-                    sensors[i][j] = go.AddComponent<SMSensor>();
+                    SMSensor sensor = go.AddComponent<SMSensor>();
+                    sensor.SetColliderRadius(1f);
+                    sensors[i][j] = sensor;
                 }
             }
             
@@ -103,13 +91,12 @@ namespace Assets.Agent.Refactor {
                 throw new Exception("sensors types don't match state machines count");
             }
 
-
             //InvokeRepeating(nameof(AdvanceSensorsParallel), 0, tickRate);
         }
 
         private void Update() {
-            //AdvanceSensorsParallel();
-            AdvanceSensors();
+            AdvanceSensorsParallel();
+            //AdvanceSensors();
         }
 
         private void AdvanceSensors() {
@@ -125,30 +112,10 @@ namespace Assets.Agent.Refactor {
             List<SensorBatch<SMSensor>> batches = new List<SensorBatch<SMSensor>>();
             for (int i = 0; i < sensors.Length; i++) {
                 batches.Add(new SensorBatch<SMSensor>(ref sms[i], ref sensors[i]));
-                /*SM<SMSensor> curSM = sms[i];
-
-                int start = 0;
-                do {
-                    int curBatchSize = batchSize;
-                    curBatchSize = curBatchSize + start > sensors[i].Length ? sensors[i].Length - start : curBatchSize;
-
-                    int end = start + curBatchSize;
-
-
-                    
-                    start += batchSize;
-                } while (start < sensors[i].Length);*/
             }
             
             for (int i = 0; i < batches.Count; i++) {
                 batches[i].Execute();
-            }
-        }
-
-        private void AdvanceSensorBatch(int smIndex, int start, int end) {
-            SM<SMSensor> curSM = sms[smIndex];
-            for (int i = start; i < end; i++) {
-                curSM.AdvanceSensor(sensors[smIndex][i]);
             }
         }
     }
