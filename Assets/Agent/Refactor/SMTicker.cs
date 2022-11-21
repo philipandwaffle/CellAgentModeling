@@ -16,7 +16,7 @@ namespace Assets.Agent.Refactor {
 
         [SerializeField] Sprite agentSprite;
         [SerializeField] int agentCount = 100;
-        [SerializeField] float tickRate = 0.001f;
+        [SerializeField] float spawnRange = 10f;
         [SerializeField] int batchCount = 10;
 
         State<SMSensor> panic = new(
@@ -72,16 +72,21 @@ namespace Assets.Agent.Refactor {
 
             sensors = new SMSensor[batchCount][];
 
-            float spawnRange = 50f;
             for (int i = 0; i < sensors.Length; i++) {
                 sensors[i] = new SMSensor[agentCount];
                 for (int j = 0; j < agentCount; j++) {
                     GameObject go = new GameObject();
-
-                    go.transform.position = new Vector2(Random.Range(-spawnRange, spawnRange), Random.Range(-spawnRange, spawnRange));
+                    go.transform.parent = transform;
+                    go.transform.position = new Vector3(
+                        Random.Range(-spawnRange, spawnRange), 
+                        Random.Range(-spawnRange, spawnRange), 
+                        transform.position.z
+                    );
                     go.AddComponent<SpriteRenderer>().sprite = agentSprite;
                     SMSensor sensor = go.AddComponent<SMSensor>();
+                    go.name = sensor.id.ToString();
                     sensor.SetColliderRadius(1f);
+
                     sensors[i][j] = sensor;
                 }
             }
@@ -90,13 +95,11 @@ namespace Assets.Agent.Refactor {
             if (sensors.Length != sms.Length) {
                 throw new Exception("sensors types don't match state machines count");
             }
-
-            //InvokeRepeating(nameof(AdvanceSensorsParallel), 0, tickRate);
         }
 
         private void Update() {
-            AdvanceSensorsParallel();
-            //AdvanceSensors();
+            //AdvanceSensorsParallel();
+            AdvanceSensors();
         }
 
         private void AdvanceSensors() {

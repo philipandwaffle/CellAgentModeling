@@ -31,12 +31,16 @@ namespace Assets.Environment {
             d = new GameObject[w, h];
 
             GameObject go = new GameObject();
+
             SpriteRenderer sr = go.AddComponent<SpriteRenderer>();
             sr.sprite = displaySprite;
 
             for (int y = 0; y < h; y++) {
                 for (int x = 0; x < w; x++) {
-                    d[x, y] = Instantiate(go, offset + new Vector2(x, y), Quaternion.identity);
+                    GameObject instance = Instantiate(go, offset + new Vector2(x, y), Quaternion.identity);
+                    instance.transform.parent = transform;
+                    instance.name = "(" + x + "," + y + ")";
+                    d[x, y] = instance;
                 }
             }
             Destroy(go);
