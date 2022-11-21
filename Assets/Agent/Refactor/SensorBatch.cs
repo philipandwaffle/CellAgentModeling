@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using Unity.Jobs;
 using UnityEngine;
-
 namespace Assets.Agent.Refactor {
     public class SensorBatch<T> : IJob where T : SMSensor {
         private SM<T> sm;

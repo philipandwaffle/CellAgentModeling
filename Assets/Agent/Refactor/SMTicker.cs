@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Reflection;
-using Unity.Collections;
-using Unity.Jobs;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.UIElements;
+using System.Threading.Tasks;
 using Random = UnityEngine.Random;
+using Unity.Collections;
 
 namespace Assets.Agent.Refactor {
     public class SMTicker : MonoBehaviour {
@@ -21,7 +17,7 @@ namespace Assets.Agent.Refactor {
 
         State<SMSensor> panic = new(
             (s) => {
-                float dist = 0.5f;
+                float dist = 1f;
 
                 int peerIndex = s.GetClosestPeer();
 
@@ -56,7 +52,7 @@ namespace Assets.Agent.Refactor {
 
 
         // Use this for initialization
-        void Start() {
+        void Awake() {
             SM<SMSensor> sm = new(
                 new State<SMSensor>[] { panic, calm },
                 new Input<SMSensor>[] {far, close},
@@ -72,12 +68,13 @@ namespace Assets.Agent.Refactor {
 
             sensors = new SMSensor[batchCount][];
 
-            float spawnRange = 50f;
+            float spawnRange = 150f;
             for (int i = 0; i < sensors.Length; i++) {
                 sensors[i] = new SMSensor[agentCount];
                 for (int j = 0; j < agentCount; j++) {
+                    
                     GameObject go = new GameObject();
-
+                    go.hideFlags = HideFlags.HideInHierarchy;
                     go.transform.position = new Vector2(Random.Range(-spawnRange, spawnRange), Random.Range(-spawnRange, spawnRange));
                     go.AddComponent<SpriteRenderer>().sprite = agentSprite;
                     SMSensor sensor = go.AddComponent<SMSensor>();
@@ -95,8 +92,8 @@ namespace Assets.Agent.Refactor {
         }
 
         private void Update() {
-            AdvanceSensorsParallel();
-            //AdvanceSensors();
+            //AdvanceSensorsParallel();
+            AdvanceSensors();
         }
 
         private void AdvanceSensors() {
@@ -109,14 +106,18 @@ namespace Assets.Agent.Refactor {
         }
 
         private void AdvanceSensorsParallel() {
+            NativeArray<bar> foo;
             List<SensorBatch<SMSensor>> batches = new List<SensorBatch<SMSensor>>();
             for (int i = 0; i < sensors.Length; i++) {
                 batches.Add(new SensorBatch<SMSensor>(ref sms[i], ref sensors[i]));
             }
-            
-            for (int i = 0; i < batches.Count; i++) {
-                batches[i].Execute();
-            }
+            Parallel.ForEach(batches, (batch) => { batch.Execute(); });
+        }
+    }
+
+    public struct bar{
+        private void Test() {
+
         }
     }
 }
