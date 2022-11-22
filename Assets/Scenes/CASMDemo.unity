@@ -945,8 +945,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ff2cd73081feb9b42a5c925b822016e8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  w: 100
-  h: 100
+  w: 10
+  h: 10
 --- !u!114 &958666177
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -960,6 +960,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   displaySprite: {fileID: 7482667652216324306, guid: bf6ff723533ce5d48b8cf8e676680fd5, type: 3}
+  scale: 0.5
   fps: 0.1
   offset: {x: 0, y: 0}
 --- !u!114 &958666178

@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using Microsoft.Unity.VisualStudio.Editor;
+using System.Collections;
 using Unity.Mathematics;
 using UnityEditor;
 using UnityEngine;
@@ -6,6 +7,7 @@ using UnityEngine;
 namespace Assets.Environment {
     public class CAController : MonoBehaviour {
         [SerializeField] Sprite displaySprite;
+        [SerializeField] public float scale;
         public Layer l;
         public GameObject[,] d;
         public float fps;
@@ -37,7 +39,8 @@ namespace Assets.Environment {
 
             for (int y = 0; y < h; y++) {
                 for (int x = 0; x < w; x++) {
-                    GameObject instance = Instantiate(go, offset + new Vector2(x, y), Quaternion.identity);
+                    GameObject instance = Instantiate(go, offset + new Vector2(x, y) * scale, Quaternion.identity);
+                    instance.transform.localScale = Vector3.one * scale;
                     instance.transform.parent = transform;
                     instance.name = "(" + x + "," + y + ")";
                     d[x, y] = instance;
