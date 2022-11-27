@@ -21,18 +21,35 @@ namespace Assets.Environment {
             cac = gameObject.GetComponent<CAController>();
             cac.SetLayer(new Layer(w, h, m));
 
+            string path = Application.dataPath + "/Layers/test.json";
+            float c = 9f;
             Refactor.Layer<float> l = new Refactor.Layer<float>(
-                new float[,] { { 1f, 2f, 3f }, { 1f, 2f, 3f }, { 1f, 2f, 3f } },
-                new float[,] { { 1f, 2f, 3f }, { 1f, 2f, 3f }, { 1f, 2f, 3f } },
+                new float[,] { 
+                    { 1f, 1f, 1f, 1f, 1f },
+                    { 1f, 1f, 1f, 1f, 1f },
+                    { 1f, 1f, 1f, 1f, 1f },
+                    { 1f, 1f, 1f, 1f, 1f },
+                    { 1f, 1f, 1f, 1f, 1f }
+                },
+                new float[,] { 
+                    { 1f/c, 1f/c, 1f/c }, 
+                    { 1f/c, 0.9f/c, 1f/c }, 
+                    { 1f/c, 1f/c, 1f/c } 
+                },
                 (a,b) => {
-                    return a * b;
+                    return Mathf.Clamp(a * b, 0f, 1f);
+                },
+                (a, b) => {
+                    return Mathf.Clamp(a + b, 0f, 1f);
+                },
+                (a) => {
+                    return Color.HSVToRGB(a, 1, 1);
+                },
+                (a) => {
+                    return Mathf.Clamp(a, 1f, 1f);
                 }
             );
-            l.Save(Application.dataPath + "/Layers/test.json");
-
-            MyClass<float> mc = new MyClass<float>(1, 1f, "1");
-            string json = JsonUtility.ToJson(mc);
-            Debug.Log(json);
+            l.Save(path);
         }
 
         // Update is called once per frame
