@@ -26,20 +26,20 @@ namespace Assets.Environment.Refactor {
 
         public T this[int x, int y] {
             get {
-                x = Math.Abs(x);
-                y = Math.Abs(y);
+                x = x <= 0 ? (x % w) + (w) : x % w;
+                x = x == 5 ? 0 : x;
 
-                x = x >= w ? x % w : x;
-                y = y >= w ? y % h : y;
+                y = y <= 0 ? (y % h) + (h) : y % h;
+                y = y == 5 ? 0 : y;
 
-                return data[x,y];
+                return data[x, y];
             }
             set {
-                x = Math.Abs(x);
-                y = Math.Abs(y);
+                x = x <= 0 ? (x % w) + (w) : x % w;
+                x = x == 5 ? 0 : x;
 
-                x = x >= w ? x % w : x;
-                y = y >= w ? y % h : y;
+                y = y <= 0 ? (y % h) + (h) : y % h;
+                y = y == 5 ? 0 : y;
 
                 data[x, y] = value;
             }
@@ -62,6 +62,14 @@ namespace Assets.Environment.Refactor {
             this.sum = sumFunc;
             this.display = display;
             this.constrain = constrain;
+        }
+        
+        public void Fill(T value) {
+            for (int i = 0; i < w; i++) {
+                for (int j = 0; j < h; j++) {
+                    data[i, j] = value;
+                }
+            }
         }
 
         public static Layer<T> LoadLayer(string path) {
