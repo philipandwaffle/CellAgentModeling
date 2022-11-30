@@ -4,13 +4,15 @@ using UnityEngine;
 using Newtonsoft.Json;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Runtime.Serialization;
-using Unity.Mathematics;
 
 namespace Assets.Environment.Refactor {
     public class Layer<T> {
         public T[,] data;
         public T[,] mask;
         
+        public T stopVal;
+        //public T maxVal;
+
         private Func<T, T, T> agg;
         private Func<T, T, T> sum;
         private Func<T, Color> display;
@@ -27,25 +29,26 @@ namespace Assets.Environment.Refactor {
         public T this[int x, int y] {
             get {
                 x = x <= 0 ? (x % w) + (w) : x % w;
-                x = x == 5 ? 0 : x;
+                x = x == w ? 0 : x;
 
                 y = y <= 0 ? (y % h) + (h) : y % h;
-                y = y == 5 ? 0 : y;
+                y = y == h ? 0 : y;
 
                 return data[x, y];
             }
             set {
                 x = x <= 0 ? (x % w) + (w) : x % w;
-                x = x == 5 ? 0 : x;
+                x = x == w ? 0 : x;
 
                 y = y <= 0 ? (y % h) + (h) : y % h;
-                y = y == 5 ? 0 : y;
+                y = y == h ? 0 : y;
 
                 data[x, y] = value;
             }
         }
 
-        public Layer(T[,] data, T[,] mask, Func<T, T, T> aggFunc, Func<T, T, T> sumFunc, Func<T, Color> display, Func<T, T> constrain) {
+        [JsonConstructor]
+        public Layer(T[,] data, T[,] mask, T stopVal, Func<T, T, T> agg, Func<T, T, T> sum, Func<T, Color> display, Func<T, T> constrain) {
             // Setup dimensions
             w = data.GetLength(0);
             h = data.GetLength(1);
@@ -53,23 +56,51 @@ namespace Assets.Environment.Refactor {
             mW = mask.GetLength(0);
             mH = mask.GetLength(1);
 
+            this.stopVal = stopVal;
+
+            /*maxVal = default(T);
+            for (int i = 0; i < mW; i++) {
+                for (int j = 0; j < mH; j++) {
+                    maxVal = sum(maxVal, mask[i, j]);
+                }
+            }*/
+
             xOffset = mW / 2;
             yOffset = mH / 2;
 
             this.data = data;
             this.mask = mask;
-            this.agg = aggFunc;
-            this.sum = sumFunc;
+            this.agg = agg;
+            this.sum = sum;
             this.display = display;
             this.constrain = constrain;
         }
-        
-        public void Fill(T value) {
-            for (int i = 0; i < w; i++) {
-                for (int j = 0; j < h; j++) {
-                    data[i, j] = value;
+
+        public Layer(int w, int h, T[,] mask, T stopVal, Func<T, T, T> agg, Func<T, T, T> sum, Func<T, Color> display, Func<T, T> constrain) {
+            this.w = w;
+            this.h = h;
+            data = new T[w, h];
+            Fill(default(T));
+
+            mW = mask.GetLength(0);
+            mH = mask.GetLength(1);
+
+            this.stopVal = stopVal;
+            /*maxVal = default(T);
+            for (int i = 0; i < mW; i++) {
+                for (int j = 0; j < mH; j++) {
+                    maxVal = sum(maxVal, mask[i, j]);
                 }
-            }
+            }*/
+
+            xOffset = mW / 2;
+            yOffset = mH / 2;
+            
+            this.mask = mask;
+            this.agg = agg;
+            this.sum = sum;
+            this.display = display;
+            this.constrain = constrain;
         }
 
         public static Layer<T> LoadLayer(string path) {
@@ -78,6 +109,14 @@ namespace Assets.Environment.Refactor {
                 return JsonConvert.DeserializeObject<Layer<T>>(json);
             }
         }
+
+        public void Fill(T value) {
+            for (int i = 0; i < w; i++) {
+                for (int j = 0; j < h; j++) {
+                    data[i, j] = value;
+                }
+            }
+        }        
 
         public Color GetDisplayData(int x, int y) {
             return display(data[x, y]);
@@ -98,21 +137,35 @@ namespace Assets.Environment.Refactor {
             data = newData;
         }
         private T DotProduct(int x, int y) {
+            if (this[x,y].Equals(stopVal)) {
+                return stopVal;
+            }
+
             T res = default(T);
+            T stopValSum = default(T);
 
             for (int i = 0; i < mW; i++) {
                 for (int j = 0; j < mH; j++) {
-                    T agg = this.agg(this[x - xOffset, y - yOffset], mask[i, j]);
-                    res = sum(res, agg);
+                    T curVal = this[x + i - xOffset, y + j - yOffset];
+                    T maskVal = mask[i, j];
+                    T agg = this.agg(curVal, maskVal);
+
+                    if (curVal.Equals(stopVal)) {
+                        stopValSum = sum(stopValSum, agg);
+                    } else {                        
+                        res = sum(res, agg);
+                    }
                 }
             }
+
+            //return sum(agg(stopValSum, agg(res, maxVal)), res);
             return res;
         }
 
         public void Save(string path, Formatting format = Formatting.None) {
             string json = JsonConvert.SerializeObject(this, format);
             
-            using (StreamWriter sr = new StreamWriter(path)) { 
+            using (StreamWriter sr = new StreamWriter(path,false)) { 
                 sr.WriteLine(json);
             }
         }

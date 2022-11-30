@@ -24,18 +24,19 @@ namespace Assets.Environment {
             string path = Application.dataPath + "/Layers/test.json";
             float c = 9f;
             Refactor.Layer<float> l = new Refactor.Layer<float>(
-                new float[,] { 
+                new float[,] {
                     { 1f, 1f, 1f, 1f, 1f },
                     { 1f, 1f, 1f, 1f, 1f },
                     { 1f, 1f, 1f, 1f, 1f },
                     { 1f, 1f, 1f, 1f, 1f },
                     { 1f, 1f, 1f, 1f, 1f }
                 },
-                new float[,] { 
-                    { 1f/c, 1f/c, 1f/c }, 
-                    { 1f/c, 0.9f/c, 1f/c }, 
-                    { 1f/c, 1f/c, 1f/c } 
+                new float[,] {
+                    { 1f/c, 1f/c, 1f/c },
+                    { 1f/c, 0.9f/c, 1f/c },
+                    { 1f/c, 1f/c, 1f/c }
                 },
+                -1,
                 (a,b) => {
                     return Mathf.Clamp(a * b, 0f, 1f);
                 },

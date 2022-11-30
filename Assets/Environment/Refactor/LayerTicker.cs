@@ -3,8 +3,8 @@ using System.Collections;
 using UnityEngine;
 
 namespace Assets.Environment.Refactor {
-    public class LayerTicker<T>: MonoBehaviour {
-        public Layer<T> layer;
+    public class LayerTicker: MonoBehaviour {
+        public Layer<float> layer;
 
         [SerializeField] private Sprite displaySprite;
 
@@ -33,13 +33,18 @@ namespace Assets.Environment.Refactor {
             Destroy(dis);
         }
 
+        public void SetValue(int x, int y, float val) {
+            layer.InsertValue(x, y, val);
+            display[x, y].GetComponent<SpriteRenderer>().color = layer.GetDisplayData(x, y);
+        }
+
         public void LoadLayer(string path) {
-            layer = Layer<T>.LoadLayer(path);
+            layer = Layer<float>.LoadLayer(path);
 
             SetDisplay();
         }
 
-        public void ClearLayer(T value) {
+        public void ClearLayer(float value) {
             layer.Fill(value);
         }
 
