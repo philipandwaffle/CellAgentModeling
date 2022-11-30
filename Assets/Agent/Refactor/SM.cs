@@ -3,16 +3,20 @@ using System.Collections.Generic;
 using Random = UnityEngine.Random;
 
 namespace Assets.Agent.Refactor {
-    public class SM<T> where T : SMSensor {
-        private State<T>[] states;
-        private Input<T>[] inputs;
+    public interface IStateMachine<T> where T : SMSensor {
+        public void AdvanceSensors(ref T[] sensors);
+        public void AdvanceSensor(T sensor);
+    }
+    public class SM<T> : IStateMachine<T> where T : SMSensor {
+        private IState<T>[] states;
+        private IInput<T>[] inputs;
         // Key being the source state
         // Value being the input index with a corrosponding new state index
         private Dictionary<int, (int, int)[]> transitions;
 
         private bool deterministic;
 
-        public SM(State<T>[] states, Input<T>[] inputs, Dictionary<int, (int, int)[]> transitions, bool deterministic = false) {
+        public SM(IState<T>[] states, IInput<T>[] inputs, Dictionary<int, (int, int)[]> transitions, bool deterministic = false) {
             this.states = states;
             this.inputs = inputs;
             this.transitions = transitions;
@@ -27,7 +31,6 @@ namespace Assets.Agent.Refactor {
 
         public void AdvanceSensor(T sensor) {
             (int, int)[] possibleTrans = transitions[sensor.curState];
-
 
             if (deterministic) {
                 for (int i = 0; i < possibleTrans.Length; i++) {
@@ -56,7 +59,10 @@ namespace Assets.Agent.Refactor {
         }
     }
 
-    public class Input<T> where T : SMSensor {        
+    public interface IInput<T> {
+        public bool Activated(T sensor);
+    }
+    public class Input<T> : IInput<T> where T : SMSensor {        
         private Func<T, bool> activation;
 
         public Input(Func<SMSensor, bool> activation) {
@@ -68,7 +74,10 @@ namespace Assets.Agent.Refactor {
         }
     }
 
-    public class State<T> where T: SMSensor {        
+    public interface IState<T> {
+        public void Act(T sensor);
+    }
+    public class State<T> : IState<T> where T : SMSensor{        
         private Action<T> act;
 
         public State(Action<T> act) {            
