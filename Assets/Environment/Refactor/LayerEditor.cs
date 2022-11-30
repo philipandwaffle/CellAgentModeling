@@ -12,18 +12,18 @@ namespace Assets.Environment.Refactor {
         private LayerTicker ticker;
 
         private float brushVal = -1;
-        private Vector2Int editPos = new Vector2Int(-1, -1);
+        private int brushRadius = 1;
         [SerializeField] private bool paused = true;
 
         // Use this for initialization
         void Start() {
-            string path = Application.dataPath + "/Layers/small_layer.json";
+            string path = Application.dataPath + "/Layers/testing_layer.json";
 
-            float c = 9f;
             float stopVal = -1;
-            Layer<float> l = new Layer<float>(
+            Layer l = new Layer(
+                100,100,
                 /*new float[,] {
-                    { -1f, -1f, -1f, -1f, -1f, -1f, -1f, -1f, -1f, -1f },                    
+                    { -1f, -1f, -1f, -1f, -1f, -1f, -1f, -1f, -1f, -1f },
                     { -1f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, -1f },
                     { -1f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, -1f },
                     { -1f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, -1f },
@@ -34,17 +34,23 @@ namespace Assets.Environment.Refactor {
                     { -1f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, -1f },
                     { -1f, -1f, -1f, -1f, -1f, -1f, -1f, -1f, -1f, -1f },
                 },*/
-                new float[,] {
+                /*new float[,] {
+                    { -1f, -1f, -1f, -1f, -1f },
+                    { -1f, 0f, 0f, 0f, -1f },
+                    { -1f, 0f, 0f, 0f, -1f },
+                    { -1f, 0f, 0f, 0f, -1f },
+                    { -1f, -1f, -1f, -1f, -1f },
+                },*/
+                /*new float[,] {
                     { -1f,-1f, -1f },
                     { -1f, 0f, -1f },
                     { -1f, -1f, -1f },
-                },
+                },*/
                 new float[,] {
-                    { 1f/c, 1f/c, 1f/c },
-                    { 1f/c, 1f/c, 1f/c },
-                    { 1f/c, 1f/c, 1f/c }
+                    { 1f, 1f, 1f },
+                    { 1f, 1f, 1f },
+                    { 1f, 1f, 1f }
                 },
-                stopVal,
                 (a, b) => {
                     if (a == stopVal) {
                         a = -a;
@@ -67,12 +73,14 @@ namespace Assets.Environment.Refactor {
                     return Mathf.Clamp(a, 0f, 1f);
                 }
             );
-            l.Save(path);
+            l.SetBorder(-1);
+            //l.Save(path);
 
             //Layer<float> l = null;
 
-            ticker = gameObject.GetComponent<LayerTicker>();            
-            ticker.LoadLayer(path);
+            ticker = gameObject.GetComponent<LayerTicker>();
+            ticker.SetLayer(l);
+            //ticker.LoadLayer(path);
         }
 
         // Update is called once per frame
@@ -88,20 +96,17 @@ namespace Assets.Environment.Refactor {
                 float xScale = transform.localScale.x;
                 float yScale = transform.localScale.y;
                 // Guard clause if mouse is outside of bounds
-                if (mPos.x < 0 || mPos.x > ticker.layer.w * xScale || mPos.y < 0 || mPos.y > ticker.layer.h * yScale) {
+                if (mPos.x < 0 || mPos.x > ticker.GetLayer().w * xScale || mPos.y < 0 || mPos.y > ticker.GetLayer().h * yScale) {
                     return;
                 }
 
                 // Convert mouse position to an integer
                 Vector2Int curEditPos = new Vector2Int((int)(mPos.x / xScale), (int)(mPos.y / yScale));
-
-                editPos = curEditPos;
-                ticker.SetValue(curEditPos.x, curEditPos.y, brushVal);
-
-                /*// If the mouse has moved
-                if (editPos != curEditPos) {
-                    //ticker.layer[curEditPos.x, curEditPos.y] = brushVal;
-                }*/
+                for (int i = -brushRadius; i < brushRadius + 1; i++) {
+                    for (int j = -brushRadius; j < brushRadius + 1; j++) {
+                        ticker.SetValue(curEditPos.x + i, curEditPos.y + j, brushVal);
+                    }
+                }
             }
         }
 
@@ -138,7 +143,7 @@ namespace Assets.Environment.Refactor {
                 "",
                 "json");
             if (!path.Equals("")) {
-                ticker.layer.Save(path);
+                ticker.GetLayer().Save(path);
             } else {
                 Debug.Log("Empty file path, exiting");
             }

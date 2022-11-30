@@ -4,7 +4,14 @@ using UnityEngine;
 
 namespace Assets.Environment.Refactor {
     public class LayerTicker: MonoBehaviour {
-        public Layer<float> layer;
+        private Layer layer;
+        public Layer GetLayer() {
+            return layer;
+        }
+        public void SetLayer(Layer layer) {
+            this.layer = layer;
+            SetDisplay();
+        }
 
         [SerializeField] private Sprite displaySprite;
 
@@ -39,7 +46,7 @@ namespace Assets.Environment.Refactor {
         }
 
         public void LoadLayer(string path) {
-            layer = Layer<float>.LoadLayer(path);
+            layer = Layer.LoadLayer(path);
 
             SetDisplay();
         }

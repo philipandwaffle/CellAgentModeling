@@ -16,6 +16,7 @@ namespace Assets.Agent.Refactor {
 
         [SerializeField] Sprite agentSprite;
         [SerializeField] int agentCount = 100;
+        [SerializeField] float spawnPoint = 50f;
         [SerializeField] float spawnRange = 10f;
         [SerializeField] int batchCount = 10;
 
@@ -27,7 +28,7 @@ namespace Assets.Agent.Refactor {
 
                 Vector2 dir = new Vector2();
                 if (peerIndex == -1) {
-                    dir = new(Random.Range(-dist, dist), Random.Range(-dist, dist));                    
+                    dir = new(Random.Range(-dist, dist), Random.Range(-dist, dist));
                 } else {
                     dir = s.transform.position - SMSensor.peers[peerIndex].transform.position;
                     dir.Normalize();
@@ -54,9 +55,45 @@ namespace Assets.Agent.Refactor {
             }
         );
 
+        /*        State<LayerSensor> panic = new(
+                    (s) => {
+                        float dist = 0.5f;
+
+                        int peerIndex = s.GetClosestPeer();
+
+                        Vector2 dir = new Vector2();
+                        if (peerIndex == -1) {
+                            dir = new(Random.Range(-dist, dist), Random.Range(-dist, dist));
+                        } else {
+                            dir = s.transform.position - SMSensor.peers[peerIndex].transform.position;
+                            dir.Normalize();
+                            dir *= dist;
+                        }
+                        s.transform.Translate(dir);
+
+                        s.gameObject.GetComponent<SpriteRenderer>().color = Color.red;
+                    }
+                );
+                State<LayerSensor> calm = new(
+                    (s) => {
+                        s.gameObject.GetComponent<SpriteRenderer>().color = Color.green;
+                    }
+                );
+                Input<LayerSensor> far = new(
+                    (s) => {
+                        return s.colliders.Count == 0;
+                    }
+                );
+                Input<LayerSensor> close = new(
+                    (s) => {
+                        return s.colliders.Count != 0;
+                    }
+                );*/
+
 
         // Use this for initialization
         void Start() {
+            //var foo = new ISensor[] { (ISensor)panic, (ISensor)calm };
             SM<SMSensor> sm = new(
                 new State<SMSensor>[] { panic, calm },
                 new Input<SMSensor>[] {far, close},
@@ -78,8 +115,8 @@ namespace Assets.Agent.Refactor {
                     GameObject go = new GameObject();
                     go.transform.parent = transform;
                     go.transform.position = new Vector3(
-                        Random.Range(-spawnRange, spawnRange), 
-                        Random.Range(-spawnRange, spawnRange), 
+                        spawnPoint + Random.Range(-spawnRange, spawnRange),
+                        spawnPoint + Random.Range(-spawnRange, spawnRange), 
                         transform.position.z
                     );
                     go.AddComponent<SpriteRenderer>().sprite = agentSprite;
@@ -108,17 +145,6 @@ namespace Assets.Agent.Refactor {
                 for (int j = 0; j < sensors[i].Length; j++) {
                     curSM.AdvanceSensor(sensors[i][j]);
                 }
-            }
-        }
-
-        private void AdvanceSensorsParallel() {
-            List<SensorBatch<SMSensor>> batches = new List<SensorBatch<SMSensor>>();
-            for (int i = 0; i < sensors.Length; i++) {
-                batches.Add(new SensorBatch<SMSensor>(ref sms[i], ref sensors[i]));
-            }
-            
-            for (int i = 0; i < batches.Count; i++) {
-                batches[i].Execute();
             }
         }
     }

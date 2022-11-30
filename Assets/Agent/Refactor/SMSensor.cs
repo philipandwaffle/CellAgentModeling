@@ -5,7 +5,8 @@ using Unity.VisualScripting;
 using UnityEngine;
 
 namespace Assets.Agent.Refactor {
-    public class SMSensor : MonoBehaviour {
+    public interface ISensor { }
+    public class SMSensor : MonoBehaviour, ISensor {
         public int curState { get; set; }
         public int id;
         private static int nextId = 0;

@@ -4,29 +4,27 @@ using UnityEngine;
 using Newtonsoft.Json;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Runtime.Serialization;
+using System.Threading.Tasks;
 
 namespace Assets.Environment.Refactor {
-    public class Layer<T> {
-        public T[,] data;
-        public T[,] mask;
-        
-        public T stopVal;
-        //public T maxVal;
+    [Serializable]
+    public class Layer {
+        public float[,] data;
+        public float[,] mask;
 
-        private Func<T, T, T> agg;
-        private Func<T, T, T> sum;
-        private Func<T, Color> display;
-        private Func<T, T> constrain;
+        private Func<float, Color> display;
+        private Func<float, float> constrain;
 
         public byte[] aggBytes, sumBytes, displayBytes, constrainBytes;
 
         public int w, h;
         public int mW, mH;
+        private float mCount;
 
         private int xOffset;
         private int yOffset;
 
-        public T this[int x, int y] {
+        public float this[int x, int y] {
             get {
                 x = x <= 0 ? (x % w) + (w) : x % w;
                 x = x == w ? 0 : x;
@@ -47,70 +45,53 @@ namespace Assets.Environment.Refactor {
             }
         }
 
-        [JsonConstructor]
-        public Layer(T[,] data, T[,] mask, T stopVal, Func<T, T, T> agg, Func<T, T, T> sum, Func<T, Color> display, Func<T, T> constrain) {
-            // Setup dimensions
+//        [JsonConstructor]
+        public Layer(float[,] data, float[,] mask, Func<float, float, float> agg, Func<float, float, float> sum, Func<float, Color> display, Func<float, float> constrain) {
+            InitVariables(mask, agg, sum, display, constrain);
+
             w = data.GetLength(0);
             h = data.GetLength(1);
-
-            mW = mask.GetLength(0);
-            mH = mask.GetLength(1);
-
-            this.stopVal = stopVal;
-
-            /*maxVal = default(T);
-            for (int i = 0; i < mW; i++) {
-                for (int j = 0; j < mH; j++) {
-                    maxVal = sum(maxVal, mask[i, j]);
-                }
-            }*/
-
-            xOffset = mW / 2;
-            yOffset = mH / 2;
-
             this.data = data;
-            this.mask = mask;
-            this.agg = agg;
-            this.sum = sum;
-            this.display = display;
-            this.constrain = constrain;
         }
+        public Layer(int w, int h, float[,] mask, Func<float, float, float> agg, Func<float, float, float> sum, Func<float, Color> display, Func<float, float> constrain) {            
+            InitVariables(mask, agg, sum, display, constrain);
 
-        public Layer(int w, int h, T[,] mask, T stopVal, Func<T, T, T> agg, Func<T, T, T> sum, Func<T, Color> display, Func<T, T> constrain) {
             this.w = w;
             this.h = h;
-            data = new T[w, h];
-            Fill(default(T));
-
-            mW = mask.GetLength(0);
-            mH = mask.GetLength(1);
-
-            this.stopVal = stopVal;
-            /*maxVal = default(T);
-            for (int i = 0; i < mW; i++) {
-                for (int j = 0; j < mH; j++) {
-                    maxVal = sum(maxVal, mask[i, j]);
-                }
-            }*/
-
-            xOffset = mW / 2;
-            yOffset = mH / 2;
-            
-            this.mask = mask;
-            this.agg = agg;
-            this.sum = sum;
-            this.display = display;
-            this.constrain = constrain;
+            data = new float[w, h];
         }
 
-        public static Layer<T> LoadLayer(string path) {
-            using (StreamReader sr = new StreamReader(path)) {
-                string json = sr.ReadToEnd();
-                return JsonConvert.DeserializeObject<Layer<T>>(json);
+        public void SetBorder(float val) {
+            for (int i = 0; i < w; i++) {
+                for (int j = 0; j < h; j++) {
+                    if (i == 0 || i == w - 1 || j == 0 || j == h - 1) {
+                        this[i, j] = val;
+                    }
+                }
             }
         }
 
-        public void Fill(T value) {
+        private void InitVariables(float[,] mask, Func<float, float, float> agg, Func<float, float, float> sum, Func<float, Color> display, Func<float, float> constrain) {
+            mW = mask.GetLength(0);
+            mH = mask.GetLength(1);
+            mCount = mW * mH;
+
+            xOffset = mW / 2;
+            yOffset = mH / 2;
+
+            this.mask = mask;
+            this.display = display;
+            this.constrain = constrain;
+        }
+
+        public static Layer LoadLayer(string path) {
+            using (StreamReader sr = new StreamReader(path)) {
+                string json = sr.ReadToEnd();
+                return JsonConvert.DeserializeObject<Layer>(json);
+            }
+        }
+
+        public void Fill(float value) {
             for (int i = 0; i < w; i++) {
                 for (int j = 0; j < h; j++) {
                     data[i, j] = value;
@@ -121,12 +102,12 @@ namespace Assets.Environment.Refactor {
         public Color GetDisplayData(int x, int y) {
             return display(data[x, y]);
         }
-        public void InsertValue(int x, int y, T value) {
+        public void InsertValue(int x, int y, float value) {
             data[x, y] = constrain(value);
         }
 
         public void Advance() {
-            T[,] newData = new T[w, h];
+            float[,] newData = new float[w, h];
 
             for (int i = 0; i < w; i++) {
                 for (int j = 0; j < h; j++) {
@@ -136,30 +117,28 @@ namespace Assets.Environment.Refactor {
 
             data = newData;
         }
-        private T DotProduct(int x, int y) {
-            if (this[x,y].Equals(stopVal)) {
-                return stopVal;
+        private float DotProduct(int x, int y) {
+            if (this[x,y].Equals(-1)) {
+                return -1;
             }
 
-            T res = default(T);
-            T stopValSum = default(T);
+            float tempMCount = mCount;
+            float total = 0f;
 
             for (int i = 0; i < mW; i++) {
                 for (int j = 0; j < mH; j++) {
-                    T curVal = this[x + i - xOffset, y + j - yOffset];
-                    T maskVal = mask[i, j];
-                    T agg = this.agg(curVal, maskVal);
+                    float curVal = this[x + i - xOffset, y + j - yOffset];
+                    float maskVal = mask[i, j];
 
-                    if (curVal.Equals(stopVal)) {
-                        stopValSum = sum(stopValSum, agg);
-                    } else {                        
-                        res = sum(res, agg);
+                    if (curVal == -1) {
+                        tempMCount -= 1f;
+                    } else {
+                        total += curVal * maskVal;
                     }
                 }
             }
 
-            //return sum(agg(stopValSum, agg(res, maxVal)), res);
-            return res;
+            return total / tempMCount;
         }
 
         public void Save(string path, Formatting format = Formatting.None) {
@@ -173,16 +152,18 @@ namespace Assets.Environment.Refactor {
         [OnSerializing]
         internal void Serializing(StreamingContext context) {
             BinaryFormatter formatter = new BinaryFormatter();
-            using (MemoryStream ms = new MemoryStream()){
+            /*using (MemoryStream ms = new MemoryStream()){
                 formatter.Serialize(ms, agg);
                 aggBytes = ms.ToArray();
             }
             using (MemoryStream ms = new MemoryStream()) {
                 formatter.Serialize(ms, sum);
                 sumBytes = ms.ToArray();
-            }
+            }*/
+
+            using (FileStream stream = new(Application.dataPath + "/Layers/deleteme.txt", FileMode.Create, FileAccess.Write, FileShare.None))
             using (MemoryStream ms = new MemoryStream()) {
-                formatter.Serialize(ms, display);
+                formatter.Serialize(stream, display);
                 displayBytes = ms.ToArray();
             }
             using (MemoryStream ms = new MemoryStream()) {
@@ -193,18 +174,18 @@ namespace Assets.Environment.Refactor {
         [OnDeserialized]
         internal void Deserialized(StreamingContext context) {
             BinaryFormatter formatter = new BinaryFormatter();
-            
-            MemoryStream ms = new MemoryStream(sumBytes);
-            sum = (Func<T, T, T>)formatter.Deserialize(ms);
+            MemoryStream ms;
+            //ms = new MemoryStream(sumBytes);
+            /*sum = (Func<float, float, float>)formatter.Deserialize(ms);
 
             ms = new MemoryStream(aggBytes);
-            agg = (Func<T, T, T>)formatter.Deserialize(ms);
+            agg = (Func<float, float, float>)formatter.Deserialize(ms);*/
 
             ms = new MemoryStream(displayBytes);
-            display = (Func<T, Color>)formatter.Deserialize(ms);
+            display = (Func<float, Color>)formatter.Deserialize(ms);
 
             ms = new MemoryStream(constrainBytes);
-            constrain = (Func<T, T>)formatter.Deserialize(ms);
+            constrain = (Func<float, float>)formatter.Deserialize(ms);
 
             ms.Dispose();
 

@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class CameraController : MonoBehaviour
 {
+    [SerializeField] private float scrollSpeed = 0.25f;
     private Vector2 prevMouse;
     private new Transform transform;
     private new Camera camera;
@@ -26,6 +27,6 @@ public class CameraController : MonoBehaviour
             prevMouse = camera.ScreenToViewportPoint(Input.mousePosition);
         }
 
-        camera.orthographicSize = Mathf.Max(0.1f, camera.orthographicSize - Input.mouseScrollDelta.y * .25f);
+        camera.orthographicSize = Mathf.Max(0.1f, camera.orthographicSize - Input.mouseScrollDelta.y * scrollSpeed);
     }
 }
