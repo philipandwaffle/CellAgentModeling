@@ -13,7 +13,7 @@ namespace Assets.Agent.Refactor {
         }
 
         public void Execute() {
-            sm.AdvanceSensors(ref sensors);
+            sm.AdvanceSensors(sensors);
         }
     }
 }

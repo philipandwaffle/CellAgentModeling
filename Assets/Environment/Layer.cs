@@ -150,19 +150,6 @@ namespace Assets.Environment {
                             total += values[vX, vY] * m[mX, mY];
                         }
                     }
-                    /*bool alive = values[x, y] == 1;
-
-                    if (alive && total < 2) {
-                        total = 0f;
-                    }else if(alive && total > 3) {
-                        total = 0f;
-                    } else if (alive && (total == 2 || total == 3)){
-                        total = 1f;
-                    } else if (!alive && total == 3){
-                        total = 1;
-                    } else {
-                        total = alive ? 1 : 0;
-                    }*/
                     newValues[x - (mW / 2), y - (mH / 2)] = total;
                 }
             }

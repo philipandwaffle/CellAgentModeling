@@ -237,8 +237,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   displaySprite: {fileID: 7482667652216324306, guid: bf6ff723533ce5d48b8cf8e676680fd5, type: 3}
-  count: 1212
-  tickRate: 0.1
+  count: 500
+  tickRate: 0.016666668
 --- !u!4 &1619334324
 Transform:
   m_ObjectHideFlags: 0

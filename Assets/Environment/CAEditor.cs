@@ -1,6 +1,8 @@
-﻿using UnityEditor;
+﻿using System;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UIElements;
 
 namespace Assets.Environment {
     public class CAEditor : MonoBehaviour {
@@ -18,6 +20,36 @@ namespace Assets.Environment {
         void Start() {
             cac = gameObject.GetComponent<CAController>();
             cac.SetLayer(new Layer(w, h, m));
+
+            string path = Application.dataPath + "/Layers/test.json";
+            float c = 9f;
+            Refactor.Layer l = new Refactor.Layer(
+                new float[,] {
+                    { 1f, 1f, 1f, 1f, 1f },
+                    { 1f, 1f, 1f, 1f, 1f },
+                    { 1f, 1f, 1f, 1f, 1f },
+                    { 1f, 1f, 1f, 1f, 1f },
+                    { 1f, 1f, 1f, 1f, 1f }
+                },
+                new float[,] {
+                    { 1f/c, 1f/c, 1f/c },
+                    { 1f/c, 0.9f/c, 1f/c },
+                    { 1f/c, 1f/c, 1f/c }
+                },
+                (a,b) => {
+                    return Mathf.Clamp(a * b, 0f, 1f);
+                },
+                (a, b) => {
+                    return Mathf.Clamp(a + b, 0f, 1f);
+                },
+                (a) => {
+                    return Color.HSVToRGB(a, 1, 1);
+                },
+                (a) => {
+                    return Mathf.Clamp(a, 1f, 1f);
+                }
+            );
+            l.Save(path);
         }
 
         // Update is called once per frame
@@ -27,12 +59,12 @@ namespace Assets.Environment {
                 Vector2 mPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
 
                 // Guard clause if mouse is outside of bounds
-                if (mPos.x < 0 || mPos.x > w || mPos.y < 0 || mPos.y > h) {
+                if (mPos.x < 0 || mPos.x > w * cac.scale || mPos.y < 0 || mPos.y > h * cac.scale) {
                     return;
                 }
 
                 // Convert mouse position to an integer
-                Vector2Int curMouse = new Vector2Int((int)mPos.x, (int)mPos.y);
+                Vector2Int curMouse = new Vector2Int((int)(mPos.x / cac.scale), (int)(mPos.y / cac.scale));
 
                 // If the mouse has moved
                 if (prevMouse != curMouse) {
@@ -88,6 +120,20 @@ namespace Assets.Environment {
             } else {
                 Debug.Log("Empty file path, exiting");
             }
+        }
+    }
+
+    [Serializable]
+    public class MyClass<T> {
+        public int level;
+        public float timeElapsed;
+        public string playerName;
+        public int[] twoD = new int[] { 1, 2, 3 };
+
+        public MyClass(int level, float timeElapsed, string playerName) {
+            this.level = level;
+            this.timeElapsed = timeElapsed;
+            this.playerName = playerName;
         }
     }
 }
