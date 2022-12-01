@@ -4,7 +4,7 @@ using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
 
-namespace Assets.Agent.Refactor {
+namespace Assets.Agent {
     public class SMSensor : MonoBehaviour {
         public int curState { get; set; }
         public int id;

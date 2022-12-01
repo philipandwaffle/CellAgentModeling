@@ -1,4 +1,5 @@
-﻿using Assets.CASMTransmission;
+﻿using Assets.Agent.Sensors;
+using Assets.CASMTransmission;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -10,7 +11,7 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using Random = UnityEngine.Random;
 
-namespace Assets.Agent.Refactor {
+namespace Assets.Agent {
     public class SMTicker : MonoBehaviour {
         private SMSensor[][] sensors;
         //private (IStateMachine<SMSensor>, IStateMachine<LayerSensor>, SMSensor[])[] horror;

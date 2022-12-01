@@ -4,7 +4,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using static UnityEngine.RuleTile.TilingRuleOutput;
 
-namespace Assets.Agent.Refactor {
+namespace Assets.Agent.Sensors {
     public class LayerSensor : SMSensor {
         public static Gearbox gb;
 

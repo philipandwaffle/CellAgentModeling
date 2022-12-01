@@ -2,7 +2,7 @@
 using System.Collections;
 using UnityEngine;
 
-namespace Assets.Environment.Refactor {
+namespace Assets.Environment {
     public class LayerTicker: MonoBehaviour {
         private Layer layer;
         public Layer GetLayer() {

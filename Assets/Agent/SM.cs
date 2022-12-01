@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Random = UnityEngine.Random;
 
-namespace Assets.Agent.Refactor {
+namespace Assets.Agent {
     public interface IStateMachine<T> {
         public void AdvanceSensors(T[] sensors);
         public void AdvanceSensor(T sensor);

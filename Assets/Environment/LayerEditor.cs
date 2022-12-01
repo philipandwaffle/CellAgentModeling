@@ -7,7 +7,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-namespace Assets.Environment.Refactor {
+namespace Assets.Environment {
     public class LayerEditor : MonoBehaviour, IToggleable{
         private LayerTicker ticker;
 
