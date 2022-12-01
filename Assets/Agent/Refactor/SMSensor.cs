@@ -8,12 +8,12 @@ namespace Assets.Agent.Refactor {
     public class SMSensor : MonoBehaviour {
         public int curState { get; set; }
         public int id;
-        private static int nextId = 0;
+        protected static int nextId = 0;
 
         public static SMSensor[] peers;
 
         private CircleCollider2D col;
-        public List<Collider2D> colliders = new List<Collider2D>(500);
+        public List<Collider2D> colliders = new List<Collider2D>();
 
         // Use this for initialization
         void Awake() {
@@ -43,6 +43,19 @@ namespace Assets.Agent.Refactor {
             peers = orderedPeers;
         }
 
+        public void SetTrigger(bool isTrigger) {
+            if (isTrigger) {
+                col = gameObject.AddComponent<CircleCollider2D>();
+                col.isTrigger = true;
+
+                Rigidbody2D rb = gameObject.AddComponent<Rigidbody2D>();
+                rb.isKinematic = true;
+            } else {
+                Destroy(GetComponent<CircleCollider2D>());
+                Destroy(GetComponent<Rigidbody2D>());
+            }
+        }
+
         public int GetClosestPeer() {
             int index = -1;
 
@@ -65,12 +78,12 @@ namespace Assets.Agent.Refactor {
 
             return index;
         }
-        private void OnTriggerEnter2D(Collider2D collision) {
+        protected void OnTriggerEnter2D(Collider2D collision) {
             if (!colliders.Contains(collision)) { 
                 colliders.Add(collision); 
             }            
         }
-        private void OnTriggerExit2D(Collider2D collision) {      
+        protected void OnTriggerExit2D(Collider2D collision) {      
             colliders.Remove(collision);
         }
     }

@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using Random = UnityEngine.Random;
 
 namespace Assets.Agent.Refactor {
-    public interface IStateMachine<T> where T : SMSensor {
-        public void AdvanceSensors(ref T[] sensors);
+    public interface IStateMachine<T> {
+        public void AdvanceSensors(T[] sensors);
         public void AdvanceSensor(T sensor);
     }
     public class SM<T> : IStateMachine<T> where T : SMSensor {
@@ -23,7 +23,7 @@ namespace Assets.Agent.Refactor {
             this.deterministic = deterministic;
         }
 
-        public void AdvanceSensors(ref T[] sensors) {
+        public void AdvanceSensors(T[] sensors) {
             for (int i = 0; i < sensors.Length; i++) {
                 AdvanceSensor(sensors[i]);
             }
@@ -65,7 +65,7 @@ namespace Assets.Agent.Refactor {
     public class Input<T> : IInput<T> where T : SMSensor {        
         private Func<T, bool> activation;
 
-        public Input(Func<SMSensor, bool> activation) {
+        public Input(Func<T, bool> activation) {
             this.activation = activation;
         }
 

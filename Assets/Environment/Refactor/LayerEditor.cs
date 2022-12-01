@@ -12,7 +12,7 @@ namespace Assets.Environment.Refactor {
         private LayerTicker ticker;
 
         private float brushVal = -1;
-        private int brushRadius = 1;
+        [SerializeField] private int brushRadius = 3;
         [SerializeField] private bool paused = true;
 
         // Use this for initialization
@@ -64,7 +64,7 @@ namespace Assets.Environment.Refactor {
                     if (a == stopVal) {
                         return Color.black;
                     }
-                    return Color.HSVToRGB(a, 1, 1);
+                    return Color.HSVToRGB(a, 0.7f, 0.5f);
                 },
                 (a) => {
                     if (a == stopVal) {
