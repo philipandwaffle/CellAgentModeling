@@ -1,11 +1,8 @@
 ﻿using Assets.CASMTransmission;
-using System.Collections;
-using Unity.VisualScripting;
 using UnityEngine;
-using static UnityEngine.RuleTile.TilingRuleOutput;
 
 namespace Assets.Agent.Sensors {
-    public class LayerSensor : SMSensor {
+    public class LayerSensor : Sensor {
         public static Gearbox gb;
 
         public void WriteValue(float val) {
