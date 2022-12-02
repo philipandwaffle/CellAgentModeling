@@ -3,20 +3,57 @@ using Assets.Agent.StateMachine;
 using Assets.CASMTransmission;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
 namespace Assets.Agent {
-    public class SMTicker : MonoBehaviour {
-        private Sensor[][] sensors;
-        //private (IStateMachine<SMSensor>, IStateMachine<LayerSensor>, SMSensor[])[] horror;
-        private IStateMachine[] sms;
+    public class AgentSpawner : MonoBehaviour {
+        AgentTicker ticker;
 
         [SerializeField] Sprite agentSprite;
-        [SerializeField] int agentCount = 100;
+        [SerializeField] private int[] agentCount = new int[] { 100, 100 };
         [SerializeField] float spawnPoint = 50f;
         [SerializeField] float spawnRange = 10f;
-        [SerializeField] int batchCount = 10;
+
+        private IStateMachine[] stateMachines;
+        private Sensor[][] sensors;
+
+        private void Start() {
+            ticker = GetComponent<AgentTicker>();
+
+            stateMachines = new IStateMachine[] {
+                new StateMachine<Sensor>(
+                    new IState<Sensor>[] { calm, panic },
+                    new IInput<Sensor>[] { close, far },
+                    new Dictionary<int, (int, int)[]>() {
+                            { 0, new (int, int)[] { (0, 1) } },
+                            { 1, new (int, int)[] { (1, 0) } }
+                    }
+                ),
+                new StateMachine<LayerSensor>(
+                    new IState<LayerSensor>[] { hot, cold },
+                    new IInput<LayerSensor>[] { isCold, isHot },
+                    new Dictionary<int, (int, int)[]>() {
+                            { 0, new (int, int)[] { (0, 1) } },
+                            { 1, new (int, int)[] { (1, 0) } }
+                    }
+                )
+            };
+            InitAgents();
+            ticker.SetAgents(sensors, stateMachines);
+        }
+
+        private void InitAgents() {
+            sensors = new Sensor[][] {
+                CreateSensors(agentCount[0]),
+                CreateLayerSensors(agentCount[1]),
+            };
+
+            Sensor.peers = sensors.SelectMany(a => a).ToArray();
+            LayerSensor.gb = GetComponent<Gearbox>();
+        }
 
         State<Sensor> panic = new(
             (s) => {
@@ -52,6 +89,26 @@ namespace Assets.Agent {
                 return s.colliders.Count != 0;
             }
         );
+        private Sensor[] CreateSensors(int agentCount) {
+            Sensor[] sensors = new Sensor[agentCount];
+
+            for (int i = 0; i < agentCount; i++) {
+                GameObject go = new GameObject();
+                go.transform.parent = transform;
+                go.transform.position = new Vector3(
+                    spawnPoint + Random.Range(-spawnRange, spawnRange),
+                    spawnPoint + Random.Range(-spawnRange, spawnRange),
+                    transform.position.z
+                );
+                go.AddComponent<SpriteRenderer>().sprite = agentSprite;
+                Sensor sensor = go.AddComponent<Sensor>();
+                go.name = sensor.id.ToString();
+                sensor.SetColliderRadius(1f);
+
+                sensors[i] = sensor;
+            }
+            return sensors;
+        }
 
         State<LayerSensor> hot = new(
             (s) => {
@@ -88,35 +145,10 @@ namespace Assets.Agent {
                 //return s.colliders.Count != 0;
             }
         );
+        private Sensor[] CreateLayerSensors(int agentCount) {
+            Sensor[] sensors = new Sensor[agentCount];
+            for (int i = 0; i < agentCount; i++) {
 
-
-        // Use this for initialization
-        void Start() {
-            IStateMachine<Sensor> PanicClose = new StateMachine<Sensor>(
-                new IState<Sensor>[] { calm, panic },
-                new IInput<Sensor>[] { close, far },
-                new Dictionary<int, (int, int)[]>() {
-                        { 0, new (int, int)[] { (0, 1) } },
-                        { 1, new (int, int)[] { (1, 0) } }
-                }
-            );
-            IStateMachine<LayerSensor> sm = new StateMachine<LayerSensor>(
-                new IState<LayerSensor>[] { hot, cold },
-                new IInput<LayerSensor>[] { isCold, isHot },
-                new Dictionary<int, (int, int)[]>() {
-                        { 0, new (int, int)[] { (0, 1) } },
-                        { 1, new (int, int)[] { (1, 0) } }
-                }
-            );
-            sms = new IStateMachine[2];
-            
-            sms[1] = PanicClose;
-            sms[0] = sm;
-
-            sensors = new Sensor[2][];
-
-            sensors[0] = new Sensor[agentCount];
-            for (int j = 0; j < agentCount; j++) {
                 GameObject go = new GameObject();
                 go.transform.parent = transform;
                 go.transform.position = new Vector3(
@@ -130,53 +162,9 @@ namespace Assets.Agent {
                 go.name = sensor.id.ToString();
                 sensor.SetColliderRadius(1f);
 
-                sensors[0][j] = sensor;
+                sensors[i] = sensor;
             }
-
-            sensors[1] = new Sensor[agentCount];
-            for (int j = 0; j < agentCount; j++) {
-                GameObject go = new GameObject();
-                go.transform.parent = transform;
-                go.transform.position = new Vector3(
-                    spawnPoint + Random.Range(-spawnRange, spawnRange),
-                    spawnPoint + Random.Range(-spawnRange, spawnRange),
-                    transform.position.z
-                );
-                go.AddComponent<SpriteRenderer>().sprite = agentSprite;
-                Sensor sensor = go.AddComponent<Sensor>();                
-                go.name = sensor.id.ToString();
-                sensor.SetColliderRadius(1f);
-
-                sensors[1][j] = sensor;
-            }
-            
-            Sensor.SetPeers();
-            LayerSensor.gb = GetComponent<Gearbox>();
-
-            if (sensors.Length != sms.Length) {
-                throw new Exception("sensors types don't match state machines count");
-            }
-        }
-
-        private void Update() {
-            AdvanceSensors();
-        }
-
-        private void AdvanceSensors() {
-            for (int i = 0; i < sensors.Length; i++) {
-                switch (sms[i]) {
-                    case IStateMachine<LayerSensor> sm:
-                        for (int j = 0; j < sensors[i].Length; j++) {
-                            sm.AdvanceSensor((LayerSensor)sensors[i][j]);
-                        }
-                    break;
-                    case IStateMachine<Sensor> sm:
-                        for (int j = 0; j < sensors[i].Length; j++) {
-                            sm.AdvanceSensor(sensors[i][j]);
-                        }
-                    break;
-                }
-            }
+            return sensors;
         }
     }
 }
