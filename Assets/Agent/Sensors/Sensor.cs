@@ -4,13 +4,13 @@ using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
 
-namespace Assets.Agent.Refactor {
-    public class SMSensor : MonoBehaviour {
+namespace Assets.Agent.Sensors {
+    public class Sensor : MonoBehaviour {
         public int curState { get; set; }
         public int id;
         protected static int nextId = 0;
 
-        public static SMSensor[] peers;
+        public static Sensor[] peers;
 
         private CircleCollider2D col;
         public List<Collider2D> colliders = new List<Collider2D>();
@@ -32,9 +32,9 @@ namespace Assets.Agent.Refactor {
         }
 
         public static void SetPeers() {
-            peers = FindObjectsOfType<SMSensor>();
+            peers = FindObjectsOfType<Sensor>();
 
-            SMSensor[] orderedPeers = new SMSensor[peers.Length];
+            Sensor[] orderedPeers = new Sensor[peers.Length];
 
             for (int i = 0; i < peers.Length; i++) {
                 orderedPeers[peers[i].id] = peers[i];
@@ -68,7 +68,7 @@ namespace Assets.Agent.Refactor {
 
                 if (minDistSquared > direction.sqrMagnitude) {
                     minDistSquared = distSquared;
-                    index = colliders[i].GetComponent<SMSensor>().id;
+                    index = colliders[i].GetComponent<Sensor>().id;
                 }
 
                 if (minDistSquared == 0) {

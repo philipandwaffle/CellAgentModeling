@@ -1,13 +1,9 @@
-﻿using System;
+﻿using Assets.Agent.Sensors;
 using System.Collections.Generic;
 using Random = UnityEngine.Random;
 
-namespace Assets.Agent.Refactor {
-    public interface IStateMachine<T> {
-        public void AdvanceSensors(T[] sensors);
-        public void AdvanceSensor(T sensor);
-    }
-    public class SM<T> : IStateMachine<T> where T : SMSensor {
+namespace Assets.Agent.StateMachine {
+    public class StateMachine<T> : IStateMachine<T> where T : Sensor {
         private IState<T>[] states;
         private IInput<T>[] inputs;
         // Key being the source state
@@ -16,7 +12,7 @@ namespace Assets.Agent.Refactor {
 
         private bool deterministic;
 
-        public SM(IState<T>[] states, IInput<T>[] inputs, Dictionary<int, (int, int)[]> transitions, bool deterministic = false) {
+        public StateMachine(IState<T>[] states, IInput<T>[] inputs, Dictionary<int, (int, int)[]> transitions, bool deterministic = false) {
             this.states = states;
             this.inputs = inputs;
             this.transitions = transitions;
@@ -56,36 +52,6 @@ namespace Assets.Agent.Refactor {
             }
 
             states[sensor.curState].Act(sensor);
-        }
-    }
-
-    public interface IInput<T> {
-        public bool Activated(T sensor);
-    }
-    public class Input<T> : IInput<T> where T : SMSensor {        
-        private Func<T, bool> activation;
-
-        public Input(Func<T, bool> activation) {
-            this.activation = activation;
-        }
-
-        public bool Activated(T sensor) {
-            return activation(sensor);
-        }
-    }
-
-    public interface IState<T> {
-        public void Act(T sensor);
-    }
-    public class State<T> : IState<T> where T : SMSensor{        
-        private Action<T> act;
-
-        public State(Action<T> act) {            
-            this.act = act;
-        }
-
-        public void Act(T sensor) {
-            act(sensor);
         }
     }
 }
