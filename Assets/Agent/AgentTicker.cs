@@ -10,6 +10,7 @@ namespace Assets.Agent {
     public class AgentTicker : MonoBehaviour {
         private Sensor[][] sensors;
         private IStateMachine[] stateMachines;
+        [SerializeField] private bool isPaused = true;
 
         public void SetAgents(Sensor[][] sensors, IStateMachine[] stateMachines) {
             this.sensors = sensors;
@@ -17,7 +18,7 @@ namespace Assets.Agent {
         }
 
         private void Update() {
-            if (sensors != null) {
+            if (!isPaused && sensors != null) {
                 AdvanceSensors();
             }
         }

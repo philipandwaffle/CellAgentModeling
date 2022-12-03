@@ -61,10 +61,9 @@ namespace Assets.Agent {
             return sensors;
         }
         private IStateMachine<LayerSensor> GetHCPC() {
+            float dist = 0.5f;
             State<LayerSensor> hotPanic = new(
                 (s) => {
-                    float dist = 0.25f;
-
                     int peerIndex = s.GetClosestPeer();
 
                     Vector2 dir = s.DirectionOfLowest();
@@ -76,8 +75,6 @@ namespace Assets.Agent {
             );
             State<LayerSensor> hotCalm = new(
                 (s) => {
-                    float dist = 0.25f;
-
                     int peerIndex = s.GetClosestPeer();
 
                     Vector2 dir = s.DirectionOfLowest();
@@ -89,8 +86,6 @@ namespace Assets.Agent {
             );
             State<LayerSensor> coldPanic = new(
                 (s) => {
-                    float dist = 0.25f;
-
                     int peerIndex = s.GetClosestPeer();
 
                     Vector2 dir = new Vector2();
@@ -103,7 +98,7 @@ namespace Assets.Agent {
                     }                    
                     s.transform.Translate(dir);
                     if (s.ReadValue() == -1) {
-                        s.transform.Translate(-dir);
+                        s.transform.Translate(-dir*4);
                     }
 
                     s.gameObject.GetComponent<SpriteRenderer>().color = Color.magenta;
