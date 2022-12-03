@@ -63,7 +63,7 @@ namespace Assets.Environment {
         public void SetBorder(float val) {
             for (int i = 0; i < w; i++) {
                 for (int j = 0; j < h; j++) {
-                    if (i == 0 || i == w - 1 || j == 0 || j == h - 1) {
+                    if (i == 0 || i == w - 1 || j == 0 || j == h - 1 || i == 50 || j == 50) {
                         this[i, j] = val;
                     }
                 }

@@ -48,7 +48,7 @@ namespace Assets.Environment {
                 },*/
                 new float[,] {
                     { 1f, 1f, 1f },
-                    { 1f, 1f, 1f },
+                    { 1f, 0.99f, 1f },
                     { 1f, 1f, 1f }
                 },
                 (a, b) => {
