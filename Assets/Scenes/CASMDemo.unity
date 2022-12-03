@@ -1246,6 +1246,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ba9457c1a3aac9b46b5456da60273643, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isPaused: 1
 --- !u!4 &1680201993
 Transform:
   m_ObjectHideFlags: 0
@@ -1289,7 +1290,7 @@ MonoBehaviour:
   agentSprite: {fileID: 7482667652216324306, guid: bf6ff723533ce5d48b8cf8e676680fd5, type: 3}
   agentCount: f4010000
   spawnPoint: 50
-  spawnRange: 10
+  spawnRange: 0
 --- !u!1 &1695066314
 GameObject:
   m_ObjectHideFlags: 0
@@ -1741,6 +1742,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   brushRadius: 1
   paused: 1
+  w: 100
+  h: 100
 --- !u!114 &1874806019
 MonoBehaviour:
   m_ObjectHideFlags: 0
