@@ -21,8 +21,9 @@ namespace Assets.Agent.Sensors {
             col.isTrigger = true;
 
             Rigidbody2D rb = gameObject.AddComponent<Rigidbody2D>();
-            rb.isKinematic = true;
-
+            rb.isKinematic = false;
+            rb.gravityScale = 0f;
+            rb.drag = 2;
             id = nextId;
             nextId++;
         }

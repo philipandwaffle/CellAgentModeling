@@ -14,6 +14,7 @@ namespace Assets.Environment {
         private float brushVal = -1;
         [SerializeField] private int brushRadius = 3;
         [SerializeField] private bool paused = true;
+        [SerializeField] private int w = 100, h = 100;
 
         // Use this for initialization
         void Start() {
@@ -21,7 +22,7 @@ namespace Assets.Environment {
 
             float stopVal = -1;
             Layer l = new Layer(
-                100,100,
+                w,h,
                 /*new float[,] {
                     { -1f, -1f, -1f, -1f, -1f, -1f, -1f, -1f, -1f, -1f },
                     { -1f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, -1f },
@@ -48,7 +49,7 @@ namespace Assets.Environment {
                 },*/
                 new float[,] {
                     { 1f, 1f, 1f },
-                    { 1f, 1f, 1f },
+                    { 1f, 0.99f, 1f },
                     { 1f, 1f, 1f }
                 },
                 (a, b) => {
