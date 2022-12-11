@@ -28,7 +28,7 @@ namespace Assets.Agent.Sensors {
             nextId++;
         }
 
-        public void SetColliderRadius(float radius) {
+        public virtual void SetColliderRadius(float radius) {
             col.radius = radius;
         }
 
@@ -44,7 +44,7 @@ namespace Assets.Agent.Sensors {
             peers = orderedPeers;
         }
 
-        public void SetTrigger(bool isTrigger) {
+        public virtual void SetTrigger(bool isTrigger) {
             if (isTrigger) {
                 col = gameObject.AddComponent<CircleCollider2D>();
                 col.isTrigger = true;
@@ -57,7 +57,7 @@ namespace Assets.Agent.Sensors {
             }
         }
 
-        public int GetClosestPeer() {
+        public virtual int GetClosestPeer() {
             int index = -1;
 
             float minDistSquared = float.PositiveInfinity;

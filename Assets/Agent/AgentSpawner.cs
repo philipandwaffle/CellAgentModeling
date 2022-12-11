@@ -51,7 +51,8 @@ namespace Assets.Agent {
                     transform.position.z
                 );
                 go.AddComponent<SpriteRenderer>().sprite = agentSprite;
-                Sensor sensor = go.AddComponent<LayerSensor>();
+                MultiLayerSensor sensor = go.AddComponent<MultiLayerSensor>();
+                sensor.MoveLayer(1);
                 //sensor.SetTrigger(false);
                 go.name = sensor.id.ToString();
                 sensor.SetColliderRadius(1f);
@@ -60,9 +61,10 @@ namespace Assets.Agent {
             }
             return sensors;
         }
-        private IStateMachine<LayerSensor> GetHCPC() {
+        private IStateMachine<MultiLayerSensor> GetHCPC() {
             float dist = 0.5f;
-            State<LayerSensor> hotPanic = new(
+            MultiLayerSensor.maxZ = 1;
+            State<MultiLayerSensor> hotPanic = new(
                 (s) => {
                     int peerIndex = s.GetClosestPeer();
 
@@ -73,7 +75,7 @@ namespace Assets.Agent {
                     s.gameObject.GetComponent<SpriteRenderer>().color = Color.red;
                 }
             );
-            State<LayerSensor> hotCalm = new(
+            State<MultiLayerSensor> hotCalm = new(
                 (s) => {
                     int peerIndex = s.GetClosestPeer();
 
@@ -84,7 +86,7 @@ namespace Assets.Agent {
                     s.gameObject.GetComponent<SpriteRenderer>().color = Color.yellow;
                 }
             );
-            State<LayerSensor> coldPanic = new(
+            State<MultiLayerSensor> coldPanic = new(
                 (s) => {
                     int peerIndex = s.GetClosestPeer();
 
@@ -104,12 +106,18 @@ namespace Assets.Agent {
                     s.gameObject.GetComponent<SpriteRenderer>().color = Color.magenta;
                 }
             );
-            State<LayerSensor> coldCalm = new(
+            State<MultiLayerSensor> coldCalm = new(
                 (s) => {
                     s.gameObject.GetComponent<SpriteRenderer>().color = Color.blue;
                 }
             );
-            Input<LayerSensor> isCold = new(
+            State<MultiLayerSensor> TakeStairs = new(
+                (s) => {
+                    s.MoveLayer(-1);
+                }
+            );
+
+            Input<MultiLayerSensor> isCold = new(
                 (s) => {
                     float val = s.ReadValue();
                     if (val == -1) {
@@ -118,30 +126,37 @@ namespace Assets.Agent {
                     return val < 0.1f;
                 }
             );
-            Input<LayerSensor> isHot = new(
+            Input<MultiLayerSensor> isHot = new(
                 (s) => {
                     return s.ReadValue() > 0.2f;
                 }
             );
-            Input<LayerSensor> isFar = new(
+            Input<MultiLayerSensor> isFar = new(
                 (s) => {
                     return s.colliders.Count == 0;
                 }
             );
-            Input<LayerSensor> isNear = new(
+            Input<MultiLayerSensor> isNear = new(
                 (s) => {
                     return s.colliders.Count != 0;
                 }
             );
+            Input<MultiLayerSensor> isOnSteps = new(
+                (s) => {
+                    return s.ReadValue() == -2;
+                }
+            );
 
-            return new StateMachine<LayerSensor>(
-                new IState<LayerSensor>[] { hotPanic, hotCalm, coldPanic, coldCalm },
-                new IInput<LayerSensor>[] {isCold, isHot, isFar, isNear},
+
+            return new StateMachine<MultiLayerSensor>(
+                new IState<MultiLayerSensor>[] { hotPanic, hotCalm, coldPanic, coldCalm, TakeStairs },
+                new IInput<MultiLayerSensor>[] {isCold, isHot, isFar, isNear, isOnSteps },
                 new Dictionary<int, (int, int)[]>() {
-                    { 0, new (int, int)[] { (2, 1), (0, 2) } },
-                    { 1, new (int, int)[] { (0, 3), (3, 0) } },
-                    { 2, new (int, int)[] { (1, 0), (2, 3) } },
-                    { 3, new (int, int)[] { (3, 2), (1, 1) } },
+                    { 0, new (int, int)[] { (2, 1), (0, 2), (4, 4) } },
+                    { 1, new (int, int)[] { (0, 3), (3, 0), (4, 4) } },
+                    { 2, new (int, int)[] { (1, 0), (2, 3), (4, 4) } },
+                    { 3, new (int, int)[] { (3, 2), (1, 1), (4, 4) } },
+                    { 4, new (int, int)[] { (0, 3), (1, 1), (2, 3), (3, 2) } },
                 }
             );
         }

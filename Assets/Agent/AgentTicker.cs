@@ -26,6 +26,11 @@ namespace Assets.Agent {
         private void AdvanceSensors() {
             for (int i = 0; i < sensors.Length; i++) {
                 switch (stateMachines[i]) {
+                    case IStateMachine<MultiLayerSensor> sm:
+                        for (int j = 0; j < sensors[i].Length; j++) {
+                            sm.AdvanceSensor((MultiLayerSensor)sensors[i][j]);
+                        }
+                        break;
                     case IStateMachine<LayerSensor> sm:
                         for (int j = 0; j < sensors[i].Length; j++) {
                             sm.AdvanceSensor((LayerSensor)sensors[i][j]);

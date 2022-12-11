@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.IO;
 using Unity.Burst;
+using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -11,6 +12,8 @@ namespace Assets.Environment {
     public class LayerEditor : MonoBehaviour, IToggleable{
         private LayerTicker ticker;
 
+        private int numLayers = 2;
+        private int z = 0;
         private float brushVal = -1;
         [SerializeField] private int brushRadius = 3;
         [SerializeField] private bool paused = true;
@@ -20,74 +23,36 @@ namespace Assets.Environment {
         void Start() {
             string path = Application.dataPath + "/Layers/testing_layer.json";
 
-            float stopVal = -1;
+            Vector3 newPos = Camera.main.transform.position;
+            newPos.z = z * Camera.main.transform.localScale.z * -10;
+            newPos.z -= 5;
+            Camera.main.transform.position = newPos;
+            
             Layer l = new Layer(
                 w,h,
-                /*new float[,] {
-                    { -1f, -1f, -1f, -1f, -1f, -1f, -1f, -1f, -1f, -1f },
-                    { -1f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, -1f },
-                    { -1f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, -1f },
-                    { -1f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, -1f },
-                    { -1f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, -1f },
-                    { -1f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, -1f },
-                    { -1f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, -1f },
-                    { -1f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, -1f },
-                    { -1f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, -1f },
-                    { -1f, -1f, -1f, -1f, -1f, -1f, -1f, -1f, -1f, -1f },
-                },*/
-                /*new float[,] {
-                    { -1f, -1f, -1f, -1f, -1f },
-                    { -1f, 0f, 0f, 0f, -1f },
-                    { -1f, 0f, 0f, 0f, -1f },
-                    { -1f, 0f, 0f, 0f, -1f },
-                    { -1f, -1f, -1f, -1f, -1f },
-                },*/
-                /*new float[,] {
-                    { -1f,-1f, -1f },
-                    { -1f, 0f, -1f },
-                    { -1f, -1f, -1f },
-                },*/
                 new float[,] {
                     { 1f, 1f, 1f },
-                    { 1f, 0.99f, 1f },
+                    { 1f, 1f, 1f },
                     { 1f, 1f, 1f }
-                },
-                (a, b) => {
-                    if (a == stopVal) {
-                        a = -a;
-                    }                    
-                    return Mathf.Clamp(a * b, stopVal, 1f);
-                },
-                (a, b) => {
-                    return Mathf.Clamp(a + b, stopVal, 1f);
-                },
-                (a) => {
-                    if (a == stopVal) {
-                        return Color.black;
-                    }
-                    return Color.HSVToRGB(a, 0.7f, 0.5f);
-                },
-                (a) => {
-                    if (a == stopVal) {
-                        return stopVal;
-                    }
-                    return Mathf.Clamp(a, 0f, 1f);
                 }
             );
             l.SetBorder(-1);
-            //l.Save(path);
 
+            //l.Save(path);
             //Layer<float> l = null;
 
             ticker = gameObject.GetComponent<LayerTicker>();
-            ticker.SetLayer(l);
+            ticker.SetNumLayers(numLayers);
+            for (int z = 0; z < numLayers; z++) {
+                ticker.SetLayer(z, l.DeepClone());
+            }
             //ticker.LoadLayer(path);
         }
 
         // Update is called once per frame
         void Update() {
             if (!paused) {
-                ticker.AdvanceLayer();
+                ticker.AdvanceLayers();
             }
 
             if (Input.GetMouseButton(0) && !EventSystem.current.IsPointerOverGameObject()) {                
@@ -97,17 +62,35 @@ namespace Assets.Environment {
                 float xScale = transform.localScale.x;
                 float yScale = transform.localScale.y;
                 // Guard clause if mouse is outside of bounds
-                if (mPos.x < 0 || mPos.x > ticker.GetLayer().w * xScale || mPos.y < 0 || mPos.y > ticker.GetLayer().h * yScale) {
+                if (mPos.x < 0 || mPos.x > ticker.GetLayer(z).w * xScale || mPos.y < 0 || mPos.y > ticker.GetLayer(z).h * yScale) {
                     return;
                 }
 
                 // Convert mouse position to an integer
                 Vector2Int curEditPos = new Vector2Int((int)(mPos.x / xScale), (int)(mPos.y / yScale));
-                for (int i = -brushRadius; i < brushRadius + 1; i++) {
-                    for (int j = -brushRadius; j < brushRadius + 1; j++) {
-                        ticker.SetValue(curEditPos.x + i, curEditPos.y + j, brushVal);
+                for (int x = -brushRadius; x < brushRadius + 1; x++) {
+                    for (int y = -brushRadius; y < brushRadius + 1; y++) {                        
+                        ticker.SetValue(z, curEditPos.x + x, curEditPos.y + y, brushVal);
                     }
                 }
+            }
+
+            if (Input.GetKeyUp(KeyCode.W)) {
+                z = Math.Max(0, z - 1);
+
+                Vector3 newPos = Camera.main.transform.position;
+                newPos.z = z * (Camera.main.transform.localScale.z * -10);
+                newPos.z -= 5;
+
+                Camera.main.transform.position = newPos;
+            } else if (Input.GetKeyUp(KeyCode.S)) {
+                z = Math.Min(numLayers - 1, z + 1);
+
+                Vector3 newPos = Camera.main.transform.position;
+                newPos.z = z * (Camera.main.transform.localScale.z * -10);
+                newPos.z -= 5;
+
+                Camera.main.transform.position = newPos;
             }
         }
 
@@ -135,7 +118,7 @@ namespace Assets.Environment {
                 Debug.Log("Empty file path, exiting");
                 return;
             }
-            ticker.LoadLayer(path);
+            ticker.LoadLayer(z, path);
         }
         public void SaveLayer() {
             string path = EditorUtility.SaveFilePanel(
@@ -144,7 +127,7 @@ namespace Assets.Environment {
                 "",
                 "json");
             if (!path.Equals("")) {
-                ticker.GetLayer().Save(path);
+                ticker.GetLayer(z).Save(path);
             } else {
                 Debug.Log("Empty file path, exiting");
             }
