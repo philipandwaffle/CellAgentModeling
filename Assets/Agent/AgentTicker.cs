@@ -1,6 +1,7 @@
 ﻿using Assets.Agent.Sensors;
 using Assets.Agent.StateMachine;
 using Assets.CASMTransmission;
+using Newtonsoft.Json.Bson;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -15,6 +16,9 @@ namespace Assets.Agent {
         public void SetAgents(Sensor[][] sensors, IStateMachine[] stateMachines) {
             this.sensors = sensors;
             this.stateMachines = stateMachines;
+        }
+        public void TogglePaused() {
+            isPaused = !isPaused;
         }
 
         private void Update() {

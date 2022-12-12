@@ -10,10 +10,14 @@ namespace Assets.CASMTransmission {
         }
 
         public float ReadVaue(int z, int x, int y) {
+            x = (int)(x / lt.transform.localScale.x);
+            y = (int)(y / lt.transform.localScale.y);
             return lt.GetLayer(z)[x, y];
         }
 
         public Vector2 DirectionOfLowest(int z, int x, int y) {
+            x = (int)(x / lt.transform.localScale.x);
+            y = (int)(y / lt.transform.localScale.y);
             Vector2 dir = Vector2.zero;
             float lowestValid = float.PositiveInfinity;
             for (int i = -1; i < 2; i++) {

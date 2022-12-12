@@ -4,6 +4,7 @@ using UnityEngine;
 using Newtonsoft.Json;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Runtime.Serialization;
+using System.Collections.Generic;
 
 namespace Assets.Environment {
     [Serializable]
@@ -25,7 +26,7 @@ namespace Assets.Environment {
             else if (val == -2) {
                 return Color.green;
             }
-            return Color.HSVToRGB(val, 0.7f, 0.5f);
+            return Color.HSVToRGB((1-val /4f) - 0.75f, 0.7f, 0.5f);
         }
         private float Constrain(float val) {
             if (val == -1) {
@@ -116,24 +117,27 @@ namespace Assets.Environment {
             data[x, y] = Constrain(value);
         }
 
-        public void Advance() {
+        public List<(int, int, float)> Advance() {
             float[,] newData = new float[w, h];
-
-            for (int i = 0; i < w; i++) {
-                for (int j = 0; j < h; j++) {
-                    newData[i, j] = DotProduct(i, j);
+            List<(int, int, float)> layerBleed = new List<(int, int, float)>();
+            for (int x = 0; x < w; x++) {
+                for (int y = 0; y < h; y++) {
+                    if (this[x, y] == -1) {
+                        newData[x, y] = -1;
+                    } else if (this[x, y] == -2) {
+                        newData[x, y] = -2;
+                        layerBleed.Add((x, y, DotProduct(x, y)));
+                    } else {
+                        newData[x, y] = Constrain(DotProduct(x, y));
+                    }
                 }
             }
 
             data = newData;
+            return layerBleed;
         }
         private float DotProduct(int x, int y) {
-            if (this[x,y] == -1) {
-                return -1;
-            }
-            if (this[x, y] == -2) {
-                return -2;
-            }
+            
 
             float tempMCount = mCount;
             float total = 0f;
@@ -150,14 +154,15 @@ namespace Assets.Environment {
                     }
                 }
             }
-
+            if (tempMCount == 0) {
+                return -2;
+            }
             return total / tempMCount;
         }
 
         public void Save(string path, Formatting format = Formatting.None) {
-            string json = JsonConvert.SerializeObject(this, format);
-            
-            using (StreamWriter sr = new StreamWriter(path,false)) { 
+            string json = JsonConvert.SerializeObject(this, format);            
+            using (StreamWriter sr = new StreamWriter(path, false)) { 
                 sr.WriteLine(json);
             }
         }

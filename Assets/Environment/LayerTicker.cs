@@ -1,10 +1,14 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Assets.Environment {
     public class LayerTicker: MonoBehaviour {
         private Layer[] layers;
+        public int GetLayerCount() {
+            return layers.Length;
+        }
         public void SetNumLayers(int z) {
             layers = new Layer[z];
             display = new GameObject[z][,];
@@ -26,16 +30,19 @@ namespace Assets.Environment {
         private void SetDisplay(int z) {
             GameObject dis = new GameObject();
             dis.transform.parent = transform;
+            display[z] = new GameObject[layers[z].w, layers[z].h];
 
             for (int x = 0; x < layers[z].w; x++) {
                 for (int y = 0; y < layers[z].h; y++) {
                     GameObject instance = Instantiate(dis);
+                    //instance.transform.localScale = transform.localScale;
                     instance.transform.parent = transform;
+                    instance.transform.localScale = Vector3.one;
                     instance.transform.position = new Vector3(
                         transform.localScale.x * x, 
                         transform.localScale.y * y, 
-                        transform.localScale.z * z * -10);
-                    instance.name = z + "" + x + "," + y;
+                        z * -LayerEditor.layerSep);
+                    instance.name = z + " " + x + "," + y;
 
                     SpriteRenderer sr = instance.AddComponent<SpriteRenderer>();
                     sr.sprite = displaySprite;
@@ -63,8 +70,19 @@ namespace Assets.Environment {
         }
 
         public void AdvanceLayers() {
-            for (int z = 0; z < layers.Length; z++) {
-                layers[z].Advance();
+            for (int z = layers.Length-1; z >= 0; z--) {
+                List<(int, int, float)> layerBleed = layers[z].Advance();
+                if (z != 0) {
+                    for (int i = 0; i < layerBleed.Count; i++) {
+                        int x = layerBleed[i].Item1;
+                        int y = layerBleed[i].Item2;
+                        float val = layerBleed[i].Item3;
+                        if (val == -2) {
+                            continue;
+                        }
+                        layers[z - 1].InsertValue(x, y, val);                        
+                    }
+                }
             }
             UpdateDisplays();
         }

@@ -52,7 +52,7 @@ namespace Assets.Agent {
                 );
                 go.AddComponent<SpriteRenderer>().sprite = agentSprite;
                 MultiLayerSensor sensor = go.AddComponent<MultiLayerSensor>();
-                sensor.MoveLayer(1);
+                sensor.MoveLayer(4);
                 //sensor.SetTrigger(false);
                 go.name = sensor.id.ToString();
                 sensor.SetColliderRadius(1f);
@@ -63,7 +63,7 @@ namespace Assets.Agent {
         }
         private IStateMachine<MultiLayerSensor> GetHCPC() {
             float dist = 0.5f;
-            MultiLayerSensor.maxZ = 1;
+            MultiLayerSensor.maxZ = 5;
             State<MultiLayerSensor> hotPanic = new(
                 (s) => {
                     int peerIndex = s.GetClosestPeer();
@@ -123,12 +123,12 @@ namespace Assets.Agent {
                     if (val == -1) {
                         return false;
                     }
-                    return val < 0.1f;
+                    return val < 0.3f;
                 }
             );
             Input<MultiLayerSensor> isHot = new(
                 (s) => {
-                    return s.ReadValue() > 0.2f;
+                    return s.ReadValue() >= 0.3f;
                 }
             );
             Input<MultiLayerSensor> isFar = new(

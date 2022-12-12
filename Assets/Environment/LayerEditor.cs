@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using System.IO;
+using TMPro;
 using Unity.Burst;
 using Unity.VisualScripting;
 using UnityEditor;
@@ -12,20 +13,23 @@ namespace Assets.Environment {
     public class LayerEditor : MonoBehaviour, IToggleable{
         private LayerTicker ticker;
 
-        private int numLayers = 2;
-        private int z = 0;
         private float brushVal = -1;
+        private int z = 0;
+        [SerializeField] private int numLayers = 2;
         [SerializeField] private int brushRadius = 3;
         [SerializeField] private bool paused = true;
         [SerializeField] private int w = 100, h = 100;
+        [SerializeField] private TMP_Text text;
+
+        public static int layerSep = 50;
 
         // Use this for initialization
         void Start() {
             string path = Application.dataPath + "/Layers/testing_layer.json";
 
             Vector3 newPos = Camera.main.transform.position;
-            newPos.z = z * Camera.main.transform.localScale.z * -10;
-            newPos.z -= 5;
+            newPos.z = z * Camera.main.transform.localScale.z * -layerSep;
+            newPos.z -= layerSep/2;
             Camera.main.transform.position = newPos;
             
             Layer l = new Layer(
@@ -76,22 +80,21 @@ namespace Assets.Environment {
             }
 
             if (Input.GetKeyUp(KeyCode.W)) {
-                z = Math.Max(0, z - 1);
-
-                Vector3 newPos = Camera.main.transform.position;
-                newPos.z = z * (Camera.main.transform.localScale.z * -10);
-                newPos.z -= 5;
-
-                Camera.main.transform.position = newPos;
+                MoveLayer(-1);
             } else if (Input.GetKeyUp(KeyCode.S)) {
-                z = Math.Min(numLayers - 1, z + 1);
-
-                Vector3 newPos = Camera.main.transform.position;
-                newPos.z = z * (Camera.main.transform.localScale.z * -10);
-                newPos.z -= 5;
-
-                Camera.main.transform.position = newPos;
+                MoveLayer(1);
             }
+        }
+
+
+        private void MoveLayer(int deltaZ) {
+            z = Math.Clamp(z + deltaZ, 0, numLayers - 1);
+            
+            Vector3 newPos = Camera.main.transform.position;
+            newPos.z = z * (Camera.main.transform.localScale.z * -layerSep);
+            newPos.z -= 5;
+            text.text = "Layer: " + z;
+            Camera.main.transform.position = newPos;
         }
 
 
@@ -125,11 +128,52 @@ namespace Assets.Environment {
                 "Save Layer",
                 Application.dataPath + "/Layers",
                 "",
-                "json");
+                "layer");
             if (!path.Equals("")) {
                 ticker.GetLayer(z).Save(path);
             } else {
                 Debug.Log("Empty file path, exiting");
+            }
+        }
+        public void LoadLayers() {
+            string path = EditorUtility.OpenFolderPanel(
+                "Load Layer",
+                Application.dataPath + "/Layers",
+                "");
+
+            if (path.Equals("")) {
+                Debug.Log("Empty folder path, exiting");
+                return;
+            }
+            DirectoryInfo d = new DirectoryInfo(path);
+            FileInfo[] layerFiles = d.GetFiles("*.layer");
+
+            int layerLength = layerFiles.Length;
+            numLayers = layerLength;
+            ticker.SetNumLayers(layerLength);
+
+            for (int i = 0; i < layerLength; i++) {
+                string name = layerFiles[i].FullName;
+                Debug.Log("loading layer: " + i + " <- " + name);
+                
+                ticker.LoadLayer(i, name);
+            }
+        }
+        public void SaveLayers() {
+            string path = EditorUtility.OpenFolderPanel(
+                "Load Layer",
+                Application.dataPath + "/Layers",
+                "");
+
+            if (path.Equals("")) {
+                Debug.Log("Empty folder path, exiting");
+                return;
+            }        
+            for (int i = 0; i < ticker.GetLayerCount(); i++) {
+
+                string name = path + "/" + i + ".layer";
+                Debug.Log("saving layer: " + i + " -> " + name);
+                ticker.GetLayer(i).Save(name);
             }
         }
     }

@@ -1,4 +1,5 @@
 ﻿using Assets.CASMTransmission;
+using Assets.Environment;
 using System;
 using UnityEditor.U2D.Animation;
 using UnityEngine;
@@ -21,7 +22,7 @@ namespace Assets.Agent.Sensors {
         public void MoveLayer(int deltaZ) {
             z = Math.Clamp(z + deltaZ, 0, maxZ);
             Vector3 newPos = transform.position;
-            newPos.z = (z * -10) - 1;
+            newPos.z = (z * -LayerEditor.layerSep) - 1;
 
             transform.position = newPos;
         }
