@@ -26,31 +26,37 @@ namespace Assets.Agent.StateMachine {
         }
 
         public void AdvanceSensor(T sensor) {
+            // The transitions possible for the current state
             (int, int)[] possibleTrans = transitions[sensor.curState];
 
-            if (deterministic) {
-                for (int i = 0; i < possibleTrans.Length; i++) {
-                    (int, int) trans = possibleTrans[i];
-                    if (inputs[trans.Item1].Activated(sensor)) {
-                        sensor.curState = trans.Item2;
-                        break;
-                    }
-                }
-            } else {
-                List<int> finalStates = new List<int>();
-                for (int i = 0; i < possibleTrans.Length; i++) {
-                    (int, int) trans = possibleTrans[i];
+            List<int> finalStates = new List<int>();
 
-                    if (inputs[trans.Item1].Activated(sensor)) {
+            // Loop through each transition
+            for (int i = 0; i < possibleTrans.Length; i++) {
+                (int, int) trans = possibleTrans[i];
+
+                // Check if the transition is valid
+                if (inputs[trans.Item1].Activated(sensor)) {
+
+                    // If deterministic the first valid transition is selected
+                    if (deterministic) {
+                        // Set the current state to the first valid state
+                        sensor.curState = trans.Item2;
+                        states[sensor.curState].Act(sensor);
+                        return;
+                    } else {
                         finalStates.Add(trans.Item2);
                     }
                 }
-                int count = finalStates.Count;
-                if (count != 0) {
-                    sensor.curState = finalStates[Random.Range(0, count - 1)];
-                }
             }
 
+            // Set the current state one of the possible states
+            int count = finalStates.Count;
+            if (count != 0) {
+                sensor.curState = finalStates[Random.Range(0, count - 1)];
+            }
+            
+            // Preform the action of the state
             states[sensor.curState].Act(sensor);
         }
     }

@@ -1,69 +1,98 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Assets.Environment {
     public class LayerTicker: MonoBehaviour {
-        private Layer layer;
-        public Layer GetLayer() {
-            return layer;
+        private Layer[] layers;
+        public int GetLayerCount() {
+            return layers.Length;
         }
-        public void SetLayer(Layer layer) {
-            this.layer = layer;
-            SetDisplay();
+        public void SetNumLayers(int z) {
+            layers = new Layer[z];
+            display = new GameObject[z][,];
+        }
+
+        public Layer GetLayer(int z) {
+            return layers[z];
+        }
+        public void SetLayer(int z, Layer layer) {
+            layers[z] = layer;
+            display[z] = new GameObject[layers[z].w, layers[z].h];
+            SetDisplay(z);
         }
 
         [SerializeField] private Sprite displaySprite;
 
-        private GameObject[,] display;
+        private GameObject[][,] display;
 
-        private void SetDisplay() {
-            display = new GameObject[layer.w, layer.h];
-
+        private void SetDisplay(int z) {
             GameObject dis = new GameObject();
             dis.transform.parent = transform;
+            display[z] = new GameObject[layers[z].w, layers[z].h];
 
-            for (int i = 0; i < layer.w; i++) {
-                for (int j = 0; j < layer.h; j++) {
+            for (int x = 0; x < layers[z].w; x++) {
+                for (int y = 0; y < layers[z].h; y++) {
                     GameObject instance = Instantiate(dis);
+                    //instance.transform.localScale = transform.localScale;
                     instance.transform.parent = transform;
-                    instance.transform.position = transform.localScale * new Vector2(i, j);
-                    instance.name = i + "," + j;
+                    instance.transform.localScale = Vector3.one;
+                    instance.transform.position = new Vector3(
+                        transform.localScale.x * x, 
+                        transform.localScale.y * y, 
+                        z * -LayerEditor.layerSep);
+                    instance.name = z + " " + x + "," + y;
 
                     SpriteRenderer sr = instance.AddComponent<SpriteRenderer>();
                     sr.sprite = displaySprite;
-                    sr.color = layer.GetDisplayData(i, j);
+                    sr.color = layers[z].GetDisplayData(x, y);
 
-                    display[i, j] = instance;
+                    display[z][x, y] = instance;
                 }
             }
             Destroy(dis);
         }
 
-        public void SetValue(int x, int y, float val) {
-            layer.InsertValue(x, y, val);
-            display[x, y].GetComponent<SpriteRenderer>().color = layer.GetDisplayData(x, y);
+        public void SetValue(int z, int x, int y, float val) {
+            layers[z].InsertValue(x, y, val);
+            display[z][x, y].GetComponent<SpriteRenderer>().color = layers[z].GetDisplayData(x, y);
         }
 
-        public void LoadLayer(string path) {
-            layer = Layer.LoadLayer(path);
+        public void LoadLayer(int z, string path) {            
+            layers[z] = Layer.LoadLayer(path);
 
-            SetDisplay();
+            SetDisplay(z);
         }
 
-        public void ClearLayer(float value) {
-            layer.Fill(value);
+        public void ClearLayer(int z, float value) {
+            layers[z].Fill(value);
         }
 
-        public void AdvanceLayer() {
-            layer.Advance();
-            UpdateDisplay();
+        public void AdvanceLayers() {
+            for (int z = layers.Length-1; z >= 0; z--) {
+                List<(int, int, float)> layerBleed = layers[z].Advance();
+                if (z != 0) {
+                    for (int i = 0; i < layerBleed.Count; i++) {
+                        int x = layerBleed[i].Item1;
+                        int y = layerBleed[i].Item2;
+                        float val = layerBleed[i].Item3;
+                        if (val == -2) {
+                            continue;
+                        }
+                        layers[z - 1].InsertValue(x, y, val);                        
+                    }
+                }
+            }
+            UpdateDisplays();
         }
 
-        private void UpdateDisplay() {
-            for (int i = 0; i < layer.w; i++) {
-                for (int j = 0; j < layer.h; j++) {
-                    display[i, j].GetComponent<SpriteRenderer>().color = layer.GetDisplayData(i, j);
+        private void UpdateDisplays() {
+            for (int z = 0; z < layers.Length; z++) {
+                for (int x = 0; x < layers[z].w; x++) {
+                    for (int y = 0; y < layers[z].h; y++) {
+                        display[z][x, y].GetComponent<SpriteRenderer>().color = layers[z].GetDisplayData(x, y);
+                    }
                 }
             }
         }

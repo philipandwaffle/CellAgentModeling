@@ -5,28 +5,25 @@ using UnityEngine;
 public class CameraController : MonoBehaviour
 {
     [SerializeField] private float scrollSpeed = 0.25f;
-    private Vector2 prevMouse;
-    private new Transform transform;
-    private new Camera camera;
+    private Vector2 prevMouse;        
 
     // Start is called before the first frame update
-    void Start() {
-        transform = gameObject.GetComponent<Transform>();
-        camera = gameObject.GetComponent<Camera>();
+    void Start() {        
+        
         prevMouse = Input.mousePosition;
     }
 
     // Update is called once per frame
     void Update() {
         if (Input.GetMouseButton(1)) {
-            Vector2 curMouse = camera.ScreenToViewportPoint(Input.mousePosition);
-            Vector3 translation = (Vector2)camera.ViewportToWorldPoint(prevMouse) - (Vector2)camera.ViewportToWorldPoint(curMouse);
+            Vector2 curMouse = GetComponent<Camera>().ScreenToViewportPoint(Input.mousePosition);
+            Vector3 translation = (Vector2)GetComponent<Camera>().ViewportToWorldPoint(prevMouse) - (Vector2)GetComponent<Camera>().ViewportToWorldPoint(curMouse);
             transform.transform.position += translation;
             prevMouse = curMouse;
         } else {
-            prevMouse = camera.ScreenToViewportPoint(Input.mousePosition);
+            prevMouse = GetComponent<Camera>().ScreenToViewportPoint(Input.mousePosition);
         }
 
-        camera.orthographicSize = Mathf.Max(0.1f, camera.orthographicSize - Input.mouseScrollDelta.y * scrollSpeed);
+        GetComponent<Camera>().orthographicSize = Mathf.Max(0.1f, GetComponent<Camera>().orthographicSize - Input.mouseScrollDelta.y * scrollSpeed);
     }
 }
