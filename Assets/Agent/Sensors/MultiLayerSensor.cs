@@ -5,6 +5,10 @@ using UnityEditor.U2D.Animation;
 using UnityEngine;
 
 namespace Assets.Agent.Sensors {
+    /// <summary>
+    /// A MultiLayerSensor is the body of an agent, it represents the agent's presence within a stack.
+    /// It can also be can be extended through inheritence.
+    /// </summary>
     public class MultiLayerSensor : LayerSensor {        
         public static int maxZ { set; private get; }
         private int z = 0;

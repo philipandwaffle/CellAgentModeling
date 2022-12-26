@@ -133,12 +133,12 @@ namespace Assets.Agent {
             );
             Input<MultiLayerSensor> isFar = new(
                 (s) => {
-                    return s.colliders.Count == 0;
+                    return s.contacts.Count == 0;
                 }
             );
             Input<MultiLayerSensor> isNear = new(
                 (s) => {
-                    return s.colliders.Count != 0;
+                    return s.contacts.Count != 0;
                 }
             );
             Input<MultiLayerSensor> isOnSteps = new(

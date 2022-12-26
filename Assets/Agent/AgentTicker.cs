@@ -1,13 +1,11 @@
 ﻿using Assets.Agent.Sensors;
 using Assets.Agent.StateMachine;
-using Assets.CASMTransmission;
-using Newtonsoft.Json.Bson;
-using System;
-using System.Collections.Generic;
 using UnityEngine;
-using Random = UnityEngine.Random;
 
 namespace Assets.Agent {
+    /// <summary>
+    /// Advances each agent every tick
+    /// </summary>
     public class AgentTicker : MonoBehaviour {
         private Sensor[][] sensors;
         private IStateMachine[] stateMachines;
@@ -22,6 +20,7 @@ namespace Assets.Agent {
         }
 
         private void Update() {
+            // If the sim isn't paused and there are sensors set
             if (!isPaused && sensors != null) {
                 AdvanceSensors();
             }
@@ -29,6 +28,7 @@ namespace Assets.Agent {
 
         private void AdvanceSensors() {
             for (int i = 0; i < sensors.Length; i++) {
+                // Cast the state machine to the correct type
                 switch (stateMachines[i]) {
                     case IStateMachine<MultiLayerSensor> sm:
                         for (int j = 0; j < sensors[i].Length; j++) {

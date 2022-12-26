@@ -2,7 +2,11 @@
 using TMPro.EditorUtilities;
 using UnityEngine;
 
-namespace Assets.Agent.Sensors {
+namespace Assets.Agent.Sensors {    
+    /// <summary>
+    /// A LayerSensor is the body of an agent, it represents the agent's presence on a layer.
+    /// It can also be can be extended through inheritence.
+    /// </summary>
     public class LayerSensor : Sensor {
         public static Gearbox gb;
         protected float offSet = 0.5f;
