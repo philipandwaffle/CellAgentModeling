@@ -51,26 +51,31 @@ namespace Assets.Agent {
                     transform.position.z
                 );
                 go.AddComponent<SpriteRenderer>().sprite = agentSprite;
+                //go.AddComponent<MultiLayerSensor>();
                 MultiLayerSensor sensor = go.AddComponent<MultiLayerSensor>();
                 sensor.MoveLayer(4);
                 //sensor.SetTrigger(false);
                 go.name = sensor.id.ToString();
-                sensor.SetColliderRadius(1f);
+                sensor.SetSenRadius(1f);
+                sensor.SetColRadius(0.5f);
 
                 sensors[i] = sensor;
             }
             return sensors;
         }
+
+        // Generates and gets the hot cold panic calm state machine
         private IStateMachine<MultiLayerSensor> GetHCPC() {
-            float dist = 0.5f;
+            float dirModifier = 10f;
             MultiLayerSensor.maxZ = 5;
             State<MultiLayerSensor> hotPanic = new(
                 (s) => {
                     int peerIndex = s.GetClosestPeer();
 
                     Vector2 dir = s.DirectionOfLowest();
-                    dir *= dist;
-                    s.transform.Translate(dir);
+                    dir *= dirModifier;
+                    s.ApplyForce(dir);
+                    //s.transform.Translate(dir);
 
                     s.gameObject.GetComponent<SpriteRenderer>().color = Color.red;
                 }
@@ -80,8 +85,9 @@ namespace Assets.Agent {
                     int peerIndex = s.GetClosestPeer();
 
                     Vector2 dir = s.DirectionOfLowest();
-                    dir *= dist;
-                    s.transform.Translate(dir);
+                    dir *= dirModifier;
+                    s.ApplyForce(dir);
+                    //s.transform.Translate(dir);
 
                     s.gameObject.GetComponent<SpriteRenderer>().color = Color.yellow;
                 }
@@ -92,15 +98,17 @@ namespace Assets.Agent {
 
                     Vector2 dir = new Vector2();
                     if (peerIndex == -1) {
-                        dir = new(Random.Range(-dist, dist), Random.Range(-dist, dist));
+                        dir = new(Random.Range(-dirModifier, dirModifier), Random.Range(-dirModifier, dirModifier));
                     } else {
                         dir = s.transform.position - Sensor.peers[peerIndex].transform.position;
                         dir.Normalize();
-                        dir *= dist;
-                    }                    
-                    s.transform.Translate(dir);
+                        dir *= dirModifier;
+                    }
+                    s.ApplyForce(dir);
+                    //s.transform.Translate(dir);
                     if (s.ReadValue() == -1) {
-                        s.transform.Translate(-dir*4);
+                        s.ApplyForce(dir);
+                        //s.transform.Translate(-dir*4);
                     }
 
                     s.gameObject.GetComponent<SpriteRenderer>().color = Color.magenta;

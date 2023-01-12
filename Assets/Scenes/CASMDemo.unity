@@ -713,7 +713,7 @@ SpriteRenderer:
   m_Size: {x: 1, y: 1}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!4 &781947013
@@ -1661,8 +1661,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bd0ad93953365bd4c9d64d0a4477a4b8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  agentSprite: {fileID: 7482667652216324306, guid: bf6ff723533ce5d48b8cf8e676680fd5, type: 3}
-  agentCount: 32000000
+  agentSprite: {fileID: -2413806693520163455, guid: 2e89c149b567951459606f0243d761a6, type: 3}
+  agentCount: 00000000
   spawnPoint: 50
   spawnRange: 10
 --- !u!1 &1695066314
@@ -2132,7 +2132,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: db448db29b07e7746ba9b76809940639, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  displaySprite: {fileID: 7482667652216324306, guid: bf6ff723533ce5d48b8cf8e676680fd5, type: 3}
+  displaySprite: {fileID: 7482667652216324306, guid: a7bf32b07da437c468a53f043deb49b5, type: 3}
 --- !u!1 &1931297286
 GameObject:
   m_ObjectHideFlags: 0
