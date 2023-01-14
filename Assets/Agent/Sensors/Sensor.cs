@@ -20,26 +20,27 @@ namespace Assets.Agent.Sensors {
         
         private Rigidbody2D rb;
         // The collider trigger belonging to this sensor used to handle the contact list
-        private CircleCollider2D sensorCol;
+        private CircleCollider2D con;
         // The collider belonging to this sensor used for collision
         private CircleCollider2D col;
+        private float conR, colR;
         // A list of peers who are in range of this sensor
         public List<Collider2D> contacts = new List<Collider2D>();
 
         // Use this for initialization
         void Awake() {
-            GameObject sensorColGo = new GameObject("sensorCol");
+            GameObject sensorColGo = new GameObject("contactCol");
             sensorColGo.transform.position = transform.position;
             sensorColGo.transform.parent = transform;
-            sensorCol = sensorColGo.AddComponent<CircleCollider2D>();
-            sensorCol.tag = "sensor";
-            sensorCol.isTrigger = true;
+            con = sensorColGo.AddComponent<CircleCollider2D>();
+            con.tag = "contactCol";
+            con.isTrigger = true;
 
             GameObject colliderGO = new GameObject("col");
             colliderGO.transform.position = transform.position;
             colliderGO.transform.parent = transform;
             col = colliderGO.AddComponent<CircleCollider2D>();
-            
+
             rb = gameObject.AddComponent<Rigidbody2D>();
             rb.isKinematic = false;
             rb.gravityScale = 0f;
@@ -50,15 +51,16 @@ namespace Assets.Agent.Sensors {
             nextId++;
         }
 
-        public virtual void SetSenRadius(float radius) {
-            if (sensorCol != null) { 
-                sensorCol.radius = radius;
-            }
+        private void Start() {
+            col.radius = colR;
+            con.radius = conR;
+        }
+
+        public virtual void SetConRadius(float radius) {
+            conR = radius;
         }
         public virtual void SetColRadius(float radius) {
-            if (col != null) {
-                col.radius = radius;
-            }
+            colR = radius;
         }
 
         /// <summary>
@@ -112,7 +114,7 @@ namespace Assets.Agent.Sensors {
         }
 
         protected void OnTriggerEnter2D(Collider2D collision) {            
-            if (!contacts.Contains(collision) && collision.CompareTag("sensor")) { 
+            if (collision.CompareTag("contactCol") && !contacts.Contains(collision)) { 
                 contacts.Add(collision); 
             }            
         }

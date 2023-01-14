@@ -45,6 +45,9 @@ namespace Assets.Environment {
                         z * -LayerEditor.layerSep);
                     instance.name = z + " " + x + "," + y;
 
+                    BoxCollider2D bc = instance.AddComponent<BoxCollider2D>();
+                    bc.enabled = layers[z][x, y] == -1;                   
+
                     SpriteRenderer sr = instance.AddComponent<SpriteRenderer>();
                     sr.sprite = displaySprite;
                     sr.color = layers[z].GetDisplayData(x, y);
@@ -64,10 +67,6 @@ namespace Assets.Environment {
             layers[z] = Layer.LoadLayer(path);
 
             SetDisplay(z);
-        }
-
-        public void ClearLayer(int z, float value) {
-            layers[z].Fill(value);
         }
 
         public void AdvanceLayers() {
@@ -92,24 +91,13 @@ namespace Assets.Environment {
             for (int z = 0; z < layers.Length; z++) {
                 for (int x = 0; x < layers[z].w; x++) {
                     for (int y = 0; y < layers[z].h; y++) {
-                        GameObject go = display[z][x, y];
-                        SpriteRenderer sr = go.GetComponent<SpriteRenderer>();
-                        Color curColour = sr.color;
-                        Color newColour = layers[z].GetDisplayData(x, y);
-                        Debug.Log("Hello");
-                        if ((int)(curColour.r * 1000) == (int)(newColour.r * 1000) && 
-                            (int)(curColour.g * 1000) == (int)(newColour.g * 1000) && 
-                            (int)(curColour.b * 1000) == (int)(newColour.b * 1000)) {
-                            sr.color = newColour;
-                            Debug.Log(layers[z][x, y]);
-                            if (layers[z][x, y] == -1f) {
-                                
-                                BoxCollider2D bc = go.AddComponent<BoxCollider2D>();
-                                Debug.Log("Hello");
-                            } else {
-                                Destroy(GetComponent<BoxCollider2D>());
-                            }
-                        }
+                        /* GameObject go = display[z][x, y];
+                         SpriteRenderer sr = go.GetComponent<SpriteRenderer>();
+                         BoxCollider2D bc = go.GetComponent<BoxCollider2D>();
+
+                         bc.enabled = layers[z][x, y] == -1;
+                         sr.color = layers[z].GetDisplayData(x, y);*/
+                        display[z][x, y].GetComponent<SpriteRenderer>().color = layers[z].GetDisplayData(x, y);
                     }
                 }
             }

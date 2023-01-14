@@ -51,12 +51,11 @@ namespace Assets.Agent {
                     transform.position.z
                 );
                 go.AddComponent<SpriteRenderer>().sprite = agentSprite;
-                //go.AddComponent<MultiLayerSensor>();
                 MultiLayerSensor sensor = go.AddComponent<MultiLayerSensor>();
                 sensor.MoveLayer(4);
-                //sensor.SetTrigger(false);
                 go.name = sensor.id.ToString();
-                sensor.SetSenRadius(1f);
+
+                sensor.SetConRadius(1f);
                 sensor.SetColRadius(0.5f);
 
                 sensors[i] = sensor;

@@ -100,14 +100,6 @@ namespace Assets.Environment {
                 string json = sr.ReadToEnd();
                 return JsonConvert.DeserializeObject<Layer>(json);
             }
-        }
-
-        public void Fill(float value) {
-            for (int i = 0; i < w; i++) {
-                for (int j = 0; j < h; j++) {
-                    data[i, j] = value;
-                }
-            }
         }        
 
         public Color GetDisplayData(int x, int y) {
