@@ -36,5 +36,25 @@ namespace Assets.CASMTransmission {
 
             return dir;
         }
+
+        public Vector2 WeightedDirectionOfLowest(int z, int x, int y) {
+            x = (int)(x / lt.transform.localScale.x);
+            y = (int)(y / lt.transform.localScale.y);
+            Vector2 dir = Vector2.zero;
+
+            for (int i = -1; i < 2; i++) {
+                for (int j = -1; j < 2; j++) {
+                    float val = lt.GetLayer(z)[x + i, y + j];
+                    float weight = 1 - val;
+                    dir += weight * new Vector2(i, j);
+                }
+            }
+
+            if (dir != Vector2.zero) {
+                dir.Normalize();
+            }
+
+            return dir;
+        }
     }
 }

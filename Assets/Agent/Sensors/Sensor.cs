@@ -13,30 +13,53 @@ namespace Assets.Agent.Sensors {
         public int curState { get; set; }
         public int id;
         protected static int nextId = 0;
-
         // Every sensor in the scene
         public static Sensor[] peers;
 
-        // The collider belonging to this sensor
-        private CircleCollider2D col;
+        
+        private Rigidbody2D rb;
+        // The collider trigger belonging to this sensor used to handle the contact list
+        protected CircleCollider2D con;
+        // The collider belonging to this sensor used for collision
+        protected CircleCollider2D col;
+        private float conR, colR;
         // A list of peers who are in range of this sensor
         public List<Collider2D> contacts = new List<Collider2D>();
 
         // Use this for initialization
         void Awake() {
-            col = gameObject.AddComponent<CircleCollider2D>();
-            col.isTrigger = true;
+            GameObject sensorColGo = new GameObject("contactCol");
+            sensorColGo.transform.position = transform.position;
+            sensorColGo.transform.parent = transform;
+            con = sensorColGo.AddComponent<CircleCollider2D>();
+            con.tag = "contactCol";
+            con.isTrigger = true;
 
-            Rigidbody2D rb = gameObject.AddComponent<Rigidbody2D>();
+            GameObject colliderGO = new GameObject("col");
+            colliderGO.transform.position = transform.position;
+            colliderGO.transform.parent = transform;
+            col = colliderGO.AddComponent<CircleCollider2D>();
+
+            rb = gameObject.AddComponent<Rigidbody2D>();
             rb.isKinematic = false;
             rb.gravityScale = 0f;
             rb.drag = 2;
+            
+
             id = nextId;
             nextId++;
         }
 
-        public virtual void SetColliderRadius(float radius) {
-            col.radius = radius;
+        private void Start() {
+            col.radius = colR;
+            con.radius = conR;
+        }
+
+        public virtual void SetConRadius(float radius) {
+            conR = radius;
+        }
+        public virtual void SetColRadius(float radius) {
+            colR = radius;
         }
 
         /// <summary>
@@ -52,20 +75,6 @@ namespace Assets.Agent.Sensors {
             }
 
             peers = orderedPeers;
-        }
-
-
-        public virtual void SetTrigger(bool isTrigger) {
-            if (isTrigger) {
-                col = gameObject.AddComponent<CircleCollider2D>();
-                col.isTrigger = true;
-
-                Rigidbody2D rb = gameObject.AddComponent<Rigidbody2D>();
-                rb.isKinematic = true;
-            } else {
-                Destroy(GetComponent<CircleCollider2D>());
-                Destroy(GetComponent<Rigidbody2D>());
-            }
         }
 
         /// <summary>
@@ -92,14 +101,19 @@ namespace Assets.Agent.Sensors {
                         return -1;
                     }
 
-                    index = contacts[i].GetComponent<Sensor>().id;
+                    index = contacts[i].transform.parent.GetComponent<Sensor>().id;
                 }
             }
 
             return index;
         }
-        protected void OnTriggerEnter2D(Collider2D collision) {
-            if (!contacts.Contains(collision)) { 
+
+        public void ApplyForce(Vector2 force) {
+            rb.AddForce(force);
+        }
+
+        protected void OnTriggerEnter2D(Collider2D collision) {            
+            if (collision.CompareTag("contactCol") && !contacts.Contains(collision)) { 
                 contacts.Add(collision); 
             }            
         }

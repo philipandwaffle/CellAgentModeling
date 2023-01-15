@@ -3,19 +3,20 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags: []
+  tags:
+  - contactCol
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Holder
   - Water
   - UI
-  - 
-  - 
-  - 
-  - 
-  - 
+  - Floor0
+  - Floor1
+  - Floor2
+  - Floor3
+  - Floor4
   - 
   - 
   - 

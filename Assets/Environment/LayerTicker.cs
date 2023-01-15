@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+
 using UnityEngine;
 
 namespace Assets.Environment {
@@ -35,7 +36,8 @@ namespace Assets.Environment {
             for (int x = 0; x < layers[z].w; x++) {
                 for (int y = 0; y < layers[z].h; y++) {
                     GameObject instance = Instantiate(dis);
-                    //instance.transform.localScale = transform.localScale;
+                    instance.layer = 6+z;
+
                     instance.transform.parent = transform;
                     instance.transform.localScale = Vector3.one;
                     instance.transform.position = new Vector3(
@@ -43,6 +45,9 @@ namespace Assets.Environment {
                         transform.localScale.y * y, 
                         z * -LayerEditor.layerSep);
                     instance.name = z + " " + x + "," + y;
+
+                    BoxCollider2D bc = instance.AddComponent<BoxCollider2D>();
+                    bc.enabled = layers[z][x, y] == -1;                   
 
                     SpriteRenderer sr = instance.AddComponent<SpriteRenderer>();
                     sr.sprite = displaySprite;
@@ -63,10 +68,6 @@ namespace Assets.Environment {
             layers[z] = Layer.LoadLayer(path);
 
             SetDisplay(z);
-        }
-
-        public void ClearLayer(int z, float value) {
-            layers[z].Fill(value);
         }
 
         public void AdvanceLayers() {
@@ -91,6 +92,12 @@ namespace Assets.Environment {
             for (int z = 0; z < layers.Length; z++) {
                 for (int x = 0; x < layers[z].w; x++) {
                     for (int y = 0; y < layers[z].h; y++) {
+                        /* GameObject go = display[z][x, y];
+                         SpriteRenderer sr = go.GetComponent<SpriteRenderer>();
+                         BoxCollider2D bc = go.GetComponent<BoxCollider2D>();
+
+                         bc.enabled = layers[z][x, y] == -1;
+                         sr.color = layers[z].GetDisplayData(x, y);*/
                         display[z][x, y].GetComponent<SpriteRenderer>().color = layers[z].GetDisplayData(x, y);
                     }
                 }
