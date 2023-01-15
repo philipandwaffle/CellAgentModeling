@@ -36,7 +36,8 @@ namespace Assets.Environment {
             for (int x = 0; x < layers[z].w; x++) {
                 for (int y = 0; y < layers[z].h; y++) {
                     GameObject instance = Instantiate(dis);
-                    //instance.transform.localScale = transform.localScale;
+                    instance.layer = 6+z;
+
                     instance.transform.parent = transform;
                     instance.transform.localScale = Vector3.one;
                     instance.transform.position = new Vector3(

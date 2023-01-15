@@ -1601,7 +1601,7 @@ GameObject:
   - component: {fileID: 1680201995}
   - component: {fileID: 1680201992}
   - component: {fileID: 1680201994}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: StateMachines
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1662,7 +1662,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   agentSprite: {fileID: -2413806693520163455, guid: 2e89c149b567951459606f0243d761a6, type: 3}
-  agentCount: 00000000
+  agentCount: f4010000
   spawnPoint: 50
   spawnRange: 10
 --- !u!1 &1695066314
@@ -2080,7 +2080,7 @@ GameObject:
   - component: {fileID: 1874806016}
   - component: {fileID: 1874806018}
   - component: {fileID: 1874806019}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Environment
   m_TagString: Untagged
   m_Icon: {fileID: 0}

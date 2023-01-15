@@ -65,7 +65,7 @@ namespace Assets.Agent {
 
         // Generates and gets the hot cold panic calm state machine
         private IStateMachine<MultiLayerSensor> GetHCPC() {
-            float dirModifier = 10f;
+            float dirModifier = 50f;
             MultiLayerSensor.maxZ = 5;
             State<MultiLayerSensor> hotPanic = new(
                 (s) => {

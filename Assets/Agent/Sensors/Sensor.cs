@@ -13,16 +13,15 @@ namespace Assets.Agent.Sensors {
         public int curState { get; set; }
         public int id;
         protected static int nextId = 0;
-
         // Every sensor in the scene
         public static Sensor[] peers;
 
         
         private Rigidbody2D rb;
         // The collider trigger belonging to this sensor used to handle the contact list
-        private CircleCollider2D con;
+        protected CircleCollider2D con;
         // The collider belonging to this sensor used for collision
-        private CircleCollider2D col;
+        protected CircleCollider2D col;
         private float conR, colR;
         // A list of peers who are in range of this sensor
         public List<Collider2D> contacts = new List<Collider2D>();
