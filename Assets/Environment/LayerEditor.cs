@@ -59,7 +59,7 @@ namespace Assets.Environment {
                 ticker.AdvanceLayers();
             }
 
-            if (Input.GetMouseButton(0) && !EventSystem.current.IsPointerOverGameObject()) {                
+            if (Input.GetMouseButton(0)) {                
                 // Get the current mouse position in the world
                 Vector2 mPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
 

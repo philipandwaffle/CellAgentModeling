@@ -37,7 +37,7 @@ namespace Assets.CASMTransmission {
             return dir;
         }
 
-        public Vector2 DirectionOfLowest1(int z, int x, int y) {
+        public Vector2 WeightedDirectionOfLowest(int z, int x, int y) {
             x = (int)(x / lt.transform.localScale.x);
             y = (int)(y / lt.transform.localScale.y);
             Vector2 dir = Vector2.zero;

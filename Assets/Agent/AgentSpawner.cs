@@ -74,7 +74,6 @@ namespace Assets.Agent {
                     Vector2 dir = s.DirectionOfLowest();
                     dir *= dirModifier;
                     s.ApplyForce(dir);
-                    //s.transform.Translate(dir);
 
                     s.gameObject.GetComponent<SpriteRenderer>().color = Color.red;
                 }
@@ -86,7 +85,6 @@ namespace Assets.Agent {
                     Vector2 dir = s.DirectionOfLowest();
                     dir *= dirModifier;
                     s.ApplyForce(dir);
-                    //s.transform.Translate(dir);
 
                     s.gameObject.GetComponent<SpriteRenderer>().color = Color.yellow;
                 }
@@ -104,11 +102,6 @@ namespace Assets.Agent {
                         dir *= dirModifier;
                     }
                     s.ApplyForce(dir);
-                    //s.transform.Translate(dir);
-                    if (s.ReadValue() == -1) {
-                        s.ApplyForce(dir);
-                        //s.transform.Translate(-dir*4);
-                    }
 
                     s.gameObject.GetComponent<SpriteRenderer>().color = Color.magenta;
                 }
@@ -126,11 +119,7 @@ namespace Assets.Agent {
 
             Input<MultiLayerSensor> isCold = new(
                 (s) => {
-                    float val = s.ReadValue();
-                    if (val == -1) {
-                        return false;
-                    }
-                    return val < 0.3f;
+                    return s.ReadValue() < 0.3f;
                 }
             );
             Input<MultiLayerSensor> isHot = new(
