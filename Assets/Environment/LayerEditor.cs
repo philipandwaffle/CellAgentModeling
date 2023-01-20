@@ -56,7 +56,7 @@ namespace Assets.Environment {
         // Update is called once per frame
         void Update() {
             if (!paused) {
-                ticker.AdvanceLayers();
+                ticker.AdvanceLayersParallel();
             }
 
             if (Input.GetMouseButton(0)) {                

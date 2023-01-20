@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Assets.Environment {
@@ -84,6 +86,35 @@ namespace Assets.Environment {
                         layers[z - 1].InsertValue(x, y, val);                        
                     }
                 }
+            }
+            UpdateDisplays();
+        }
+
+        public void AdvanceLayersParallel() {
+            
+            Task<List<(int, int, float)>>[] tasks = new Task<List<(int, int, float)>>[layers.Length];
+            for (int z = layers.Length - 1; z >= 0; z--) {
+                int layerIndex = z;
+                tasks[layerIndex] = new Task<List<(int, int, float)>>(() => {
+                    return layers[layerIndex].Advance(); 
+                });
+            }
+
+            Parallel.ForEach(tasks, task => task.Start());
+            Task.WaitAll(tasks);
+
+            for (int z = tasks.Length - 1; z > 0; z--) {
+                List<(int, int, float)> layerBleed = tasks[z].Result;
+
+                for (int i = 0; i < layerBleed.Count; i++) {
+                    int x = layerBleed[i].Item1;
+                    int y = layerBleed[i].Item2;
+                    float val = layerBleed[i].Item3;
+                    if (val == -2) {
+                        continue;
+                    }
+                    layers[z - 1].InsertValue(x, y, val);
+                }                
             }
             UpdateDisplays();
         }
