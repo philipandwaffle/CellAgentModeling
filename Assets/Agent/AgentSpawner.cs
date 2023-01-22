@@ -72,7 +72,7 @@ namespace Assets.Agent {
                     int peerIndex = s.GetClosestPeer();
 
                     Vector2 dir = s.DirectionOfLowest();
-                    dir *= dirModifier;
+                    dir *= dirModifier * 2;
                     s.ApplyForce(dir);
 
                     s.gameObject.GetComponent<SpriteRenderer>().color = Color.red;
@@ -99,7 +99,7 @@ namespace Assets.Agent {
                     } else {
                         dir = s.transform.position - Sensor.peers[peerIndex].transform.position;
                         dir.Normalize();
-                        dir *= dirModifier;
+                        dir *= dirModifier * 2;
                     }
                     s.ApplyForce(dir);
 

@@ -8,12 +8,32 @@ using UnityEngine;
 
 namespace Assets.Environment {
     public class LayerTicker: MonoBehaviour {
+        [SerializeField] private Sprite displaySprite;
+
         private Layer[] layers;
+        private GameObject[][,] display;
+
         public int GetLayerCount() {
             return layers.Length;
         }
         public void SetNumLayers(int z) {
             layers = new Layer[z];
+
+            // Check if the display has been set before
+            if (display != null) {
+
+                // destroy the previous environment
+                for (int curLayer = 0; curLayer < z; curLayer++) {
+                    for (int row = 0; row < display[curLayer].GetLength(0); row++) {
+                        for (int col = 0; col < display[curLayer].GetLength(1); col++) {
+                            // Destroy cell
+                            Destroy(display[curLayer][row, col]);
+                        }
+                    }
+                }
+            }
+
+            // Set the lenght of the display
             display = new GameObject[z][,];
         }
 
@@ -22,15 +42,12 @@ namespace Assets.Environment {
         }
         public void SetLayer(int z, Layer layer) {
             layers[z] = layer;
-            display[z] = new GameObject[layers[z].w, layers[z].h];
             SetDisplay(z);
         }
 
-        [SerializeField] private Sprite displaySprite;
-
-        private GameObject[][,] display;
-
         private void SetDisplay(int z) {
+            Debug.Log("attempting to set layer " + z);
+
             GameObject dis = new GameObject();
             dis.transform.parent = transform;
             display[z] = new GameObject[layers[z].w, layers[z].h];
@@ -49,7 +66,7 @@ namespace Assets.Environment {
                     instance.name = z + " " + x + "," + y;
 
                     BoxCollider2D bc = instance.AddComponent<BoxCollider2D>();
-                    bc.enabled = layers[z][x, y] == -1;                   
+                    bc.enabled = layers[z][x, y] == -1;
 
                     SpriteRenderer sr = instance.AddComponent<SpriteRenderer>();
                     sr.sprite = displaySprite;
@@ -63,12 +80,13 @@ namespace Assets.Environment {
 
         public void SetValue(int z, int x, int y, float val) {
             layers[z].InsertValue(x, y, val);
-            display[z][x, y].GetComponent<SpriteRenderer>().color = layers[z].GetDisplayData(x, y);
+            GameObject go = display[z][x, y];
+            go.GetComponent<SpriteRenderer>().color = layers[z].GetDisplayData(x, y);
+            go.GetComponent<BoxCollider2D>().enabled = val == -1;
         }
 
         public void LoadLayer(int z, string path) {            
             layers[z] = Layer.LoadLayer(path);
-
             SetDisplay(z);
         }
 

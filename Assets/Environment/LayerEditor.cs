@@ -148,11 +148,11 @@ namespace Assets.Environment {
             DirectoryInfo d = new DirectoryInfo(path);
             FileInfo[] layerFiles = d.GetFiles("*.layer");
 
-            int layerLength = layerFiles.Length;
-            numLayers = layerLength;
-            ticker.SetNumLayers(layerLength);
+            int numLayers = layerFiles.Length;
+            this.numLayers = numLayers;
+            ticker.SetNumLayers(numLayers);
 
-            for (int i = 0; i < layerLength; i++) {
+            for (int i = 0; i < numLayers; i++) {
                 string name = layerFiles[i].FullName;
                 Debug.Log("loading layer: " + i + " <- " + name);
                 
