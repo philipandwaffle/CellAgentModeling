@@ -12,18 +12,23 @@ namespace Assets.Environment {
 
         private Layer[] layers;
         private GameObject[][,] display;
+        private GameObject[] displayContainers;
 
         public int GetLayerCount() {
             return layers.Length;
         }
         public void SetNumLayers(int z) {
             layers = new Layer[z];
+            
 
             // Check if the display has been set before
             if (display != null) {
 
                 // destroy the previous environment
                 for (int curLayer = 0; curLayer < z; curLayer++) {
+                    // Destroy container 
+                    Destroy(displayContainers[curLayer]);
+
                     for (int row = 0; row < display[curLayer].GetLength(0); row++) {
                         for (int col = 0; col < display[curLayer].GetLength(1); col++) {
                             // Destroy cell
@@ -35,6 +40,7 @@ namespace Assets.Environment {
 
             // Set the lenght of the display
             display = new GameObject[z][,];
+            displayContainers = new GameObject[z];
         }
 
         public Layer GetLayer(int z) {
@@ -46,18 +52,21 @@ namespace Assets.Environment {
         }
 
         private void SetDisplay(int z) {
-            Debug.Log("attempting to set layer " + z);
+            // Create new display container
+            GameObject container = new GameObject("Layer: " + z);
+            container.transform.parent = transform;
+            container.transform.localScale = Vector3.one;
+            displayContainers[z] = container;
 
+            // Create display cell
             GameObject dis = new GameObject();
-            dis.transform.parent = transform;
             display[z] = new GameObject[layers[z].w, layers[z].h];
 
             for (int x = 0; x < layers[z].w; x++) {
                 for (int y = 0; y < layers[z].h; y++) {
                     GameObject instance = Instantiate(dis);
-                    instance.layer = 6+z;
-
-                    instance.transform.parent = transform;
+                    instance.layer = 6 + z;
+                    instance.transform.parent = container.transform;
                     instance.transform.localScale = Vector3.one;
                     instance.transform.position = new Vector3(
                         transform.localScale.x * x, 
@@ -108,8 +117,7 @@ namespace Assets.Environment {
             UpdateDisplays();
         }
 
-        public void AdvanceLayersParallel() {
-            
+        public void AdvanceLayersParallel() {            
             Task<List<(int, int, float)>>[] tasks = new Task<List<(int, int, float)>>[layers.Length];
             for (int z = layers.Length - 1; z >= 0; z--) {
                 int layerIndex = z;
@@ -141,12 +149,6 @@ namespace Assets.Environment {
             for (int z = 0; z < layers.Length; z++) {
                 for (int x = 0; x < layers[z].w; x++) {
                     for (int y = 0; y < layers[z].h; y++) {
-                        /* GameObject go = display[z][x, y];
-                         SpriteRenderer sr = go.GetComponent<SpriteRenderer>();
-                         BoxCollider2D bc = go.GetComponent<BoxCollider2D>();
-
-                         bc.enabled = layers[z][x, y] == -1;
-                         sr.color = layers[z].GetDisplayData(x, y);*/
                         display[z][x, y].GetComponent<SpriteRenderer>().color = layers[z].GetDisplayData(x, y);
                     }
                 }

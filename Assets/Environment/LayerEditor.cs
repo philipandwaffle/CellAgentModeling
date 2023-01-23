@@ -42,15 +42,11 @@ namespace Assets.Environment {
             );
             l.SetBorder(-1);
 
-            //l.Save(path);
-            //Layer<float> l = null;
-
             ticker = gameObject.GetComponent<LayerTicker>();
             ticker.SetNumLayers(numLayers);
             for (int z = 0; z < numLayers; z++) {
                 ticker.SetLayer(z, l.DeepClone());
             }
-            //ticker.LoadLayer(path);
         }
 
         // Update is called once per frame

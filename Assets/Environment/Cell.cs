@@ -1,64 +1,82 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 using Unity.VisualScripting;
 using UnityEngine;
 
 namespace Assets.Environment {
+    public enum CellType { Open, Wall, Stairs }
+
+    [JsonObject(MemberSerialization.OptIn)]
     public class Cell {
-        public enum CellType { Open, Wall, Stairs }
-        
-        public CellType type { private set; get; }
-        public float val { private set; get; }
+        public CellType type;
+        public float? val;
 
-        public Cell(CellType type = CellType.Open, float val = 0) {
-            this.type = type;
-            this.val = val;
+        [JsonProperty]
+        private float v;
+
+        private SpriteRenderer sr;
+        private BoxCollider2D bc;
+
+        [JsonConstructor]
+        public Cell(float val) {
+            SetVal(val);
         }
 
-        public Color GetDisplay() {
+        public float? GetValue() {
             switch (type) {
-                case CellType.Open:
-                return Color.HSVToRGB((1 - val / 4f) - 0.75f, 0.7f, 0.5f);
                 case CellType.Wall:
-                return Color.black;
+                    return null;
                 case CellType.Stairs:
-                return Color.green;
+                    return null;
+                case CellType.Open:
+                    return val;
                 default:
-                return Color.magenta;
+                    throw new NotImplementedException();
             }
         }
-
         public void SetVal(float val) {
-            this.val = val;
-        }
-        public void SetType(CellType type) {
-            this.type = type;
-        }
-
-        public static Cell[,] ValuesToCells(float[,] data) {
-            int w = data.GetLength(0);
-            int h = data.GetLength(1);
-            Cell[,] cells = new Cell[w,h];
-
-            for (int x = 0; x < w; x++) {
-                for (int y = 0; y < h; y++) {
-                    float val = data[x, y];
-                    CellType type = CellType.Open;
-
-                    if (val == -1){
-                        type = CellType.Wall;
-                    }else if(val == -2) {
-                        type = CellType.Stairs;
-                    }
-
-                    cells[w, h] = new Cell(type, val);
-                }
+            switch (val) {
+                case -1:
+                    type = CellType.Wall;
+                    this.val = null;
+                    sr.color = Color.black;
+                    break;
+                case -2:
+                    type = CellType.Stairs;
+                    this.val = null; 
+                    sr.color = Color.green;
+                    break;
+                default:
+                    type = CellType.Open;
+                    this.val = Mathf.Clamp(val, 0f, 1f);
+                    sr.color = Color.HSVToRGB((1 - val / 4f) - 0.75f, 0.7f, 0.5f);
+                    break;
             }
+        }
+        public bool HasValue() {
+            return val is not null;
+        }
 
-            return cells;
+        [OnSerializing]
+        internal void OnSerializingMethod(StreamingContext context) {
+            switch (type) {
+                case CellType.Wall:
+                    v = - 1f;
+                    break;
+                case CellType.Stairs:
+                    v = -2;
+                    break;
+                case CellType.Open:
+                    v = val.Value;
+                    break;
+                default:
+                    throw new NotImplementedException();
+            }
         }
     }
 }
