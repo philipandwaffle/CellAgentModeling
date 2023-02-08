@@ -741,7 +741,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 620486433}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 33d18c4678d11be4c85ac08eed5dd423, type: 3}
+  m_Script: {fileID: 11500000, guid: 361a3555a86369a41b3e4ccf5e1cd0dc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &649552704
@@ -1673,7 +1673,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!50 &1301498615
 Rigidbody2D:
   serializedVersion: 4
@@ -1688,7 +1688,7 @@ Rigidbody2D:
   m_UseAutoMass: 0
   m_Mass: 1
   m_LinearDrag: 0
-  m_AngularDrag: 0.05
+  m_AngularDrag: 0.1
   m_GravityScale: 1
   m_Material: {fileID: 0}
   m_Interpolate: 0
@@ -1788,13 +1788,14 @@ GameObject:
   m_Component:
   - component: {fileID: 1589748192}
   - component: {fileID: 1589748191}
+  - component: {fileID: 1589748193}
   m_Layer: 0
   m_Name: Grid
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!156049354 &1589748191
 Grid:
   m_ObjectHideFlags: 0
@@ -1823,6 +1824,18 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1589748193
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1589748190}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 33d18c4678d11be4c85ac08eed5dd423, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1680201991
 GameObject:
   m_ObjectHideFlags: 0
@@ -1841,7 +1854,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1680201992
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1896,7 +1909,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   agentSprite: {fileID: -2413806693520163455, guid: 2e89c149b567951459606f0243d761a6, type: 3}
-  agentCount: f4010000
+  agentCount: c8000000
   spawnPoint: 50
   spawnRange: 10
 --- !u!1 &1695066314
@@ -2320,7 +2333,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1874806016
 Transform:
   m_ObjectHideFlags: 0

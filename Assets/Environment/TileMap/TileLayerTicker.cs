@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
-namespace Assets.Environment {
+namespace Assets.Environment.TileMap {
     public class TileLayerTicker : MonoBehaviour {
-        private static Tile wall, open, stair;
+        public static Tile wall, open, stair;
         private static bool loadedTiles = false;
 
         private CellLayer layer;
