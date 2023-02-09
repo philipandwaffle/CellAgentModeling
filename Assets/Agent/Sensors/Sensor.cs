@@ -43,7 +43,7 @@ namespace Assets.Agent.Sensors {
             rb = gameObject.AddComponent<Rigidbody2D>();
             rb.isKinematic = false;
             rb.gravityScale = 0f;
-            rb.drag = 2;
+            rb.drag = 1;
             
 
             id = nextId;

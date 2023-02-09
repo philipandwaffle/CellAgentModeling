@@ -42,21 +42,17 @@ namespace Assets.Environment {
             );
             l.SetBorder(-1);
 
-            //l.Save(path);
-            //Layer<float> l = null;
-
             ticker = gameObject.GetComponent<LayerTicker>();
             ticker.SetNumLayers(numLayers);
             for (int z = 0; z < numLayers; z++) {
                 ticker.SetLayer(z, l.DeepClone());
             }
-            //ticker.LoadLayer(path);
         }
 
         // Update is called once per frame
         void Update() {
             if (!paused) {
-                ticker.AdvanceLayers();
+                ticker.AdvanceLayersParallel();
             }
 
             if (Input.GetMouseButton(0)) {                
@@ -148,11 +144,11 @@ namespace Assets.Environment {
             DirectoryInfo d = new DirectoryInfo(path);
             FileInfo[] layerFiles = d.GetFiles("*.layer");
 
-            int layerLength = layerFiles.Length;
-            numLayers = layerLength;
-            ticker.SetNumLayers(layerLength);
+            int numLayers = layerFiles.Length;
+            this.numLayers = numLayers;
+            ticker.SetNumLayers(numLayers);
 
-            for (int i = 0; i < layerLength; i++) {
+            for (int i = 0; i < numLayers; i++) {
                 string name = layerFiles[i].FullName;
                 Debug.Log("loading layer: " + i + " <- " + name);
                 

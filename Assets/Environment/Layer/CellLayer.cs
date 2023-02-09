@@ -8,8 +8,8 @@ using System.Collections.Generic;
 
 namespace Assets.Environment {
     [Serializable]
-    public class Layer {
-        public float[,] data;
+    public class CellLayer {
+        public Cell[,] cells;
         public float[,] mask;
 
         public int w { get; private set; }
@@ -37,7 +37,7 @@ namespace Assets.Environment {
             return Mathf.Clamp(val, 0f, 1f);
         }
 
-        public float this[int x, int y] {
+        public float? this[int x, int y] {
             get {
                 x = x <= 0 ? (x % w) + (w) : x % w;
                 x = x == w ? 0 : x;
@@ -45,7 +45,7 @@ namespace Assets.Environment {
                 y = y <= 0 ? (y % h) + (h) : y % h;
                 y = y == h ? 0 : y;
 
-                return data[x, y];
+                return cells[x, y].GetValue();
             }
             set {
                 x = x <= 0 ? (x % w) + (w) : x % w;
@@ -54,25 +54,33 @@ namespace Assets.Environment {
                 y = y <= 0 ? (y % h) + (h) : y % h;
                 y = y == h ? 0 : y;
 
-                data[x, y] = value;
+                cells[x, y].SetVal(value.Value);
             }
         }
 
         [JsonConstructor]
-        public Layer(float[,] data, float[,] mask) {
+        public CellLayer(Cell[,] cells, float[,] mask) {
             InitVariables(mask);
 
-            w = data.GetLength(0);
-            h = data.GetLength(1);
-            this.data = data;
+            w = cells.GetLength(0);
+            h = cells.GetLength(1);
+            this.cells = cells;
         }
 
-        public Layer(int w, int h, float[,] mask) {            
+        private void SpawnCells() {
+            for (int i = 0; i < w; i++) {
+                for (int j = 0; j < h; j++) {
+                    
+                }
+            }
+        }
+
+        public CellLayer(int w, int h, float[,] mask) {            
             InitVariables(mask);
 
             this.w = w;
             this.h = h;
-            data = new float[w, h];
+            cells = new Cell[w, h];
         }
 
         public void SetBorder(float val) {
@@ -103,47 +111,40 @@ namespace Assets.Environment {
             }
         }        
 
-        public Color GetDisplayData(int x, int y) {
-            return Display(data[x, y]);
-        }
         public void InsertValue(int x, int y, float value) {
-            data[x, y] = Constrain(value);
+            this[x, y] = value;
         }
 
         public List<(int, int, float)> Advance() {
-            float[,] newData = new float[w, h];
+            Cell[,] newData = new Cell[w, h];
             List<(int, int, float)> layerBleed = new List<(int, int, float)>();
             for (int x = 0; x < w; x++) {
                 for (int y = 0; y < h; y++) {
                     if (this[x, y] == -1) {
-                        newData[x, y] = -1;
+                        newData[x, y].SetVal(-1);
                     } else if (this[x, y] == -2) {
-                        newData[x, y] = -2;
+                        newData[x, y].SetVal(-2);
                         layerBleed.Add((x, y, DotProduct(x, y)));
                     } else {
-                        newData[x, y] = Constrain(DotProduct(x, y));
+                        newData[x, y].SetVal(DotProduct(x, y));
                     }
                 }
             }
 
-            data = newData;
+            cells = newData;
             return layerBleed;
         }
         private float DotProduct(int x, int y) {
-            
-
             float tempMCount = mCount;
             float total = 0f;
 
             for (int i = 0; i < mW; i++) {
                 for (int j = 0; j < mH; j++) {
-                    float curVal = this[x + i - xOffset, y + j - yOffset];
-                    float maskVal = mask[i, j];
-
-                    if (curVal == -1 || curVal == -2) {
-                        tempMCount -= 1f;
+                    float? cellVal = this[x + i - xOffset, y + j - yOffset];
+                    if (cellVal.HasValue) {
+                        total += cellVal.Value * mask[i, j];
                     } else {
-                        total += curVal * maskVal;
+                        tempMCount -= 1f;
                     }
                 }
             }
