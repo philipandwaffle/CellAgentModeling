@@ -2361,11 +2361,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5d83cccc6a069af44a65ad9d81029b1b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  numLayers: 5
+  numLayers: 1
   brushRadius: 0
   paused: 1
-  w: 44
-  h: 44
+  w: 220
+  h: 220
   text: {fileID: 447385751}
 --- !u!114 &1874806019
 MonoBehaviour:
