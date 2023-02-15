@@ -1,5 +1,4 @@
 ﻿using Assets.CASMTransmission;
-using TMPro.EditorUtilities;
 using UnityEngine;
 
 namespace Assets.Agent.Sensors {    

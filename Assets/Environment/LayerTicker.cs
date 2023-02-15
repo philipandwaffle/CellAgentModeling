@@ -56,7 +56,9 @@ namespace Assets.Environment {
             GameObject container = new GameObject("Layer: " + z);
             container.transform.parent = transform;
             container.transform.localScale = Vector3.one;
+            container.layer = 6 + z;
             displayContainers[z] = container;
+            
 
             // Create display cell
             GameObject dis = new GameObject();

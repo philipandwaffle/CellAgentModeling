@@ -2361,7 +2361,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5d83cccc6a069af44a65ad9d81029b1b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  numLayers: 9
+  numLayers: 20
   brushRadius: 0
   paused: 1
   w: 0

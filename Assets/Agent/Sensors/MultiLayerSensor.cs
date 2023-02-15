@@ -1,7 +1,5 @@
-﻿using Assets.CASMTransmission;
-using Assets.Environment;
+﻿using Assets.Environment;
 using System;
-using UnityEditor.U2D.Animation;
 using UnityEngine;
 
 namespace Assets.Agent.Sensors {

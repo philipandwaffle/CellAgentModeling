@@ -91,6 +91,9 @@ namespace Assets.Environment {
             newPos.z -= 5;
             text.text = "Layer: " + z;
             Camera.main.transform.position = newPos;
+            int mask = 1 << (6 + z);
+            Debug.Log("On Layer: " + z + "\nUsing mask:"+mask.ToBinaryString());
+            Camera.main.cullingMask = mask;
         }
 
 
@@ -108,7 +111,7 @@ namespace Assets.Environment {
         }
 
         public void LoadLayer() {
-            string path = EditorUtility.OpenFilePanel(
+            /*string path = EditorUtility.OpenFilePanel(
                 "Load Layer",
                 Application.dataPath + "/Layers",
                 "json");
@@ -117,10 +120,10 @@ namespace Assets.Environment {
                 Debug.Log("Empty file path, exiting");
                 return;
             }
-            ticker.LoadLayer(z, path);
+            ticker.LoadLayer(z, path);*/
         }
         public void SaveLayer() {
-            string path = EditorUtility.SaveFilePanel(
+            /*string path = EditorUtility.SaveFilePanel(
                 "Save Layer",
                 Application.dataPath + "/Layers",
                 "",
@@ -129,10 +132,10 @@ namespace Assets.Environment {
                 ticker.GetLayer(z).Save(path);
             } else {
                 Debug.Log("Empty file path, exiting");
-            }
+            }*/
         }
         public void LoadLayers() {
-            string path = EditorUtility.OpenFolderPanel(
+            /*string path = EditorUtility.OpenFolderPanel(
                 "Load Layer",
                 Application.dataPath + "/Layers",
                 "");
@@ -140,8 +143,9 @@ namespace Assets.Environment {
             if (path.Equals("")) {
                 Debug.Log("Empty folder path, exiting");
                 return;
-            }
-            DirectoryInfo d = new DirectoryInfo(path);
+            }*/
+            //DirectoryInfo d = new DirectoryInfo(path);
+            DirectoryInfo d = new DirectoryInfo("C:\\Users\\phili\\Documents\\code_stuff\\unity\\CellAgentModeling\\Assets\\Layers\\grenfell_110x110");
             FileInfo[] layerFiles = d.GetFiles("*.layer");
 
             int numLayers = layerFiles.Length;
@@ -156,7 +160,7 @@ namespace Assets.Environment {
             }
         }
         public void SaveLayers() {
-            string path = EditorUtility.OpenFolderPanel(
+            /*string path = EditorUtility.OpenFolderPanel(
                 "Load Layer",
                 Application.dataPath + "/Layers",
                 "");
@@ -170,7 +174,7 @@ namespace Assets.Environment {
                 string name = path + "/" + i + ".layer";
                 Debug.Log("saving layer: " + i + " -> " + name);
                 ticker.GetLayer(i).Save(name);
-            }
+            }*/
         }
     }
 }
