@@ -1,0 +1,47 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSMain
+
+StructuredBuffer<float> paddedLayer;
+RWStructuredBuffer<float> newLayer;
+
+uint w;
+uint h;
+
+uint pw;
+uint ph;
+
+[numthreads(64,1,1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    // the 'normal index' is the index in the unpadded flattened layer
+    uint nIndex = id.x;
+
+    // convert normal index into x and y for easier calculations
+    uint nY = nIndex / w;
+    uint nX = nIndex - (nY * w);
+
+    float newVal = 0.0;
+    float divisor = 0.0;
+    
+    for(uint y = 0; y < 3; y++){
+        for(uint x = 0; x < 3; x++){
+            // index in padded flattened array
+            uint paddedIndex = ((y+nY) * pw) + (x+nX);
+            float curVal = paddedLayer[paddedIndex];
+            if (x == 1 && y == 1){
+                if (curVal < 0.0){
+                    newLayer[nIndex] = curVal;
+                    return;
+                }
+            }
+
+            if (curVal >= 0.0){
+                newVal += curVal;
+                divisor += 1.0;
+            }
+        }
+    }
+    newVal /= divisor;
+
+    newLayer[nIndex] = newVal;
+}

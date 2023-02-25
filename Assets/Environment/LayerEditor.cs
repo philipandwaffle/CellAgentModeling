@@ -52,7 +52,8 @@ namespace Assets.Environment {
         // Update is called once per frame
         void Update() {
             if (!paused) {
-                ticker.AdvanceLayersParallel();
+                ticker.AdvanceLayersGPU();
+                ticker.UpdateDisplay(z);
             }
 
             if (Input.GetMouseButton(0)) {                
@@ -92,8 +93,9 @@ namespace Assets.Environment {
             text.text = "Layer: " + z;
             Camera.main.transform.position = newPos;
             int mask = 1 << (6 + z);
-            Debug.Log("On Layer: " + z + "\nUsing mask:"+mask.ToBinaryString());
             Camera.main.cullingMask = mask;
+            //Debug.Log("On Layer: " + z + "\nUsing mask:"+mask.ToBinaryString());
+            ticker.UpdateDisplay(z);
         }
 
 

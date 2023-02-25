@@ -13,10 +13,8 @@ namespace Assets.Environment {
         private Layer[] layers;
         private GameObject[][,] display;
         private GameObject[] displayContainers;
+        public ComputeShader computeShader;
 
-        public int GetLayerCount() {
-            return layers.Length;
-        }
         public void SetNumLayers(int z) {
             layers = new Layer[z];
             
@@ -101,58 +99,29 @@ namespace Assets.Environment {
             SetDisplay(z);
         }
 
-        public void AdvanceLayers() {
-            for (int z = layers.Length-1; z >= 0; z--) {
-                List<(int, int, float)> layerBleed = layers[z].Advance();
-                if (z != 0) {
-                    for (int i = 0; i < layerBleed.Count; i++) {
-                        int x = layerBleed[i].Item1;
-                        int y = layerBleed[i].Item2;
-                        float val = layerBleed[i].Item3;
-                        if (val == -2) {
-                            continue;
-                        }
-                        layers[z - 1].InsertValue(x, y, val);                        
-                    }
-                }
-            }
-            UpdateDisplays();
-        }
-
-        public void AdvanceLayersParallel() {            
-            Task<List<(int, int, float)>>[] tasks = new Task<List<(int, int, float)>>[layers.Length];
+        public void AdvanceLayersGPU() {
+            List<List<(int, int, float)>> layerBleed = new List<List<(int, int, float)>>();
             for (int z = layers.Length - 1; z >= 0; z--) {
-                int layerIndex = z;
-                tasks[layerIndex] = new Task<List<(int, int, float)>>(() => {
-                    return layers[layerIndex].Advance(); 
-                });
+                layerBleed.Add(layers[z].AdvanceGPU(computeShader));
             }
 
-            Parallel.ForEach(tasks, task => task.Start());
-            Task.WaitAll(tasks);
-
-            for (int z = tasks.Length - 1; z > 0; z--) {
-                List<(int, int, float)> layerBleed = tasks[z].Result;
-
-                for (int i = 0; i < layerBleed.Count; i++) {
-                    int x = layerBleed[i].Item1;
-                    int y = layerBleed[i].Item2;
-                    float val = layerBleed[i].Item3;
+            for (int z = layerBleed.Count - 1; z > 0; z--) {
+                for (int i = 0; i < layerBleed[z].Count; i++) {
+                    int x = layerBleed[z][i].Item1;
+                    int y = layerBleed[z][i].Item2;
+                    float val = layerBleed[z][i].Item3;
                     if (val == -2) {
                         continue;
                     }
                     layers[z - 1].InsertValue(x, y, val);
-                }                
+                }
             }
-            UpdateDisplays();
         }
 
-        private void UpdateDisplays() {
-            for (int z = 0; z < layers.Length; z++) {
-                for (int x = 0; x < layers[z].w; x++) {
-                    for (int y = 0; y < layers[z].h; y++) {
-                        display[z][x, y].GetComponent<SpriteRenderer>().color = layers[z].GetDisplayData(x, y);
-                    }
+        public void UpdateDisplay(int z) {
+            for (int x = 0; x < layers[z].w; x++) {
+                for (int y = 0; y < layers[z].h; y++) {
+                    display[z][x, y].GetComponent<SpriteRenderer>().color = layers[z].GetDisplayData(x, y);
                 }
             }
         }

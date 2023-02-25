@@ -5,6 +5,10 @@ using Newtonsoft.Json;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Runtime.Serialization;
 using System.Collections.Generic;
+using Unity.Mathematics;
+using static UnityEngine.RuleTile.TilingRuleOutput;
+using static UnityEditor.Experimental.GraphView.GraphView;
+using System.Threading.Tasks;
 
 namespace Assets.Environment {
     [Serializable]
@@ -129,9 +133,7 @@ namespace Assets.Environment {
             data = newData;
             return layerBleed;
         }
-        private float DotProduct(int x, int y) {
-            
-
+        private float DotProduct(int x, int y) { 
             float tempMCount = mCount;
             float total = 0f;
 
@@ -143,7 +145,11 @@ namespace Assets.Environment {
                     if (curVal == -1 || curVal == -2) {
                         tempMCount -= 1f;
                     } else {
-                        total += curVal * maskVal;
+                        if (maskVal != 1) {
+                            total += curVal * maskVal;
+                        } else {
+                            total += curVal;
+                        }
                     }
                 }
             }
@@ -151,6 +157,85 @@ namespace Assets.Environment {
                 return -2;
             }
             return total / tempMCount;
+        }
+
+        private float[] AsPaddedFlattened() {
+
+            float[] padded = new float[(w + 2) * (h + 2)];
+            int i = 0;
+            for (int x = -1; x <= w; x++) {
+                for (int y = -1; y <= h; y++) {
+                    int newX = x;
+                    int newY = y;
+
+                    LoopIndex(ref newX, w);
+                    LoopIndex(ref newY, h);
+
+                    padded[i] = data[newX, newY];
+                    i++;
+                }
+            }
+
+            return padded;
+        }
+        private void LoopIndex(ref int index, int max) {
+            if (index == -1) {
+                index = max - 1;
+            } else if (index == max) {
+                index = 0;
+            }
+        }
+
+        public List<(int, int, float)> AdvanceGPU(ComputeShader cs) {
+            // Get a padded flattened layer and create a buffer for it
+            float[] padLayerData = AsPaddedFlattened();
+            ComputeBuffer padLayerBuf = new ComputeBuffer(padLayerData.Length, sizeof(float));
+            padLayerBuf.SetData(padLayerData);
+
+            // Allocate a buffer for the advanced layer
+            int layerLen = w * h;
+            float[] newLayerData = new float[layerLen];
+            ComputeBuffer newLayerBuf = new ComputeBuffer(layerLen, sizeof(float));
+
+            // Set the buffer
+            cs.SetBuffer(0, "paddedLayer", padLayerBuf);
+            cs.SetBuffer(0, "newLayer", newLayerBuf);
+
+            // Set the width and height
+            cs.SetInt("w", w);
+            cs.SetInt("h", h);
+
+            // Set the padded width and height
+            cs.SetInt("pw", w + 2);
+            cs.SetInt("ph", h + 2);
+
+            cs.Dispatch(0, padLayerData.Length / 64, 1, 1);
+
+            // Get the new layer data
+            newLayerBuf.GetData(newLayerData);
+
+            //Dispose
+            padLayerBuf.Dispose();
+            newLayerBuf.Dispose();
+
+            //Debug.Log()
+            // Map the new layer array to the 2d data array
+            /*Parallel.ForEach(newLayerData,(val,state,i) => {
+                long y = i / w;
+                long x = i - (y * h);
+
+                data[y, x] = val;
+            });*/
+            for (int i = 0; i < newLayerData.Length; i++) {
+                float val = newLayerData[i];
+
+                int y = i / w;
+                int x = i - (y * h);
+
+                data[y, x] = val;
+            }
+
+            return new List<(int, int, float)> { };
         }
 
         public void Save(string path, Formatting format = Formatting.None) {
