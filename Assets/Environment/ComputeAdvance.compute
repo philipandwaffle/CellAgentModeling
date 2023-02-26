@@ -4,11 +4,22 @@
 StructuredBuffer<float> paddedLayer;
 RWStructuredBuffer<float> newLayer;
 
+struct Bleed
+{
+   uint x;
+   uint y;
+   float val;
+};
+RWStructuredBuffer<Bleed> layerBleed;
+
 uint w;
 uint h;
 
 uint pw;
 uint ph;
+
+
+volatile uint bleedIndex = 0;
 
 [numthreads(64,1,1)]
 void CSMain (uint3 id : SV_DispatchThreadID)
@@ -22,12 +33,15 @@ void CSMain (uint3 id : SV_DispatchThreadID)
 
     float newVal = 0.0;
     float divisor = 0.0;
-    
+
+    bool cellBleeds = false;
     for(uint y = 0; y < 3; y++){
         for(uint x = 0; x < 3; x++){
             // index in padded flattened array
             uint paddedIndex = ((y+nY) * pw) + (x+nX);
             float curVal = paddedLayer[paddedIndex];
+
+            // the point at the centre of the layer segment
             if (x == 1 && y == 1){
                 if (curVal < 0.0){
                     newLayer[nIndex] = curVal;
@@ -35,13 +49,27 @@ void CSMain (uint3 id : SV_DispatchThreadID)
                 }
             }
 
+            // if the current value is an open cell
             if (curVal >= 0.0){
                 newVal += curVal;
                 divisor += 1.0;
+            }else if (curVal == -2){
+                cellBleeds = true;
             }
         }
     }
-    newVal /= divisor;
+    newVal /= divisor * 0.99;
+    newVal = clamp(newVal, 0.0, 1.0);
+
+    if (cellBleeds){
+        Bleed bleed;
+        bleed.x = nX;
+        bleed.y = nY;
+        bleed.val = newVal;
+
+        layerBleed[bleedIndex] = bleed;
+        bleedIndex++;
+    }
 
     newLayer[nIndex] = newVal;
 }

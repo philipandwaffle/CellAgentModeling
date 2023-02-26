@@ -3,12 +3,9 @@ using System.IO;
 using UnityEngine;
 using Newtonsoft.Json;
 using System.Runtime.Serialization.Formatters.Binary;
-using System.Runtime.Serialization;
 using System.Collections.Generic;
-using Unity.Mathematics;
-using static UnityEngine.RuleTile.TilingRuleOutput;
-using static UnityEditor.Experimental.GraphView.GraphView;
-using System.Threading.Tasks;
+using System.Linq;
+using Unity.VisualScripting;
 
 namespace Assets.Environment {
     [Serializable]
@@ -186,6 +183,12 @@ namespace Assets.Environment {
             }
         }
 
+        public struct Bleed {
+            public int x;
+            public int y;
+            public float val;
+        }
+
         public List<(int, int, float)> AdvanceGPU(ComputeShader cs) {
             // Get a padded flattened layer and create a buffer for it
             float[] padLayerData = AsPaddedFlattened();
@@ -197,9 +200,16 @@ namespace Assets.Environment {
             float[] newLayerData = new float[layerLen];
             ComputeBuffer newLayerBuf = new ComputeBuffer(layerLen, sizeof(float));
 
+            // Allocate a buffer for the advanced layer
+            int bleedCount = 50;
+            Bleed[] bleed = new Bleed[bleedCount];
+            ComputeBuffer bleedBuf = new ComputeBuffer(bleedCount, sizeof(float) + (2 * sizeof(int)));
+            bleedBuf.SetData(bleed);
+
             // Set the buffer
             cs.SetBuffer(0, "paddedLayer", padLayerBuf);
             cs.SetBuffer(0, "newLayer", newLayerBuf);
+            cs.SetBuffer(0, "layerBleed", bleedBuf);
 
             // Set the width and height
             cs.SetInt("w", w);
@@ -209,23 +219,20 @@ namespace Assets.Environment {
             cs.SetInt("pw", w + 2);
             cs.SetInt("ph", h + 2);
 
+            //cs.SetInt("bleedIndex", 0);
+
             cs.Dispatch(0, padLayerData.Length / 64, 1, 1);
 
             // Get the new layer data
             newLayerBuf.GetData(newLayerData);
+            bleedBuf.GetData(bleed);
+            Debug.Log(string.Join(", ", bleed.Select(b => b.val).ToArray()));
 
             //Dispose
             padLayerBuf.Dispose();
             newLayerBuf.Dispose();
+            bleedBuf.Dispose();
 
-            //Debug.Log()
-            // Map the new layer array to the 2d data array
-            /*Parallel.ForEach(newLayerData,(val,state,i) => {
-                long y = i / w;
-                long x = i - (y * h);
-
-                data[y, x] = val;
-            });*/
             for (int i = 0; i < newLayerData.Length; i++) {
                 float val = newLayerData[i];
 
