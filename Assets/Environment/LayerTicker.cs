@@ -100,19 +100,22 @@ namespace Assets.Environment {
         }
 
         public void AdvanceLayersGPU() {
-            List<List<(int, int, float)>> layerBleed = new List<List<(int, int, float)>>();
-            for (int z = layers.Length - 1; z >= 0; z--) {
+            List<Bleed[]> layerBleed = new List<Bleed[]>();
+            for (int z = 0; z < layers.Length; z++) {
                 layerBleed.Add(layers[z].AdvanceGPU(computeShader));
             }
 
             for (int z = layerBleed.Count - 1; z > 0; z--) {
-                for (int i = 0; i < layerBleed[z].Count; i++) {
-                    int x = layerBleed[z][i].Item1;
-                    int y = layerBleed[z][i].Item2;
-                    float val = layerBleed[z][i].Item3;
-                    if (val == -2) {
-                        continue;
+                Debug.Log("Looking at layer: " + z);
+                for (int i = 0; i < layerBleed[z].Length; i++) {
+                    float val = layerBleed[z][i].val;
+                    if (val == -1) {
+                        break;
                     }
+                    int x = layerBleed[z][i].x;
+                    int y = layerBleed[z][i].y;
+
+
                     layers[z - 1].InsertValue(x, y, val);
                 }
             }

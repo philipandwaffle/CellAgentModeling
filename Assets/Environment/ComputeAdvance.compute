@@ -11,15 +11,13 @@ struct Bleed
    float val;
 };
 RWStructuredBuffer<Bleed> layerBleed;
+groupshared uint bleedindex = 0;
 
 uint w;
 uint h;
 
 uint pw;
 uint ph;
-
-
-volatile uint bleedIndex = 0;
 
 [numthreads(64,1,1)]
 void CSMain (uint3 id : SV_DispatchThreadID)
@@ -61,14 +59,20 @@ void CSMain (uint3 id : SV_DispatchThreadID)
     newVal /= divisor * 0.99;
     newVal = clamp(newVal, 0.0, 1.0);
 
+    // if the current cell bleeds
     if (cellBleeds){
+        // create bleed struct
         Bleed bleed;
-        bleed.x = nX;
-        bleed.y = nY;
+        bleed.x = nY;
+        bleed.y = nX;
         bleed.val = newVal;
+        
+        // atomic counter increment 
+        uint thisIndex;
+        InterlockedAdd(bleedindex, 1, thisIndex);
 
-        layerBleed[bleedIndex] = bleed;
-        bleedIndex++;
+        //set bleed
+        layerBleed[thisIndex] = bleed;
     }
 
     newLayer[nIndex] = newVal;

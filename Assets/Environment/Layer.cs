@@ -175,6 +175,26 @@ namespace Assets.Environment {
 
             return padded;
         }
+
+        private float[] AsPaddedFlattenedV2() {
+
+            float[] padded = new float[(w + 2) * (h + 2)];
+            int i = 0;
+            for (int x = -1; x <= w; x++) {
+                for (int y = -1; y <= h; y++) {
+                    int newX = x;
+                    int newY = y;
+
+                    LoopIndex(ref newX, w);
+                    LoopIndex(ref newY, h);
+
+                    padded[i] = data[newX, newY];
+                    i++;
+                }
+            }
+
+            return padded;
+        }
         private void LoopIndex(ref int index, int max) {
             if (index == -1) {
                 index = max - 1;
@@ -183,13 +203,7 @@ namespace Assets.Environment {
             }
         }
 
-        public struct Bleed {
-            public int x;
-            public int y;
-            public float val;
-        }
-
-        public List<(int, int, float)> AdvanceGPU(ComputeShader cs) {
+        public Bleed[] AdvanceGPU(ComputeShader cs) {
             // Get a padded flattened layer and create a buffer for it
             float[] padLayerData = AsPaddedFlattened();
             ComputeBuffer padLayerBuf = new ComputeBuffer(padLayerData.Length, sizeof(float));
@@ -201,8 +215,8 @@ namespace Assets.Environment {
             ComputeBuffer newLayerBuf = new ComputeBuffer(layerLen, sizeof(float));
 
             // Allocate a buffer for the advanced layer
-            int bleedCount = 50;
-            Bleed[] bleed = new Bleed[bleedCount];
+            int bleedCount = 10;
+            Bleed[] bleed = Bleed.GetDataHolder(bleedCount);
             ComputeBuffer bleedBuf = new ComputeBuffer(bleedCount, sizeof(float) + (2 * sizeof(int)));
             bleedBuf.SetData(bleed);
 
@@ -226,7 +240,6 @@ namespace Assets.Environment {
             // Get the new layer data
             newLayerBuf.GetData(newLayerData);
             bleedBuf.GetData(bleed);
-            Debug.Log(string.Join(", ", bleed.Select(b => b.val).ToArray()));
 
             //Dispose
             padLayerBuf.Dispose();
@@ -242,7 +255,7 @@ namespace Assets.Environment {
                 data[y, x] = val;
             }
 
-            return new List<(int, int, float)> { };
+            return bleed;
         }
 
         public void Save(string path, Formatting format = Formatting.None) {
