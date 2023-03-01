@@ -177,22 +177,48 @@ namespace Assets.Environment {
         }
 
         private float[] AsPaddedFlattenedV2() {
-
-            float[] padded = new float[(w + 2) * (h + 2)];
+            int paddedCount = (this.w + 2) * (this.h + 2);
+            float[] padded = new float[paddedCount];
             int i = 0;
-            for (int x = -1; x <= w; x++) {
-                for (int y = -1; y <= h; y++) {
-                    int newX = x;
-                    int newY = y;
 
-                    LoopIndex(ref newX, w);
-                    LoopIndex(ref newY, h);
+            int h = this.h - 1;
+            int w = this.w - 1;
 
-                    padded[i] = data[newX, newY];
+            // first row of padded
+            padded[i] = data[h, w];
+            i++;
+            for (int x = 0; x < this.w; x++) {
+                padded[i] = data[h, x];
+                i++;
+            }
+            padded[i] = data[h, 0];
+            i++;
+
+            // internal rows in padded
+            for (int y = 0; y < this.h; y++) {
+                padded[i] = data[y, w];
+                i++;
+                for (int x = 0; x < this.w; x++) {
+                    padded[i] = data[y, x];
                     i++;
                 }
+                padded[i] = data[y, 0];
+                i++;
             }
 
+            // last row of padded
+            padded[i] = data[0, w];
+            i++;
+            for (int x = 0; x < this.w; x++) {
+                padded[i] = data[0, x];
+                i++;
+            }
+            padded[i] = data[0, 0];
+            i++;
+
+            if (i != paddedCount) {
+                Debug.LogError("Impropper padding/flattening of layer");
+            }
             return padded;
         }
         private void LoopIndex(ref int index, int max) {
@@ -205,7 +231,8 @@ namespace Assets.Environment {
 
         public Bleed[] AdvanceGPU(ComputeShader cs) {
             // Get a padded flattened layer and create a buffer for it
-            float[] padLayerData = AsPaddedFlattened();
+            //float[] padLayerData = AsPaddedFlattened();
+            float[] padLayerData = AsPaddedFlattenedV2();
             ComputeBuffer padLayerBuf = new ComputeBuffer(padLayerData.Length, sizeof(float));
             padLayerBuf.SetData(padLayerData);
 
