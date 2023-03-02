@@ -100,23 +100,46 @@ namespace Assets.Environment {
         }
 
         public void AdvanceLayersGPU() {
+            // Create padded and flattened layer tasks 
+            int layerCount = layers.Length;
+            Task<float[]>[] tasks = new Task<float[]>[layers.Length];
+            for (int z = 0; z < layerCount; z++) {
+                int layerIndex = z;
+                tasks[layerIndex] = new Task<float[]>(() => {
+                    return layers[layerIndex].AsPaddedFlattened();
+                });
+            }
+            // Start tasks in parallel
+            Parallel.ForEach(tasks, task => task.Start());
+            Task.WaitAll(tasks);
+            
             List<Bleed[]> layerBleed = new List<Bleed[]>();
-            for (int z = 0; z < layers.Length; z++) {
-                layerBleed.Add(layers[z].AdvanceGPU(computeShader));
+            // Advance and get layer bleed
+            for (int z = 0; z < layerCount; z++) {
+                layerBleed.Add(layers[z].AdvanceGPU(computeShader, tasks[z].Result));
             }
 
-            for (int z = layerBleed.Count - 1; z > 0; z--) {
-                Debug.Log("Looking at layer: " + z);
+            // Apply bleed
+            for (int z = 0; z < layerCount; z++) {
                 for (int i = 0; i < layerBleed[z].Length; i++) {
                     float val = layerBleed[z][i].val;
                     if (val == -1) {
+                        // Null check
                         break;
+                    }else if (val < 0.1f) {
+                        // SKip if threshold isn't met
+                        continue;
                     }
                     int x = layerBleed[z][i].x;
                     int y = layerBleed[z][i].y;
 
-
-                    layers[z - 1].InsertValue(x, y, val);
+                    // Insert bleed in the above and below layers
+                    if (z > 0) {
+                        layers[z - 1].InsertValue(x, y, val);
+                    }
+                    if (z < layerCount - 1) {
+                        layers[z + 1].InsertValue(x, y, val);
+                    }
                 }
             }
         }

@@ -11,6 +11,7 @@ struct Bleed
    float val;
 };
 RWStructuredBuffer<Bleed> layerBleed;
+float bleedModifier;
 groupshared uint bleedindex = 0;
 
 uint w;
@@ -65,7 +66,7 @@ void CSMain (uint3 id : SV_DispatchThreadID)
         Bleed bleed;
         bleed.x = nY;
         bleed.y = nX;
-        bleed.val = newVal;
+        bleed.val = newVal * bleedModifier;
         
         // atomic counter increment 
         uint thisIndex;

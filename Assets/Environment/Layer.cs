@@ -156,7 +156,7 @@ namespace Assets.Environment {
             return total / tempMCount;
         }
 
-        private float[] AsPaddedFlattened() {
+        private float[] AsPaddedFlattenedOld() {
 
             float[] padded = new float[(w + 2) * (h + 2)];
             int i = 0;
@@ -176,7 +176,7 @@ namespace Assets.Environment {
             return padded;
         }
 
-        private float[] AsPaddedFlattenedV2() {
+        public float[] AsPaddedFlattened() {
             int paddedCount = (this.w + 2) * (this.h + 2);
             float[] padded = new float[paddedCount];
             int i = 0;
@@ -229,10 +229,8 @@ namespace Assets.Environment {
             }
         }
 
-        public Bleed[] AdvanceGPU(ComputeShader cs) {
+        public Bleed[] AdvanceGPU(ComputeShader cs, float[] padLayerData) {
             // Get a padded flattened layer and create a buffer for it
-            //float[] padLayerData = AsPaddedFlattened();
-            float[] padLayerData = AsPaddedFlattenedV2();
             ComputeBuffer padLayerBuf = new ComputeBuffer(padLayerData.Length, sizeof(float));
             padLayerBuf.SetData(padLayerData);
 
@@ -251,6 +249,9 @@ namespace Assets.Environment {
             cs.SetBuffer(0, "paddedLayer", padLayerBuf);
             cs.SetBuffer(0, "newLayer", newLayerBuf);
             cs.SetBuffer(0, "layerBleed", bleedBuf);
+
+            // Set modifier
+            cs.SetFloat("bleedModifier", .5f);
 
             // Set the width and height
             cs.SetInt("w", w);
