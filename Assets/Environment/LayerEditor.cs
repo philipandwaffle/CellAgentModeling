@@ -70,8 +70,8 @@ namespace Assets.Environment {
                 // Convert mouse position to an integer
                 Vector2Int curEditPos = new Vector2Int((int)(mPos.x / xScale), (int)(mPos.y / yScale));
                 for (int x = -brushRadius; x < brushRadius + 1; x++) {
-                    for (int y = -brushRadius; y < brushRadius + 1; y++) {                        
-                        ticker.SetValue(z, curEditPos.x + x, curEditPos.y + y, brushVal);
+                    for (int y = -brushRadius; y < brushRadius + 1; y++) {
+                        ticker.SetValue(z, curEditPos.y + y, curEditPos.x + x, brushVal);
                     }
                 }
             }

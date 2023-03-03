@@ -11,15 +11,10 @@ namespace Assets.Environment {
     [Serializable]
     public class Layer {
         public float[,] data;
-        public float[,] mask;
 
         public int w { get; private set; }
         public int h {get; private set;}
-        private int mW, mH;
-        private float mCount;
 
-        private int xOffset;
-        private int yOffset;
         private Color Display(float val) {
             if (val == -1) {
                 return Color.black;
@@ -38,7 +33,7 @@ namespace Assets.Environment {
             return Mathf.Clamp(val, 0f, 1f);
         }
 
-        public float this[int x, int y] {
+        public float this[int y, int x] {
             get {
                 x = x <= 0 ? (x % w) + (w) : x % w;
                 x = x == w ? 0 : x;
@@ -46,7 +41,7 @@ namespace Assets.Environment {
                 y = y <= 0 ? (y % h) + (h) : y % h;
                 y = y == h ? 0 : y;
 
-                return data[x, y];
+                return data[y, x];
             }
             set {
                 x = x <= 0 ? (x % w) + (w) : x % w;
@@ -55,46 +50,31 @@ namespace Assets.Environment {
                 y = y <= 0 ? (y % h) + (h) : y % h;
                 y = y == h ? 0 : y;
 
-                data[x, y] = value;
+                data[y, x] = value;
             }
         }
 
         [JsonConstructor]
         public Layer(float[,] data, float[,] mask) {
-            InitVariables(mask);
-
             w = data.GetLength(0);
             h = data.GetLength(1);
             this.data = data;
         }
 
-        public Layer(int w, int h, float[,] mask) {            
-            InitVariables(mask);
-
+        public Layer(int w, int h, float[,] mask) {
             this.w = w;
             this.h = h;
-            data = new float[w, h];
+            data = new float[h, w];
         }
 
         public void SetBorder(float val) {
-            for (int i = 0; i < w; i++) {
-                for (int j = 0; j < h; j++) {
-                    if (i == 0 || i == w - 1 || j == 0 || j == h - 1) {
-                        this[i, j] = val;
+            for (int y = 0; y < h; y++) {
+                for (int x = 0; x < w; x++) {
+                    if (y == 0 || y == w - 1 || x == 0 || x == h - 1) {
+                        this[y, x] = val;
                     }
                 }
             }
-        }
-
-        private void InitVariables(float[,] mask) {
-            mW = mask.GetLength(0);
-            mH = mask.GetLength(1);
-            mCount = mW * mH;
-
-            xOffset = mW / 2;
-            yOffset = mH / 2;
-
-            this.mask = mask;
         }
 
         public static Layer LoadLayer(string path) {
@@ -104,76 +84,11 @@ namespace Assets.Environment {
             }
         }        
 
-        public Color GetDisplayData(int x, int y) {
-            return Display(data[x, y]);
+        public Color GetDisplayData(int y, int x) {
+            return Display(data[y, x]);
         }
-        public void InsertValue(int x, int y, float value) {
-            data[x, y] = Constrain(value);
-        }
-
-        public List<(int, int, float)> Advance() {
-            float[,] newData = new float[w, h];
-            List<(int, int, float)> layerBleed = new List<(int, int, float)>();
-            for (int x = 0; x < w; x++) {
-                for (int y = 0; y < h; y++) {
-                    if (this[x, y] == -1) {
-                        newData[x, y] = -1;
-                    } else if (this[x, y] == -2) {
-                        newData[x, y] = -2;
-                        layerBleed.Add((x, y, DotProduct(x, y)));
-                    } else {
-                        newData[x, y] = Constrain(DotProduct(x, y));
-                    }
-                }
-            }
-
-            data = newData;
-            return layerBleed;
-        }
-        private float DotProduct(int x, int y) { 
-            float tempMCount = mCount;
-            float total = 0f;
-
-            for (int i = 0; i < mW; i++) {
-                for (int j = 0; j < mH; j++) {
-                    float curVal = this[x + i - xOffset, y + j - yOffset];
-                    float maskVal = mask[i, j];
-
-                    if (curVal == -1 || curVal == -2) {
-                        tempMCount -= 1f;
-                    } else {
-                        if (maskVal != 1) {
-                            total += curVal * maskVal;
-                        } else {
-                            total += curVal;
-                        }
-                    }
-                }
-            }
-            if (tempMCount == 0) {
-                return -2;
-            }
-            return total / tempMCount;
-        }
-
-        private float[] AsPaddedFlattenedOld() {
-
-            float[] padded = new float[(w + 2) * (h + 2)];
-            int i = 0;
-            for (int x = -1; x <= w; x++) {
-                for (int y = -1; y <= h; y++) {
-                    int newX = x;
-                    int newY = y;
-
-                    LoopIndex(ref newX, w);
-                    LoopIndex(ref newY, h);
-
-                    padded[i] = data[newX, newY];
-                    i++;
-                }
-            }
-
-            return padded;
+        public void InsertValue(int y, int x, float value) {
+            data[y, x] = Constrain(value);
         }
 
         public float[] AsPaddedFlattened() {
@@ -220,13 +135,6 @@ namespace Assets.Environment {
                 Debug.LogError("Impropper padding/flattening of layer");
             }
             return padded;
-        }
-        private void LoopIndex(ref int index, int max) {
-            if (index == -1) {
-                index = max - 1;
-            } else if (index == max) {
-                index = 0;
-            }
         }
 
         public Bleed[] AdvanceGPU(ComputeShader cs, float[] padLayerData) {

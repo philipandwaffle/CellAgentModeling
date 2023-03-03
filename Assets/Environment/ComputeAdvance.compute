@@ -64,8 +64,8 @@ void CSMain (uint3 id : SV_DispatchThreadID)
     if (cellBleeds){
         // create bleed struct
         Bleed bleed;
-        bleed.x = nY;
-        bleed.y = nX;
+        bleed.x = nX;
+        bleed.y = nY;
         bleed.val = newVal * bleedModifier;
         
         // atomic counter increment 

@@ -27,10 +27,10 @@ namespace Assets.Environment {
                     // Destroy container 
                     Destroy(displayContainers[curLayer]);
 
-                    for (int row = 0; row < display[curLayer].GetLength(0); row++) {
-                        for (int col = 0; col < display[curLayer].GetLength(1); col++) {
+                    for (int y = 0; y < display[curLayer].GetLength(0); y++) {
+                        for (int x = 0; x < display[curLayer].GetLength(1); x++) {
                             // Destroy cell
-                            Destroy(display[curLayer][row, col]);
+                            Destroy(display[curLayer][y, x]);
                         }
                     }
                 }
@@ -60,7 +60,7 @@ namespace Assets.Environment {
 
             // Create display cell
             GameObject dis = new GameObject();
-            display[z] = new GameObject[layers[z].w, layers[z].h];
+            display[z] = new GameObject[layers[z].h, layers[z].w];
 
             for (int x = 0; x < layers[z].w; x++) {
                 for (int y = 0; y < layers[z].h; y++) {
@@ -75,22 +75,22 @@ namespace Assets.Environment {
                     instance.name = z + " " + x + "," + y;
 
                     BoxCollider2D bc = instance.AddComponent<BoxCollider2D>();
-                    bc.enabled = layers[z][x, y] == -1;
+                    bc.enabled = layers[z][y, x] == -1;
 
                     SpriteRenderer sr = instance.AddComponent<SpriteRenderer>();
                     sr.sprite = displaySprite;
-                    sr.color = layers[z].GetDisplayData(x, y);
+                    sr.color = layers[z].GetDisplayData(y, x);
 
-                    display[z][x, y] = instance;
+                    display[z][y, x] = instance;
                 }
             }
             Destroy(dis);
         }
 
-        public void SetValue(int z, int x, int y, float val) {
-            layers[z].InsertValue(x, y, val);
-            GameObject go = display[z][x, y];
-            go.GetComponent<SpriteRenderer>().color = layers[z].GetDisplayData(x, y);
+        public void SetValue(int z, int y, int x, float val) {
+            layers[z].InsertValue(y, x, val);
+            GameObject go = display[z][y, x];
+            go.GetComponent<SpriteRenderer>().color = layers[z].GetDisplayData(y, x);
             go.GetComponent<BoxCollider2D>().enabled = val == -1;
         }
 
@@ -135,19 +135,19 @@ namespace Assets.Environment {
 
                     // Insert bleed in the above and below layers
                     if (z > 0) {
-                        layers[z - 1].InsertValue(x, y, val);
+                        layers[z - 1].InsertValue(y, x, val);
                     }
                     if (z < layerCount - 1) {
-                        layers[z + 1].InsertValue(x, y, val);
+                        layers[z + 1].InsertValue(y, x, val);
                     }
                 }
             }
         }
 
         public void UpdateDisplay(int z) {
-            for (int x = 0; x < layers[z].w; x++) {
-                for (int y = 0; y < layers[z].h; y++) {
-                    display[z][x, y].GetComponent<SpriteRenderer>().color = layers[z].GetDisplayData(x, y);
+            for (int y = 0; y < layers[z].h; y++) {
+                for (int x = 0; x < layers[z].w; x++) {
+                    display[z][y, x].GetComponent<SpriteRenderer>().color = layers[z].GetDisplayData(y, x);
                 }
             }
         }
