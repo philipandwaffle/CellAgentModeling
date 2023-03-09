@@ -1701,7 +1701,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   agentSprite: {fileID: -2413806693520163455, guid: 2e89c149b567951459606f0243d761a6, type: 3}
-  agentCount: 14000000
+  agentCount: 2c010000
   spawnPoint: 50
   spawnRange: 10
 --- !u!1 &1695066314

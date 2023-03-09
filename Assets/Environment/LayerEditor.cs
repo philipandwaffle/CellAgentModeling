@@ -137,7 +137,7 @@ namespace Assets.Environment {
             }*/
         }
         public void LoadLayers() {
-            /*string path = EditorUtility.OpenFolderPanel(
+            string path = EditorUtility.OpenFolderPanel(
                 "Load Layer",
                 Application.dataPath + "/Layers",
                 "");
@@ -145,9 +145,9 @@ namespace Assets.Environment {
             if (path.Equals("")) {
                 Debug.Log("Empty folder path, exiting");
                 return;
-            }*/
-            //DirectoryInfo d = new DirectoryInfo(path);
-            DirectoryInfo d = new DirectoryInfo("C:\\Users\\phili\\Documents\\code_stuff\\unity\\CellAgentModeling\\Assets\\Layers\\grenfell_110x110");
+            }
+            DirectoryInfo d = new DirectoryInfo(path);
+            //DirectoryInfo d = new DirectoryInfo("C:\\Users\\phili\\Documents\\code_stuff\\unity\\CellAgentModeling\\Assets\\Layers\\grenfell_110x110");
             FileInfo[] layerFiles = d.GetFiles("*.layer");
 
             int numLayers = layerFiles.Length;

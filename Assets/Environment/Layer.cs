@@ -11,6 +11,7 @@ namespace Assets.Environment {
     [Serializable]
     public class Layer {
         public float[,] data;
+        public NavGraph navGraph;
 
         public int w { get; private set; }
         public int h {get; private set;}
