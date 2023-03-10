@@ -20,20 +20,16 @@ namespace Assets.Environment {
         public int h {get; private set;}
 
         private Color Display(float val) {
-            if (val == -1) {
-                return Color.black;
-            }
-            else if (val == -2) {
-                return Color.green;
-            }
+            if (val == -1) return Color.black;
+            else if (val == -2) return Color.green;
+
             return Color.HSVToRGB((1-val /4f) - 0.75f, 0.7f, 0.5f);
         }
+
         private float Constrain(float val) {
-            if (val == -1) {
-                return -1;
-            } else if (val == -2) {
-                return -2;
-            }
+            if (val == -1) return -1;
+            else if (val == -2) return -2;
+
             return Mathf.Clamp(val, 0f, 1f);
         }
 
@@ -59,13 +55,13 @@ namespace Assets.Environment {
         }
 
         [JsonConstructor]
-        public Layer(float[,] data, float[,] mask) {
+        public Layer(float[,] data) {
             w = data.GetLength(0);
             h = data.GetLength(1);
             this.data = data;
         }
 
-        public Layer(int w, int h, float[,] mask) {
+        public Layer(int w, int h) {
             this.w = w;
             this.h = h;
             data = new float[h, w];
@@ -81,10 +77,14 @@ namespace Assets.Environment {
             }
         }
 
-        public static Layer LoadLayer(string path) {
-            using (StreamReader sr = new StreamReader(path)) {
-                string json = sr.ReadToEnd();
-                return JsonConvert.DeserializeObject<Layer>(json);
+        public static Layer LoadLayer(string layerPath, string navPath) {
+            using (StreamReader lr = new StreamReader(layerPath))
+            using (StreamReader nr = new StreamReader(navPath)) {
+                string layerJson = lr.ReadToEnd();
+                string navJson = nr.ReadToEnd();
+                Layer l = JsonConvert.DeserializeObject<Layer>(layerJson);
+                l.navGraph = JsonConvert.DeserializeObject<NavGraph>(navJson);
+                return l;
             }
         }        
 

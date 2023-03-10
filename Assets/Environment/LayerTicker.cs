@@ -84,6 +84,40 @@ namespace Assets.Environment {
                     display[z][y, x] = instance;
                 }
             }
+            // Debug to display nav graph nodes and connections
+/*            if (layers[z].navGraph is not null) {
+                foreach (Vector2Int nc in layers[z].navGraph.nodeCoords) {
+                    GameObject instance = Instantiate(dis);
+                    instance.layer = 6 + z;
+                    instance.transform.parent = container.transform;
+                    instance.transform.localScale = Vector3.one;
+                    instance.transform.position = new Vector3(
+                        transform.localScale.x * nc.x,
+                        transform.localScale.y * nc.y,
+                        z * -LayerEditor.layerSep);
+
+                    SpriteRenderer sr = instance.AddComponent<SpriteRenderer>();
+                    sr.sprite = displaySprite;
+                    sr.color = Color.blue;
+                }
+                foreach (Vector2Int[] edge in layers[z].navGraph.edgeCoords) {
+                    if (edge is null) continue;
+                    foreach (Vector2Int ec in edge) {
+                        GameObject instance = Instantiate(dis);
+                        instance.layer = 6 + z;
+                        instance.transform.parent = container.transform;
+                        instance.transform.localScale = Vector3.one;
+                        instance.transform.position = new Vector3(
+                            transform.localScale.x * ec.x,
+                            transform.localScale.y * ec.y,
+                            z * -LayerEditor.layerSep);
+
+                        SpriteRenderer sr = instance.AddComponent<SpriteRenderer>();
+                        sr.sprite = displaySprite;
+                        sr.color = Color.yellow;
+                    }
+                }
+            }*/
             Destroy(dis);
         }
 
@@ -94,8 +128,8 @@ namespace Assets.Environment {
             go.GetComponent<BoxCollider2D>().enabled = val == -1;
         }
 
-        public void LoadLayer(int z, string path) {            
-            layers[z] = Layer.LoadLayer(path);
+        public void LoadLayer(int z, string layerPath, string navPath) {            
+            layers[z] = Layer.LoadLayer(layerPath, navPath);
             SetDisplay(z);
         }
 

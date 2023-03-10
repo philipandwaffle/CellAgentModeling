@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 namespace Assets.Environment {
+    [JsonObject(MemberSerialization.OptIn)]
     [Serializable]
     public class NavGraph {
         public Vector2Int[,][] edgeCoords;

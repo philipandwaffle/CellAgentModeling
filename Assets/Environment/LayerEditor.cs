@@ -29,12 +29,7 @@ namespace Assets.Environment {
             Camera.main.transform.position = newPos;
             
             Layer l = new Layer(
-                w,h,
-                new float[,] {
-                    { 1f, 1f, 1f },
-                    { 1f, 1f, 1f },
-                    { 1f, 1f, 1f }
-                }
+                w,h
             );
             l.SetBorder(-1);
 
@@ -145,16 +140,27 @@ namespace Assets.Environment {
             DirectoryInfo d = new DirectoryInfo(path);
             //DirectoryInfo d = new DirectoryInfo("C:\\Users\\phili\\Documents\\code_stuff\\unity\\CellAgentModeling\\Assets\\Layers\\grenfell_110x110");
             FileInfo[] layerFiles = d.GetFiles("*.layer");
+            FileInfo[] navFiles = d.GetFiles("*.nav");
 
+            int numNavs = navFiles.Length;
             int numLayers = layerFiles.Length;
+
+            if (numNavs != numLayers) {
+                Debug.LogError(".layer and .nav file mismatch in " + path);
+                return;
+            }
+
             this.numLayers = numLayers;
+
             ticker.SetNumLayers(numLayers);
 
             for (int i = 0; i < numLayers; i++) {
-                string name = layerFiles[i].FullName;
-                Debug.Log("loading layer: " + i + " <- " + name);
+                string layerPath = layerFiles[i].FullName;
+                string navPath = navFiles[i].FullName;
+                Debug.Log("loading layer: " + i + " <- " + layerPath);
+                Debug.Log("loading nav: " + i + " <- " + navPath);
                 
-                ticker.LoadLayer(i, name);
+                ticker.LoadLayer(i, layerPath, navPath);
             }
         }
         public void SaveLayers() {
