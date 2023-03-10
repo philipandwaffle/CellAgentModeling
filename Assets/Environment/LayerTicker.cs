@@ -13,10 +13,8 @@ namespace Assets.Environment {
         private Layer[] layers;
         private GameObject[][,] display;
         private GameObject[] displayContainers;
+        public ComputeShader computeShader;
 
-        public int GetLayerCount() {
-            return layers.Length;
-        }
         public void SetNumLayers(int z) {
             layers = new Layer[z];
             
@@ -29,10 +27,10 @@ namespace Assets.Environment {
                     // Destroy container 
                     Destroy(displayContainers[curLayer]);
 
-                    for (int row = 0; row < display[curLayer].GetLength(0); row++) {
-                        for (int col = 0; col < display[curLayer].GetLength(1); col++) {
+                    for (int y = 0; y < display[curLayer].GetLength(0); y++) {
+                        for (int x = 0; x < display[curLayer].GetLength(1); x++) {
                             // Destroy cell
-                            Destroy(display[curLayer][row, col]);
+                            Destroy(display[curLayer][y, x]);
                         }
                     }
                 }
@@ -56,11 +54,13 @@ namespace Assets.Environment {
             GameObject container = new GameObject("Layer: " + z);
             container.transform.parent = transform;
             container.transform.localScale = Vector3.one;
+            container.layer = 6 + z;
             displayContainers[z] = container;
+            
 
             // Create display cell
             GameObject dis = new GameObject();
-            display[z] = new GameObject[layers[z].w, layers[z].h];
+            display[z] = new GameObject[layers[z].h, layers[z].w];
 
             for (int x = 0; x < layers[z].w; x++) {
                 for (int y = 0; y < layers[z].h; y++) {
@@ -75,82 +75,113 @@ namespace Assets.Environment {
                     instance.name = z + " " + x + "," + y;
 
                     BoxCollider2D bc = instance.AddComponent<BoxCollider2D>();
-                    bc.enabled = layers[z][x, y] == -1;
+                    bc.enabled = layers[z][y, x] == -1;
 
                     SpriteRenderer sr = instance.AddComponent<SpriteRenderer>();
                     sr.sprite = displaySprite;
-                    sr.color = layers[z].GetDisplayData(x, y);
+                    sr.color = layers[z].GetDisplayData(y, x);
 
-                    display[z][x, y] = instance;
+                    display[z][y, x] = instance;
                 }
             }
+            // Debug to display nav graph nodes and connections
+/*            if (layers[z].navGraph is not null) {
+                foreach (Vector2Int nc in layers[z].navGraph.nodeCoords) {
+                    GameObject instance = Instantiate(dis);
+                    instance.layer = 6 + z;
+                    instance.transform.parent = container.transform;
+                    instance.transform.localScale = Vector3.one;
+                    instance.transform.position = new Vector3(
+                        transform.localScale.x * nc.x,
+                        transform.localScale.y * nc.y,
+                        z * -LayerEditor.layerSep);
+
+                    SpriteRenderer sr = instance.AddComponent<SpriteRenderer>();
+                    sr.sprite = displaySprite;
+                    sr.color = Color.blue;
+                }
+                foreach (Vector2Int[] edge in layers[z].navGraph.edgeCoords) {
+                    if (edge is null) continue;
+                    foreach (Vector2Int ec in edge) {
+                        GameObject instance = Instantiate(dis);
+                        instance.layer = 6 + z;
+                        instance.transform.parent = container.transform;
+                        instance.transform.localScale = Vector3.one;
+                        instance.transform.position = new Vector3(
+                            transform.localScale.x * ec.x,
+                            transform.localScale.y * ec.y,
+                            z * -LayerEditor.layerSep);
+
+                        SpriteRenderer sr = instance.AddComponent<SpriteRenderer>();
+                        sr.sprite = displaySprite;
+                        sr.color = Color.yellow;
+                    }
+                }
+            }*/
             Destroy(dis);
         }
 
-        public void SetValue(int z, int x, int y, float val) {
-            layers[z].InsertValue(x, y, val);
-            GameObject go = display[z][x, y];
-            go.GetComponent<SpriteRenderer>().color = layers[z].GetDisplayData(x, y);
+        public void SetValue(int z, int y, int x, float val) {
+            layers[z].InsertValue(y, x, val);
+            GameObject go = display[z][y, x];
+            go.GetComponent<SpriteRenderer>().color = layers[z].GetDisplayData(y, x);
             go.GetComponent<BoxCollider2D>().enabled = val == -1;
         }
 
-        public void LoadLayer(int z, string path) {            
-            layers[z] = Layer.LoadLayer(path);
+        public void LoadLayer(int z, string layerPath, string navPath) {            
+            layers[z] = Layer.LoadLayer(layerPath, navPath);
             SetDisplay(z);
         }
 
-        public void AdvanceLayers() {
-            for (int z = layers.Length-1; z >= 0; z--) {
-                List<(int, int, float)> layerBleed = layers[z].Advance();
-                if (z != 0) {
-                    for (int i = 0; i < layerBleed.Count; i++) {
-                        int x = layerBleed[i].Item1;
-                        int y = layerBleed[i].Item2;
-                        float val = layerBleed[i].Item3;
-                        if (val == -2) {
-                            continue;
-                        }
-                        layers[z - 1].InsertValue(x, y, val);                        
+        public void AdvanceLayersGPU() {
+            // Create padded and flattened layer tasks 
+            int layerCount = layers.Length;
+            Task<float[]>[] tasks = new Task<float[]>[layers.Length];
+            for (int z = 0; z < layerCount; z++) {
+                int layerIndex = z;
+                tasks[layerIndex] = new Task<float[]>(() => {
+                    return layers[layerIndex].AsPaddedFlattened();
+                });
+            }
+            // Start tasks in parallel
+            Parallel.ForEach(tasks, task => task.Start());
+            Task.WaitAll(tasks);
+            
+            List<Bleed[]> layerBleed = new List<Bleed[]>();
+            // Advance and get layer bleed
+            for (int z = 0; z < layerCount; z++) {
+                layerBleed.Add(layers[z].AdvanceGPU(computeShader, tasks[z].Result));
+            }
+
+            // Apply bleed
+            for (int z = 0; z < layerCount; z++) {
+                for (int i = 0; i < layerBleed[z].Length; i++) {
+                    float val = layerBleed[z][i].val;
+                    if (val == -1) {
+                        // Null check
+                        break;
+                    }else if (val < 0.1f) {
+                        // SKip if threshold isn't met
+                        continue;
+                    }
+                    int x = layerBleed[z][i].x;
+                    int y = layerBleed[z][i].y;
+
+                    // Insert bleed in the above and below layers
+                    if (z > 0) {
+                        layers[z - 1].InsertValue(y, x, val);
+                    }
+                    if (z < layerCount - 1) {
+                        layers[z + 1].InsertValue(y, x, val);
                     }
                 }
             }
-            UpdateDisplays();
         }
 
-        public void AdvanceLayersParallel() {            
-            Task<List<(int, int, float)>>[] tasks = new Task<List<(int, int, float)>>[layers.Length];
-            for (int z = layers.Length - 1; z >= 0; z--) {
-                int layerIndex = z;
-                tasks[layerIndex] = new Task<List<(int, int, float)>>(() => {
-                    return layers[layerIndex].Advance(); 
-                });
-            }
-
-            Parallel.ForEach(tasks, task => task.Start());
-            Task.WaitAll(tasks);
-
-            for (int z = tasks.Length - 1; z > 0; z--) {
-                List<(int, int, float)> layerBleed = tasks[z].Result;
-
-                for (int i = 0; i < layerBleed.Count; i++) {
-                    int x = layerBleed[i].Item1;
-                    int y = layerBleed[i].Item2;
-                    float val = layerBleed[i].Item3;
-                    if (val == -2) {
-                        continue;
-                    }
-                    layers[z - 1].InsertValue(x, y, val);
-                }                
-            }
-            UpdateDisplays();
-        }
-
-        private void UpdateDisplays() {
-            for (int z = 0; z < layers.Length; z++) {
+        public void UpdateDisplay(int z) {
+            for (int y = 0; y < layers[z].h; y++) {
                 for (int x = 0; x < layers[z].w; x++) {
-                    for (int y = 0; y < layers[z].h; y++) {
-                        display[z][x, y].GetComponent<SpriteRenderer>().color = layers[z].GetDisplayData(x, y);
-                    }
+                    display[z][y, x].GetComponent<SpriteRenderer>().color = layers[z].GetDisplayData(y, x);
                 }
             }
         }

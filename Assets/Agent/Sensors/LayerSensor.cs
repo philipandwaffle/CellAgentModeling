@@ -1,5 +1,4 @@
 ﻿using Assets.CASMTransmission;
-using TMPro.EditorUtilities;
 using UnityEngine;
 
 namespace Assets.Agent.Sensors {    
@@ -12,13 +11,13 @@ namespace Assets.Agent.Sensors {
         protected float offSet = 0.5f;
 
         public virtual void WriteValue(float val) {
-            gb.WriteValue(val, 0, (int)(transform.position.x + offSet), (int)(transform.position.y + offSet));
+            gb.WriteValue(val, 0, (int)(transform.position.y + offSet), (int)(transform.position.x + offSet));
         }
         public virtual float ReadValue() {
-            return gb.ReadVaue(0, (int)(transform.position.x + offSet), (int)(transform.position.y + offSet));
+            return gb.ReadVaue(0, (int)(transform.position.y + offSet), (int)(transform.position.x + offSet));
         }
         public virtual Vector2 DirectionOfLowest() {
-            return gb.DirectionOfLowest(0, (int)(transform.position.x + offSet), (int)(transform.position.y + offSet));
+            return gb.DirectionOfLowest(0, (int)(transform.position.y + offSet), (int)(transform.position.x + offSet));
         }
     }
 }

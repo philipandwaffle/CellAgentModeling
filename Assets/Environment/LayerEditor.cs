@@ -1,13 +1,9 @@
 ﻿using Assets.UI;
 using System;
-using System.Collections;
 using System.IO;
 using TMPro;
-using Unity.Burst;
-using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.EventSystems;
 
 namespace Assets.Environment {
     public class LayerEditor : MonoBehaviour, IToggleable{
@@ -33,12 +29,7 @@ namespace Assets.Environment {
             Camera.main.transform.position = newPos;
             
             Layer l = new Layer(
-                w,h,
-                new float[,] {
-                    { 1f, 1f, 1f },
-                    { 1f, 1f, 1f },
-                    { 1f, 1f, 1f }
-                }
+                w,h
             );
             l.SetBorder(-1);
 
@@ -52,7 +43,8 @@ namespace Assets.Environment {
         // Update is called once per frame
         void Update() {
             if (!paused) {
-                ticker.AdvanceLayersParallel();
+                ticker.AdvanceLayersGPU();
+                ticker.UpdateDisplay(z);
             }
 
             if (Input.GetMouseButton(0)) {                
@@ -69,8 +61,8 @@ namespace Assets.Environment {
                 // Convert mouse position to an integer
                 Vector2Int curEditPos = new Vector2Int((int)(mPos.x / xScale), (int)(mPos.y / yScale));
                 for (int x = -brushRadius; x < brushRadius + 1; x++) {
-                    for (int y = -brushRadius; y < brushRadius + 1; y++) {                        
-                        ticker.SetValue(z, curEditPos.x + x, curEditPos.y + y, brushVal);
+                    for (int y = -brushRadius; y < brushRadius + 1; y++) {
+                        ticker.SetValue(z, curEditPos.y + y, curEditPos.x + x, brushVal);
                     }
                 }
             }
@@ -91,6 +83,10 @@ namespace Assets.Environment {
             newPos.z -= 5;
             text.text = "Layer: " + z;
             Camera.main.transform.position = newPos;
+            int mask = 1 << (6 + z);
+            Camera.main.cullingMask = mask;
+            //Debug.Log("On Layer: " + z + "\nUsing mask:"+mask.ToBinaryString());
+            ticker.UpdateDisplay(z);
         }
 
 
@@ -108,7 +104,7 @@ namespace Assets.Environment {
         }
 
         public void LoadLayer() {
-            string path = EditorUtility.OpenFilePanel(
+            /*string path = EditorUtility.OpenFilePanel(
                 "Load Layer",
                 Application.dataPath + "/Layers",
                 "json");
@@ -117,10 +113,10 @@ namespace Assets.Environment {
                 Debug.Log("Empty file path, exiting");
                 return;
             }
-            ticker.LoadLayer(z, path);
+            ticker.LoadLayer(z, path);*/
         }
         public void SaveLayer() {
-            string path = EditorUtility.SaveFilePanel(
+            /*string path = EditorUtility.SaveFilePanel(
                 "Save Layer",
                 Application.dataPath + "/Layers",
                 "",
@@ -129,7 +125,7 @@ namespace Assets.Environment {
                 ticker.GetLayer(z).Save(path);
             } else {
                 Debug.Log("Empty file path, exiting");
-            }
+            }*/
         }
         public void LoadLayers() {
             string path = EditorUtility.OpenFolderPanel(
@@ -142,21 +138,33 @@ namespace Assets.Environment {
                 return;
             }
             DirectoryInfo d = new DirectoryInfo(path);
+            //DirectoryInfo d = new DirectoryInfo("C:\\Users\\phili\\Documents\\code_stuff\\unity\\CellAgentModeling\\Assets\\Layers\\grenfell_110x110");
             FileInfo[] layerFiles = d.GetFiles("*.layer");
+            FileInfo[] navFiles = d.GetFiles("*.nav");
 
+            int numNavs = navFiles.Length;
             int numLayers = layerFiles.Length;
+
+            if (numNavs != numLayers) {
+                Debug.LogError(".layer and .nav file mismatch in " + path);
+                return;
+            }
+
             this.numLayers = numLayers;
+
             ticker.SetNumLayers(numLayers);
 
             for (int i = 0; i < numLayers; i++) {
-                string name = layerFiles[i].FullName;
-                Debug.Log("loading layer: " + i + " <- " + name);
+                string layerPath = layerFiles[i].FullName;
+                string navPath = navFiles[i].FullName;
+                Debug.Log("loading layer: " + i + " <- " + layerPath);
+                Debug.Log("loading nav: " + i + " <- " + navPath);
                 
-                ticker.LoadLayer(i, name);
+                ticker.LoadLayer(i, layerPath, navPath);
             }
         }
         public void SaveLayers() {
-            string path = EditorUtility.OpenFolderPanel(
+            /*string path = EditorUtility.OpenFolderPanel(
                 "Load Layer",
                 Application.dataPath + "/Layers",
                 "");
@@ -170,7 +178,7 @@ namespace Assets.Environment {
                 string name = path + "/" + i + ".layer";
                 Debug.Log("saving layer: " + i + " -> " + name);
                 ticker.GetLayer(i).Save(name);
-            }
+            }*/
         }
     }
 }

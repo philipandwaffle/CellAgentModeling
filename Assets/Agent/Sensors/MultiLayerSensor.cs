@@ -1,7 +1,5 @@
-﻿using Assets.CASMTransmission;
-using Assets.Environment;
+﻿using Assets.Environment;
 using System;
-using UnityEditor.U2D.Animation;
 using UnityEngine;
 
 namespace Assets.Agent.Sensors {
@@ -14,13 +12,13 @@ namespace Assets.Agent.Sensors {
         private int z = 0;
 
         public override void WriteValue(float val) {
-            gb.WriteValue(val, z, (int)(transform.position.x + offSet), (int)(transform.position.y + offSet));
+            gb.WriteValue(val, z, (int)(transform.position.y + offSet), (int)(transform.position.x + offSet));
         }
         public override float ReadValue() {
-            return gb.ReadVaue(z, (int)(transform.position.x + offSet), (int)(transform.position.y + offSet));
+            return gb.ReadVaue(z, (int)(transform.position.y + offSet), (int)(transform.position.x + offSet));
         }
         public override Vector2 DirectionOfLowest() {
-            return gb.DirectionOfLowest(z, (int)(transform.position.x + offSet), (int)(transform.position.y + offSet));
+            return gb.DirectionOfLowest(z, (int)(transform.position.y + offSet), (int)(transform.position.x + offSet));
         }
 
         public void MoveLayer(int deltaZ) {

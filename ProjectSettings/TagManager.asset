@@ -17,27 +17,27 @@ TagManager:
   - Floor2
   - Floor3
   - Floor4
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
+  - Floor5
+  - Floor6
+  - Floor7
+  - Floor8
+  - Floor9
+  - Floor10
+  - Floor11
+  - Floor12
+  - Floor13
+  - Floor14
+  - Floor15
+  - Floor16
+  - Floor17
+  - Floor18
+  - Floor19
+  - Floor20
+  - Floor21
+  - Floor22
+  - Floor23
+  - Floor24
+  - Floor25
   m_SortingLayers:
   - name: Default
     uniqueID: 0
