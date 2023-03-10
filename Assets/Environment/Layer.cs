@@ -8,9 +8,12 @@ using System.Linq;
 using Unity.VisualScripting;
 
 namespace Assets.Environment {
+    [JsonObject(MemberSerialization.OptIn)]
     [Serializable]
     public class Layer {
+        [JsonProperty]
         public float[,] data;
+
         public NavGraph navGraph;
 
         public int w { get; private set; }

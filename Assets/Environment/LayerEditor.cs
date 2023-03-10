@@ -1,13 +1,9 @@
 ﻿using Assets.UI;
 using System;
-using System.Collections;
 using System.IO;
 using TMPro;
-using Unity.Burst;
-using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.EventSystems;
 
 namespace Assets.Environment {
     public class LayerEditor : MonoBehaviour, IToggleable{
