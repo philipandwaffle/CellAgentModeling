@@ -1,6 +1,8 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace Assets.Environment {
@@ -9,23 +11,26 @@ namespace Assets.Environment {
     public class NavGraph {
         public Vector2Int[,][] edgeCoords;
         public Vector2Int[] nodeCoords;
+        //public Dictionary<Vector2Int, int>
         private int numVerts;
         public float[,] adjMatrix;
-        public List<int>[] paths;
+
+        public int[][] paths { get; private set; }
+        int srcNode;
 
         [JsonConstructor]
         public NavGraph(int[,] graph) {
             CC cc = new CC(graph);
             edgeCoords = cc.CalcEdgeCoords();
             nodeCoords = cc.nodeCoords;
+            srcNode = cc.srcNode;
             
             numVerts = edgeCoords.GetLength(0);
-            adjMatrix = new float[numVerts, numVerts];
-            paths = new List<int>[numVerts];
         }
 
         public void UpdatePaths() {
-            int srcVert = 0;
+            Debug.Log("Updating Path");
+            paths = new int[numVerts][];
 
             float[] shortestDist = new float[numVerts];
             bool[] added = new bool[numVerts];
@@ -37,16 +42,16 @@ namespace Assets.Environment {
             }
 
             // Distance of source vertex from itself is always 0
-            shortestDist[srcVert] = 0;
+            shortestDist[srcNode] = 0;
 
             // Parent array to store shortest path tree
             int[] parents = new int[numVerts];
 
             // The starting vertex does not have a parent
-            parents[srcVert] = -1;
+            parents[srcNode] = -1;
 
             // Find shortest path for all vertices
-            for (int i = 1; i < numVerts; i++) {
+            for (int i = 0; i < numVerts; i++) {
                 // Pick the minimum distance vertex from the set of vertices not yet processed
                 int nearestVertex = -1;
                 float shortestDistance = float.MaxValue;
@@ -62,7 +67,7 @@ namespace Assets.Environment {
 
                 // Update dist value of the adjacent vertices of the picked vertex.
                 for (int vertI = 0; vertI < numVerts; vertI++) {
-                    float edgeDistance = adjMatrix[nearestVertex, vertI];
+                    float edgeDistance = adjMatrix[vertI, nearestVertex];
 
                     if (edgeDistance > 0 && ((shortestDistance + edgeDistance) < shortestDist[vertI])) {
                         parents[vertI] = nearestVertex;
@@ -74,25 +79,36 @@ namespace Assets.Environment {
             for (int dest = 0; dest < numVerts; dest++) {
                 List<int> path = new List<int>();
                 BuildPath(ref path, dest, parents);
-                paths[dest] = path;
+                paths[dest] = path.ToArray();
             }
         }
 
         private void BuildPath(ref List<int> path, int dest, int[] parents) {
-            if (dest == -1) {
-                return;
-            }
+            if (dest == -1) return;
+
             BuildPath(ref path, parents[dest], parents);
             path.Add(dest);
         }
 
         public void UpdateAdjMatrix(ref float[,] layer) {
+            Debug.Log("Updating adj matrix");
+            adjMatrix = new float[numVerts, numVerts];
             for (int src = 0; src < numVerts; src++) {
                 for (int dest = 0; dest < numVerts; dest++) {
+                    // Default to 0
                     adjMatrix[src, dest] = 0f;
+
+                    // Skip if connection doesn't exist
+                    if (edgeCoords[src, dest] is null) continue;
+
+                    // Loop through each edge coord and set weight
                     for (int i = 0; i < edgeCoords[src,dest].Length; i++) {
                         Vector2Int pos = edgeCoords[src, dest][i];
-                        adjMatrix[src,dest] += layer[pos.y, pos.x];
+                        float val = layer[pos.y, pos.x];
+
+                        // Set to infinite when too hot
+                        if (val == 1f) val = float.MaxValue;
+                        adjMatrix[src, dest] += 1 + (val * .5f);
                     }
                 }
             }
@@ -109,6 +125,7 @@ namespace Assets.Environment {
 
         private int[] dx = { -1, 0, 1, 0 };
         private int[] dy = { 0, 1, 0, -1 };
+        public int srcNode { get; private set; } = -1;
 
         List<List<Vector2Int>> conCoords = new List<List<Vector2Int>> {
             new List<Vector2Int>()
@@ -180,23 +197,17 @@ namespace Assets.Environment {
             }
             conCoords.RemoveAt(curLabel - 1);
 
-            // Put the src node at the start
-            int srcNode = -1;
             // Find the src node index
             for (int i = 0; i < nodes.Count; i++) {
                 int x = nodes[i].x;
                 int y = nodes[i].y;
                 if (graph[y, x] == -2) {
-                    srcNode = i; break;
+                    srcNode = i; 
+                    break;
                 }
             }
-            //insert the src node at the start
-            conCoords.Insert(0, conCoords[srcNode]);
-            nodes.Insert(0, nodes[srcNode]);
+            if (srcNode == -1) Debug.LogError("No source node in nav graph");
 
-            //remove old src node
-            conCoords.RemoveAt(srcNode + 1);
-            nodes.RemoveAt(srcNode + 1);
             nodeCoords = nodes.ToArray();
             List<int>[] nodeCons = CalcNodeCons(nodeCoords);
             int numNodes = nodeCons.Length;
@@ -205,16 +216,16 @@ namespace Assets.Environment {
             Vector2Int[,][] edgeCoords = new Vector2Int[numNodes, numNodes][];
 
             //Loop through each src node and check connections with other nodes
+            edgeCoords = new Vector2Int[numNodes, numNodes][];
             for (int src = 0; src < numNodes; src++) {
-                foreach (int conId in nodeCons[src]) {
-                    for (int dest = 0; dest < numNodes; dest++) {
-                        // Can't be connected to itself
-                        if (src == dest) continue;
-
-                        // Connection found
-                        if (nodeCons[dest].Contains(conId)) {
-                            edgeCoords[src, dest] = conCoords[dest].ToArray();
-                        }
+                for (int dest = 0; dest < numNodes; dest++) {
+                    if (src == dest) continue;
+                    int[] inter = nodeCons[src].Intersect(nodeCons[dest]).ToArray();
+                    int interCount = inter.Length;
+                    if (interCount == 1) {
+                        edgeCoords[src, dest] = conCoords[inter[0] - 1].ToArray();
+                    } else if (interCount > 1) {
+                        Console.WriteLine("WTF");
                     }
                 }
             }

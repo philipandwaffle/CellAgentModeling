@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using UnityEditorInternal.Profiling;
 using UnityEngine;
 
 namespace Assets.Environment {
@@ -16,8 +17,7 @@ namespace Assets.Environment {
         public ComputeShader computeShader;
 
         public void SetNumLayers(int z) {
-            layers = new Layer[z];
-            
+            layers = new Layer[z];            
 
             // Check if the display has been set before
             if (display != null) {
@@ -84,16 +84,19 @@ namespace Assets.Environment {
                     display[z][y, x] = instance;
                 }
             }
-            // Debug to display nav graph nodes and connections
-/*            if (layers[z].navGraph is not null) {
-                foreach (Vector2Int nc in layers[z].navGraph.nodeCoords) {
+
+           /* // Debug to display nav graph nodes and connections
+            if (layers[z].navGraph is not null) {
+                Vector2Int[] nodeCoords = layers[z].navGraph.nodeCoords;
+                for (int i = 0; i < nodeCoords.Length; i++) {
                     GameObject instance = Instantiate(dis);
+                    instance.name = i.ToString();
                     instance.layer = 6 + z;
                     instance.transform.parent = container.transform;
                     instance.transform.localScale = Vector3.one;
                     instance.transform.position = new Vector3(
-                        transform.localScale.x * nc.x,
-                        transform.localScale.y * nc.y,
+                        transform.localScale.x * nodeCoords[i].x,
+                        transform.localScale.y * nodeCoords[i].y,
                         z * -LayerEditor.layerSep);
 
                     SpriteRenderer sr = instance.AddComponent<SpriteRenderer>();
@@ -117,7 +120,8 @@ namespace Assets.Environment {
                         sr.color = Color.yellow;
                     }
                 }
-            }*/
+            }
+*/
             Destroy(dis);
         }
 
@@ -176,6 +180,20 @@ namespace Assets.Environment {
                     }
                 }
             }
+        }
+
+        public void UpdateNavGraphs() {
+            int layerCount = layers.Length;
+            Task[] tasks = new Task[layers.Length];
+            for (int z = 0; z < layerCount; z++) {
+                int layerIndex = z;
+                tasks[layerIndex] = new Task(() => {
+                    layers[layerIndex].UpdateNavGraph();
+                });
+            }
+            // Start tasks in parallel
+            Parallel.ForEach(tasks, task => task.Start());
+            Task.WaitAll(tasks);
         }
 
         public void UpdateDisplay(int z) {

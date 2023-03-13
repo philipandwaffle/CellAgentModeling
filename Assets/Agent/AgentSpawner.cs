@@ -4,12 +4,14 @@ using Assets.CASMTransmission;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices.WindowsRuntime;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.SocialPlatforms;
 using Random = UnityEngine.Random;
 
 namespace Assets.Agent {
-    public class AgentSpawner : MonoBehaviour {
+    public class AgentSpawner : MonoBehaviour { 
         AgentTicker ticker;
 
         [SerializeField] Sprite agentSprite;
@@ -28,15 +30,17 @@ namespace Assets.Agent {
 
         private void InitAgents() {
             stateMachines = new IStateMachine[] {
-                GetHCPC()
+                //GetHCPC()
+                GetNavAgent()
             };
 
             sensors = new Sensor[][] {
-                CreateLayerSensors(agentCount[0]),
+                CreateNavSensors(agentCount[0]),
             };
 
             Sensor.peers = sensors.SelectMany(a => a).ToArray();
-            LayerSensor.gb = GetComponent<Gearbox>();
+            //LayerSensor.gb = GetComponent<Gearbox>();
+            NavLayerSensor.gb = GetComponent<Gearbox>();
         }
 
         private Sensor[] CreateLayerSensors(int agentCount) {
@@ -53,6 +57,30 @@ namespace Assets.Agent {
                 go.AddComponent<SpriteRenderer>().sprite = agentSprite;
                 MultiLayerSensor sensor = go.AddComponent<MultiLayerSensor>();
                 sensor.MoveLayer(4);
+                go.name = sensor.id.ToString();
+
+                sensor.SetConRadius(1f);
+                sensor.SetColRadius(0.5f);
+
+                sensors[i] = sensor;
+            }
+            return sensors;
+        }
+
+        private Sensor[] CreateNavSensors(int agentCount) {
+            Sensor[] sensors = new Sensor[agentCount];
+            for (int i = 0; i < agentCount; i++) {
+
+                GameObject go = new GameObject();
+                go.transform.parent = transform;
+                go.transform.position = new Vector3(
+                    spawnPoint + Random.Range(-spawnRange, spawnRange),
+                    spawnPoint + Random.Range(-spawnRange, spawnRange),
+                    transform.position.z
+                );
+                go.AddComponent<SpriteRenderer>().sprite = agentSprite;
+                NavLayerSensor sensor = go.AddComponent<NavLayerSensor>();
+                //sensor.MoveLayer(4);
                 go.name = sensor.id.ToString();
 
                 sensor.SetConRadius(1f);
@@ -153,6 +181,32 @@ namespace Assets.Agent {
                     { 2, new (int, int)[] { (1, 0), (2, 3), (4, 4) } },
                     { 3, new (int, int)[] { (3, 2), (1, 1), (4, 4) } },
                     { 4, new (int, int)[] { (0, 3), (1, 1), (2, 3), (3, 2) } },
+                }
+            );
+        }
+
+        private IStateMachine<NavLayerSensor> GetNavAgent() {
+            float dirModifier = 10f;
+            State<NavLayerSensor> findPath = new(
+                (s) => {
+                    Debug.Log("find path");
+                    s.UpdatePath();
+                }
+            );
+            State<NavLayerSensor> escape = new(
+                (s) => {
+                    //Debug.Log("moving");
+                    s.ApplyForce(dirModifier * s.GetDir());
+                }
+            );
+
+            Input<NavLayerSensor> finishSetup = new((s) => { return s.HasPath(); });
+
+            return new StateMachine<NavLayerSensor>(
+                new IState<NavLayerSensor>[] { findPath, escape },
+                new IInput<NavLayerSensor>[] { finishSetup },
+                new Dictionary<int, (int, int)[]>() {
+                    { 0, new (int, int)[] { (0, 1) } },
                 }
             );
         }

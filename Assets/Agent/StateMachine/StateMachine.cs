@@ -1,5 +1,6 @@
 ﻿using Assets.Agent.Sensors;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using Random = UnityEngine.Random;
 
 namespace Assets.Agent.StateMachine {
@@ -27,6 +28,11 @@ namespace Assets.Agent.StateMachine {
 
         public void AdvanceSensor(T sensor) {
             // The transitions possible for the current state
+            if (!transitions.ContainsKey(sensor.curState)) {
+                states[sensor.curState].Act(sensor);
+                return;
+            }
+
             (int, int)[] possibleTrans = transitions[sensor.curState];
 
             List<int> finalStates = new List<int>();

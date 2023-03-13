@@ -2,6 +2,7 @@
 using System;
 using System.IO;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
 
@@ -11,7 +12,7 @@ namespace Assets.Environment {
 
         private float brushVal = -1;
         private int z = 0;
-        [SerializeField] private int numLayers = 2;
+        private int numLayers = 0;
         [SerializeField] private int brushRadius = 3;
         [SerializeField] private bool paused = true;
         [SerializeField] private int w = 100, h = 100;
@@ -21,30 +22,34 @@ namespace Assets.Environment {
 
         // Use this for initialization
         void Start() {
-            string path = Application.dataPath + "/Layers/testing_layer.json";
-
+            // Camera setup
             Vector3 newPos = Camera.main.transform.position;
             newPos.z = z * Camera.main.transform.localScale.z * -layerSep;
             newPos.z -= layerSep/2;
             Camera.main.transform.position = newPos;
-            
-            Layer l = new Layer(
-                w,h
-            );
-            l.SetBorder(-1);
 
             ticker = gameObject.GetComponent<LayerTicker>();
-            ticker.SetNumLayers(numLayers);
-            for (int z = 0; z < numLayers; z++) {
-                ticker.SetLayer(z, l.DeepClone());
-            }
+
+            // Load default layers
+            string path = Application.dataPath + "/Layers/default/";
+            //string path = Application.dataPath + "/Layers/single_grenfell_53x53/";
+            Debug.Log(path);
+            DirectoryInfo d = new DirectoryInfo(path);
+            LoadLayers(d.GetFiles("*.layer"), d.GetFiles("*.nav"));
         }
 
+        int navGraphUpdates = 0;
         // Update is called once per frame
         void Update() {
             if (!paused) {
                 ticker.AdvanceLayersGPU();
                 ticker.UpdateDisplay(z);
+
+                if (navGraphUpdates % 10 == 0) { 
+                    ticker.UpdateNavGraphs();
+                    navGraphUpdates = 0;
+                }
+                navGraphUpdates++;
             }
 
             if (Input.GetMouseButton(0)) {                
@@ -142,16 +147,19 @@ namespace Assets.Environment {
             FileInfo[] layerFiles = d.GetFiles("*.layer");
             FileInfo[] navFiles = d.GetFiles("*.nav");
 
+            LoadLayers(layerFiles, navFiles);
+        }
+
+        private void LoadLayers(FileInfo[] layerFiles, FileInfo[] navFiles) {
             int numNavs = navFiles.Length;
             int numLayers = layerFiles.Length;
 
             if (numNavs != numLayers) {
-                Debug.LogError(".layer and .nav file mismatch in " + path);
+                Debug.LogError(".layer and .nav file count mismatch");
                 return;
-            }
+            }else if (numLayers == 0) Debug.LogError("No layers were loaded");
 
             this.numLayers = numLayers;
-
             ticker.SetNumLayers(numLayers);
 
             for (int i = 0; i < numLayers; i++) {
@@ -159,7 +167,7 @@ namespace Assets.Environment {
                 string navPath = navFiles[i].FullName;
                 Debug.Log("loading layer: " + i + " <- " + layerPath);
                 Debug.Log("loading nav: " + i + " <- " + navPath);
-                
+
                 ticker.LoadLayer(i, layerPath, navPath);
             }
         }

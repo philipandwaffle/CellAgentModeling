@@ -3,9 +3,6 @@ using System.IO;
 using UnityEngine;
 using Newtonsoft.Json;
 using System.Runtime.Serialization.Formatters.Binary;
-using System.Collections.Generic;
-using System.Linq;
-using Unity.VisualScripting;
 
 namespace Assets.Environment {
     [JsonObject(MemberSerialization.OptIn)]
@@ -61,12 +58,6 @@ namespace Assets.Environment {
             this.data = data;
         }
 
-        public Layer(int w, int h) {
-            this.w = w;
-            this.h = h;
-            data = new float[h, w];
-        }
-
         public void SetBorder(float val) {
             for (int y = 0; y < h; y++) {
                 for (int x = 0; x < w; x++) {
@@ -84,6 +75,7 @@ namespace Assets.Environment {
                 string navJson = nr.ReadToEnd();
                 Layer l = JsonConvert.DeserializeObject<Layer>(layerJson);
                 l.navGraph = JsonConvert.DeserializeObject<NavGraph>(navJson);
+                l.navGraph.UpdateAdjMatrix(ref l.data);
                 return l;
             }
         }        
@@ -173,8 +165,6 @@ namespace Assets.Environment {
             cs.SetInt("pw", w + 2);
             cs.SetInt("ph", h + 2);
 
-            //cs.SetInt("bleedIndex", 0);
-
             cs.Dispatch(0, padLayerData.Length / 64, 1, 1);
 
             // Get the new layer data
@@ -196,6 +186,11 @@ namespace Assets.Environment {
             }
 
             return bleed;
+        }
+
+        public void UpdateNavGraph() {
+            navGraph.UpdateAdjMatrix(ref data);
+            navGraph.UpdatePaths();
         }
 
         public void Save(string path, Formatting format = Formatting.None) {

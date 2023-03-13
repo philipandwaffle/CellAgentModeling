@@ -1646,7 +1646,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1680201992
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1701,9 +1701,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   agentSprite: {fileID: -2413806693520163455, guid: 2e89c149b567951459606f0243d761a6, type: 3}
-  agentCount: 2c010000
-  spawnPoint: 50
-  spawnRange: 10
+  agentCount: 32000000
+  spawnPoint: 25
+  spawnRange: 20
 --- !u!1 &1695066314
 GameObject:
   m_ObjectHideFlags: 0
@@ -2153,7 +2153,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5d83cccc6a069af44a65ad9d81029b1b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  numLayers: 20
   brushRadius: 0
   paused: 1
   w: 50
