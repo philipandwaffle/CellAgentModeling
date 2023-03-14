@@ -3,12 +3,10 @@ using Assets.UI;
 using System;
 using System.IO;
 using TMPro;
-using Unity.VisualScripting;
-using UnityEditor;
 using UnityEngine;
 
 namespace Assets.Environment {
-    public class CASMEditor : MonoBehaviour, IToggleable{
+    public class CASMEditor : MonoBehaviour, IToggleable {
         [SerializeField] private LayerTicker layerTicker;
         [SerializeField] private AgentTicker agentTicker;
 
@@ -30,7 +28,7 @@ namespace Assets.Environment {
             // Camera setup
             Vector3 newPos = Camera.main.transform.position;
             newPos.z = z * Camera.main.transform.localScale.z * -layerSep;
-            newPos.z -= layerSep/2;
+            newPos.z -= layerSep / 2;
             Camera.main.transform.position = newPos;
 
             // Load default layers
@@ -45,7 +43,7 @@ namespace Assets.Environment {
         // Update is called once per frame
         void Update() {
             if (!paused) {
-                if (navGraphUpdates % 10 == 0) { 
+                if (navGraphUpdates % 10 == 0) {
                     layerTicker.UpdateNavGraphs();
                     navGraphUpdates = 0;
                 }
@@ -57,7 +55,7 @@ namespace Assets.Environment {
                 layerTicker.UpdateDisplay(z);
             }
 
-            if (Input.GetMouseButton(0)) {                
+            if (Input.GetMouseButton(0)) {
                 // Get the current mouse position in the world
                 Vector2 mPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
 
@@ -87,7 +85,7 @@ namespace Assets.Environment {
 
         private void MoveLayer(int deltaZ) {
             z = Math.Clamp(z + deltaZ, 0, numLayers - 1);
-            
+
             Vector3 newPos = Camera.main.transform.position;
             newPos.z = z * (Camera.main.transform.localScale.z * -layerSep);
             newPos.z -= 5;
@@ -102,7 +100,7 @@ namespace Assets.Environment {
 
 
         public void SetBrushValue(float val) {
-            brushVal = val;            
+            brushVal = val;
         }
 
         public void TogglePaused() {
@@ -126,7 +124,7 @@ namespace Assets.Environment {
             if (numNavs != numLayers) {
                 Debug.LogError(".layer and .nav file count mismatch");
                 return;
-            }else if (numLayers == 0) Debug.LogError("No layers were loaded");
+            } else if (numLayers == 0) Debug.LogError("No layers were loaded");
 
             this.numLayers = numLayers;
             layerTicker.SetNumLayers(numLayers);

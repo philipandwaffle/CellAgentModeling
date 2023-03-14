@@ -1,17 +1,12 @@
 ﻿using Assets.Agent.Sensors;
 using Assets.Agent.StateMachine;
-using Assets.CASMTransmission;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.SocialPlatforms;
 using Random = UnityEngine.Random;
 
 namespace Assets.Agent {
-    public class AgentSpawner : MonoBehaviour { 
+    public class AgentSpawner : MonoBehaviour {
         AgentTicker ticker;
 
         [SerializeField] Sprite agentSprite;
@@ -23,7 +18,7 @@ namespace Assets.Agent {
         private Sensor[][] sensors;
 
         private void Start() {
-            ticker = GetComponent<AgentTicker>();           
+            ticker = GetComponent<AgentTicker>();
             InitAgents();
             ticker.SetAgents(sensors, stateMachines);
         }
@@ -172,7 +167,7 @@ namespace Assets.Agent {
 
             return new StateMachine<MultiLayerSensor>(
                 new IState<MultiLayerSensor>[] { hotPanic, hotCalm, coldPanic, coldCalm, TakeStairs },
-                new IInput<MultiLayerSensor>[] {isCold, isHot, isFar, isNear, isOnSteps },
+                new IInput<MultiLayerSensor>[] { isCold, isHot, isFar, isNear, isOnSteps },
                 new Dictionary<int, (int, int)[]>() {
                     { 0, new (int, int)[] { (2, 1), (0, 2), (4, 4) } },
                     { 1, new (int, int)[] { (0, 3), (3, 0), (4, 4) } },

@@ -4,14 +4,13 @@ using System;
 using UnityEditor;
 
 namespace SFB {
-    public class StandaloneFileBrowserEditor : IStandaloneFileBrowser  {
+    public class StandaloneFileBrowserEditor : IStandaloneFileBrowser {
         public string[] OpenFilePanel(string title, string directory, ExtensionFilter[] extensions, bool multiselect) {
             string path = "";
 
             if (extensions == null) {
                 path = EditorUtility.OpenFilePanel(title, directory, "");
-            }
-            else {
+            } else {
                 path = EditorUtility.OpenFilePanelWithFilters(title, directory, GetFilterFromFileExtensionList(extensions));
             }
 
@@ -24,7 +23,7 @@ namespace SFB {
 
         public string[] OpenFolderPanel(string title, string directory, bool multiselect) {
             var path = EditorUtility.OpenFolderPanel(title, directory, "");
-            return string.IsNullOrEmpty(path) ? new string[0] : new[] {path};
+            return string.IsNullOrEmpty(path) ? new string[0] : new[] { path };
         }
 
         public void OpenFolderPanelAsync(string title, string directory, bool multiselect, Action<string[]> cb) {

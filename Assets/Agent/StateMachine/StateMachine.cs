@@ -1,6 +1,5 @@
 ﻿using Assets.Agent.Sensors;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using Random = UnityEngine.Random;
 
 namespace Assets.Agent.StateMachine {
@@ -61,7 +60,7 @@ namespace Assets.Agent.StateMachine {
             if (count != 0) {
                 sensor.curState = finalStates[Random.Range(0, count - 1)];
             }
-            
+
             // Preform the action of the state
             states[sensor.curState].Act(sensor);
         }

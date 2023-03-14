@@ -50,7 +50,7 @@ namespace Assets.CASMTransmission {
             float minDist = float.MaxValue;
             Vector2Int pos = new Vector2Int(x, y);
             Vector2Int[] nodeCoords = layerTicker.GetLayer(z).navGraph.nodeCoords;
-            
+
             int curNode = 0;
             for (int i = 0; i < nodeCoords.Length; i++) {
                 float curDist = Mathf.Abs(pos.sqrMagnitude - nodeCoords[i].sqrMagnitude);

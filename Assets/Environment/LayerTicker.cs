@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using UnityEditorInternal.Profiling;
 using UnityEngine;
 
 namespace Assets.Environment {
-    public class LayerTicker: MonoBehaviour {
+    public class LayerTicker : MonoBehaviour {
         [SerializeField] private Sprite displaySprite;
 
         private Layer[] layers;
@@ -17,7 +12,7 @@ namespace Assets.Environment {
         public ComputeShader computeShader;
 
         public void SetNumLayers(int z) {
-            layers = new Layer[z];            
+            layers = new Layer[z];
 
             // Check if the display has been set before
             if (display != null) {
@@ -59,7 +54,7 @@ namespace Assets.Environment {
             container.transform.localScale = Vector3.one;
             container.layer = 6 + z;
             displayContainers[z] = container;
-            
+
 
             // Create display cell
             GameObject dis = new GameObject();
@@ -72,8 +67,8 @@ namespace Assets.Environment {
                     instance.transform.parent = container.transform;
                     instance.transform.localScale = Vector3.one;
                     instance.transform.position = new Vector3(
-                        transform.localScale.x * x, 
-                        transform.localScale.y * y, 
+                        transform.localScale.x * x,
+                        transform.localScale.y * y,
                         z * -CASMEditor.layerSep);
                     instance.name = z + " " + x + "," + y;
 
@@ -88,43 +83,43 @@ namespace Assets.Environment {
                 }
             }
 
-           /* // Debug to display nav graph nodes and connections
-            if (layers[z].navGraph is not null) {
-                Vector2Int[] nodeCoords = layers[z].navGraph.nodeCoords;
-                for (int i = 0; i < nodeCoords.Length; i++) {
-                    GameObject instance = Instantiate(dis);
-                    instance.name = i.ToString();
-                    instance.layer = 6 + z;
-                    instance.transform.parent = container.transform;
-                    instance.transform.localScale = Vector3.one;
-                    instance.transform.position = new Vector3(
-                        transform.localScale.x * nodeCoords[i].x,
-                        transform.localScale.y * nodeCoords[i].y,
-                        z * -LayerEditor.layerSep);
+            /* // Debug to display nav graph nodes and connections
+             if (layers[z].navGraph is not null) {
+                 Vector2Int[] nodeCoords = layers[z].navGraph.nodeCoords;
+                 for (int i = 0; i < nodeCoords.Length; i++) {
+                     GameObject instance = Instantiate(dis);
+                     instance.name = i.ToString();
+                     instance.layer = 6 + z;
+                     instance.transform.parent = container.transform;
+                     instance.transform.localScale = Vector3.one;
+                     instance.transform.position = new Vector3(
+                         transform.localScale.x * nodeCoords[i].x,
+                         transform.localScale.y * nodeCoords[i].y,
+                         z * -LayerEditor.layerSep);
 
-                    SpriteRenderer sr = instance.AddComponent<SpriteRenderer>();
-                    sr.sprite = displaySprite;
-                    sr.color = Color.blue;
-                }
-                foreach (Vector2Int[] edge in layers[z].navGraph.edgeCoords) {
-                    if (edge is null) continue;
-                    foreach (Vector2Int ec in edge) {
-                        GameObject instance = Instantiate(dis);
-                        instance.layer = 6 + z;
-                        instance.transform.parent = container.transform;
-                        instance.transform.localScale = Vector3.one;
-                        instance.transform.position = new Vector3(
-                            transform.localScale.x * ec.x,
-                            transform.localScale.y * ec.y,
-                            z * -LayerEditor.layerSep);
+                     SpriteRenderer sr = instance.AddComponent<SpriteRenderer>();
+                     sr.sprite = displaySprite;
+                     sr.color = Color.blue;
+                 }
+                 foreach (Vector2Int[] edge in layers[z].navGraph.edgeCoords) {
+                     if (edge is null) continue;
+                     foreach (Vector2Int ec in edge) {
+                         GameObject instance = Instantiate(dis);
+                         instance.layer = 6 + z;
+                         instance.transform.parent = container.transform;
+                         instance.transform.localScale = Vector3.one;
+                         instance.transform.position = new Vector3(
+                             transform.localScale.x * ec.x,
+                             transform.localScale.y * ec.y,
+                             z * -LayerEditor.layerSep);
 
-                        SpriteRenderer sr = instance.AddComponent<SpriteRenderer>();
-                        sr.sprite = displaySprite;
-                        sr.color = Color.yellow;
-                    }
-                }
-            }
-*/
+                         SpriteRenderer sr = instance.AddComponent<SpriteRenderer>();
+                         sr.sprite = displaySprite;
+                         sr.color = Color.yellow;
+                     }
+                 }
+             }
+ */
             Destroy(dis);
         }
 
@@ -135,7 +130,7 @@ namespace Assets.Environment {
             go.GetComponent<BoxCollider2D>().enabled = val == -1;
         }
 
-        public void LoadLayer(int z, string layerPath, string navPath) {            
+        public void LoadLayer(int z, string layerPath, string navPath) {
             layers[z] = Layer.LoadLayer(layerPath, navPath);
             SetDisplay(z);
         }
@@ -153,7 +148,7 @@ namespace Assets.Environment {
             // Start tasks in parallel
             Parallel.ForEach(tasks, task => task.Start());
             Task.WaitAll(tasks);
-            
+
             List<Bleed[]> layerBleed = new List<Bleed[]>();
             // Advance and get layer bleed
             for (int z = 0; z < layerCount; z++) {
@@ -167,7 +162,7 @@ namespace Assets.Environment {
                     if (val == -1) {
                         // Null check
                         break;
-                    }else if (val < 0.1f) {
+                    } else if (val < 0.1f) {
                         // SKip if threshold isn't met
                         continue;
                     }

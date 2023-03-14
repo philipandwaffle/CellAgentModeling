@@ -1,8 +1,7 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.IO;
 using UnityEngine;
-using Newtonsoft.Json;
-using System.Runtime.Serialization.Formatters.Binary;
 
 namespace Assets.Environment {
     [JsonObject(MemberSerialization.OptIn)]
@@ -14,13 +13,13 @@ namespace Assets.Environment {
         public NavGraph navGraph;
 
         public int w { get; private set; }
-        public int h {get; private set;}
+        public int h { get; private set; }
 
         private Color Display(float val) {
             if (val == -1) return Color.black;
             else if (val == -2) return Color.green;
 
-            return Color.HSVToRGB((1-val /4f) - 0.75f, 0.7f, 0.5f);
+            return Color.HSVToRGB((1 - val / 4f) - 0.75f, 0.7f, 0.5f);
         }
 
         private float Constrain(float val) {
@@ -66,7 +65,7 @@ namespace Assets.Environment {
                     }
                 }
             }
-        } 
+        }
 
         public Color GetDisplayData(int y, int x) {
             return Display(data[y, x]);
@@ -192,7 +191,7 @@ namespace Assets.Environment {
                     l.navGraph.UpdateAdjMatrix(ref l.data);
                     return l;
                 }
-            }catch(Exception ex) {
+            } catch (Exception ex) {
                 // TODO: better error handling 
                 Debug.LogError("Error loading file(s) " + ex.ToString());
                 return null;
@@ -204,11 +203,11 @@ namespace Assets.Environment {
 
             try {
                 using (StreamWriter lw = new StreamWriter(layerPath))
-                using (StreamWriter nw = new StreamWriter(navPath)) { 
+                using (StreamWriter nw = new StreamWriter(navPath)) {
                     lw.WriteLine(layerJson);
                     nw.WriteLine(navJson);
                 }
-            }catch(Exception ex) {
+            } catch (Exception ex) {
                 // TODO: better error handling 
                 Debug.LogError("Error saving file(s) " + ex.ToString());
             }

@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.VisualScripting;
 using UnityEngine;
 
 namespace Assets.Environment {
@@ -24,7 +23,7 @@ namespace Assets.Environment {
             edgeCoords = cc.CalcEdgeCoords();
             nodeCoords = cc.nodeCoords;
             srcNode = cc.srcNode;
-            
+
             numVerts = edgeCoords.GetLength(0);
         }
 
@@ -102,7 +101,7 @@ namespace Assets.Environment {
                     if (edgeCoords[src, dest] is null) continue;
 
                     // Loop through each edge coord and set weight
-                    for (int i = 0; i < edgeCoords[src,dest].Length; i++) {
+                    for (int i = 0; i < edgeCoords[src, dest].Length; i++) {
                         Vector2Int pos = edgeCoords[src, dest][i];
                         float val = layer[pos.y, pos.x];
 
@@ -201,7 +200,7 @@ namespace Assets.Environment {
                 int x = nodes[i].x;
                 int y = nodes[i].y;
                 if (graph[y, x] == -2) {
-                    srcNode = i; 
+                    srcNode = i;
                     break;
                 }
             }

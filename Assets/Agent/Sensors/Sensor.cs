@@ -1,7 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using Unity.VisualScripting;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 namespace Assets.Agent.Sensors {
@@ -16,7 +13,7 @@ namespace Assets.Agent.Sensors {
         // Every sensor in the scene
         public static Sensor[] peers;
 
-        
+
         private Rigidbody2D rb;
         // The collider trigger belonging to this sensor used to handle the contact list
         protected CircleCollider2D con;
@@ -38,7 +35,7 @@ namespace Assets.Agent.Sensors {
             rb.isKinematic = false;
             rb.gravityScale = 0f;
             rb.drag = 1;
-            
+
 
             id = nextId;
             nextId++;
@@ -116,12 +113,12 @@ namespace Assets.Agent.Sensors {
             rb.AddForce(force);
         }
 
-        protected void OnTriggerEnter2D(Collider2D collision) {            
-            if (collision.CompareTag("contactCol") && !contacts.Contains(collision)) { 
-                contacts.Add(collision); 
-            }            
+        protected void OnTriggerEnter2D(Collider2D collision) {
+            if (collision.CompareTag("contactCol") && !contacts.Contains(collision)) {
+                contacts.Add(collision);
+            }
         }
-        protected void OnTriggerExit2D(Collider2D collision) {      
+        protected void OnTriggerExit2D(Collider2D collision) {
             contacts.Remove(collision);
         }
     }

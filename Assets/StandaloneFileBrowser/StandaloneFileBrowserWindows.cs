@@ -1,10 +1,10 @@
 #if UNITY_STANDALONE_WIN
 
+using Ookii.Dialogs;
 using System;
 using System.IO;
-using System.Windows.Forms;
 using System.Runtime.InteropServices;
-using Ookii.Dialogs;
+using System.Windows.Forms;
 
 namespace SFB {
     // For fullscreen support
@@ -27,8 +27,7 @@ namespace SFB {
             if (extensions != null) {
                 fd.Filter = GetFilterFromFileExtensionList(extensions);
                 fd.FilterIndex = 1;
-            }
-            else {
+            } else {
                 fd.Filter = string.Empty;
             }
             fd.Multiselect = multiselect;
@@ -52,7 +51,7 @@ namespace SFB {
                 fd.SelectedPath = GetDirectoryPath(directory);
             }
             var res = fd.ShowDialog(new WindowWrapper(GetActiveWindow()));
-            var filenames = res == DialogResult.OK ? new []{ fd.SelectedPath } : new string[0];
+            var filenames = res == DialogResult.OK ? new[] { fd.SelectedPath } : new string[0];
             fd.Dispose();
             return filenames;
         }
@@ -81,8 +80,7 @@ namespace SFB {
                 fd.FilterIndex = 1;
                 fd.DefaultExt = extensions[0].Extensions[0];
                 fd.AddExtension = true;
-            }
-            else {
+            } else {
                 fd.DefaultExt = string.Empty;
                 fd.Filter = string.Empty;
                 fd.AddExtension = false;

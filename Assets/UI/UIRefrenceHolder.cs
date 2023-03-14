@@ -1,15 +1,12 @@
 ﻿using Assets.Environment;
-using Newtonsoft.Json.Serialization;
 using SFB;
 using System.IO;
-using Unity.VisualScripting;
-using UnityEditor;
 using UnityEngine;
 
 namespace Assets.UI {
     public class UIRefrenceHolder : MonoBehaviour {
         [SerializeField] private CASMEditor casm;
-        [SerializeField] 
+        [SerializeField]
 
         public void SetBrushVal(string val) {
             float brushVal;
