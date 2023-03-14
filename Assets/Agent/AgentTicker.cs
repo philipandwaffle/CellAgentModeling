@@ -10,24 +10,13 @@ namespace Assets.Agent {
     public class AgentTicker : MonoBehaviour {
         private Sensor[][] sensors;
         private IStateMachine[] stateMachines;
-        [SerializeField] private bool isPaused = true;
 
         public void SetAgents(Sensor[][] sensors, IStateMachine[] stateMachines) {
             this.sensors = sensors;
             this.stateMachines = stateMachines;
         }
-        public void TogglePaused() {
-            isPaused = !isPaused;
-        }
-
-        private void Update() {
-            // If the sim isn't paused and there are sensors set
-            if (!isPaused && sensors != null) {
-                AdvanceSensors();
-            }
-        }
-
-        private void AdvanceSensors() {
+         
+        public void AdvanceSensors() {
             for (int i = 0; i < sensors.Length; i++) {
                 // Cast the state machine to the correct type
                 switch (stateMachines[i]) {

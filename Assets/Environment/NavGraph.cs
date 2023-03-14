@@ -107,8 +107,7 @@ namespace Assets.Environment {
                         float val = layer[pos.y, pos.x];
 
                         // Set to infinite when too hot
-                        if (val == 1f) val = float.MaxValue;
-                        adjMatrix[src, dest] += 1 + (val * .5f);
+                        adjMatrix[src, dest] += 1 + (val * 15f);
                     }
                 }
             }

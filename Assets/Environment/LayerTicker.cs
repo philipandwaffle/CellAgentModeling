@@ -44,6 +44,9 @@ namespace Assets.Environment {
         public Layer GetLayer(int z) {
             return layers[z];
         }
+        public int GetNumLayers() {
+            return layers.Length;
+        }
         public void SetLayer(int z, Layer layer) {
             layers[z] = layer;
             SetDisplay(z);
@@ -71,7 +74,7 @@ namespace Assets.Environment {
                     instance.transform.position = new Vector3(
                         transform.localScale.x * x, 
                         transform.localScale.y * y, 
-                        z * -LayerEditor.layerSep);
+                        z * -CASMEditor.layerSep);
                     instance.name = z + " " + x + "," + y;
 
                     BoxCollider2D bc = instance.AddComponent<BoxCollider2D>();

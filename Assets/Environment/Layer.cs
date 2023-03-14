@@ -66,19 +66,7 @@ namespace Assets.Environment {
                     }
                 }
             }
-        }
-
-        public static Layer LoadLayer(string layerPath, string navPath) {
-            using (StreamReader lr = new StreamReader(layerPath))
-            using (StreamReader nr = new StreamReader(navPath)) {
-                string layerJson = lr.ReadToEnd();
-                string navJson = nr.ReadToEnd();
-                Layer l = JsonConvert.DeserializeObject<Layer>(layerJson);
-                l.navGraph = JsonConvert.DeserializeObject<NavGraph>(navJson);
-                l.navGraph.UpdateAdjMatrix(ref l.data);
-                return l;
-            }
-        }        
+        } 
 
         public Color GetDisplayData(int y, int x) {
             return Display(data[y, x]);
@@ -193,20 +181,36 @@ namespace Assets.Environment {
             navGraph.UpdatePaths();
         }
 
-        public void Save(string path, Formatting format = Formatting.None) {
-            string json = JsonConvert.SerializeObject(this, format);            
-            using (StreamWriter sr = new StreamWriter(path, false)) { 
-                sr.WriteLine(json);
+        public static Layer LoadLayer(string layerPath, string navPath) {
+            try {
+                using (StreamReader lr = new StreamReader(layerPath))
+                using (StreamReader nr = new StreamReader(navPath)) {
+                    string layerJson = lr.ReadToEnd();
+                    string navJson = nr.ReadToEnd();
+                    Layer l = JsonConvert.DeserializeObject<Layer>(layerJson);
+                    l.navGraph = JsonConvert.DeserializeObject<NavGraph>(navJson);
+                    l.navGraph.UpdateAdjMatrix(ref l.data);
+                    return l;
+                }
+            }catch(Exception ex) {
+                // TODO: better error handling 
+                Debug.LogError("Error loading file(s) " + ex.ToString());
+                return null;
             }
         }
+        public void Save(string layerPath, string navPath, Formatting format = Formatting.None) {
+            string layerJson = JsonConvert.SerializeObject(this, format);
+            string navJson = JsonConvert.SerializeObject(navGraph, format);
 
-        public Layer DeepClone() {
-            using (var ms = new MemoryStream()) {
-                var formatter = new BinaryFormatter();
-                formatter.Serialize(ms, this);
-                ms.Position = 0;
-
-                return (Layer)formatter.Deserialize(ms);
+            try {
+                using (StreamWriter lw = new StreamWriter(layerPath))
+                using (StreamWriter nw = new StreamWriter(navPath)) { 
+                    lw.WriteLine(layerJson);
+                    nw.WriteLine(navJson);
+                }
+            }catch(Exception ex) {
+                // TODO: better error handling 
+                Debug.LogError("Error saving file(s) " + ex.ToString());
             }
         }
     }

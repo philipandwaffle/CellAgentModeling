@@ -28,12 +28,6 @@ namespace Assets.Agent.Sensors {
 
         // Use this for initialization
         void Awake() {
-            GameObject sensorColGo = new GameObject("contactCol");
-            sensorColGo.transform.position = transform.position;
-            sensorColGo.transform.parent = transform;
-            con = sensorColGo.AddComponent<CircleCollider2D>();
-            con.tag = "contactCol";
-            con.isTrigger = true;
 
             GameObject colliderGO = new GameObject("col");
             colliderGO.transform.position = transform.position;
@@ -48,10 +42,20 @@ namespace Assets.Agent.Sensors {
 
             id = nextId;
             nextId++;
+
+            if (this is NavLayerSensor) return;
+            GameObject sensorColGo = new GameObject("contactCol");
+            sensorColGo.transform.position = transform.position;
+            sensorColGo.transform.parent = transform;
+            con = sensorColGo.AddComponent<CircleCollider2D>();
+            con.tag = "contactCol";
+            con.isTrigger = true;
         }
 
         private void Start() {
             col.radius = colR;
+
+            if (this is NavLayerSensor) return;
             con.radius = conR;
         }
 

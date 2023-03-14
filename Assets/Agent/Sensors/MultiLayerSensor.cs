@@ -28,7 +28,7 @@ namespace Assets.Agent.Sensors {
             col.gameObject.layer = 6+z;
 
             Vector3 newPos = transform.position;
-            newPos.z = (z * -LayerEditor.layerSep) - 1;
+            newPos.z = (z * -CASMEditor.layerSep) - 1;
 
             transform.position = newPos;
         }

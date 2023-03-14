@@ -4,7 +4,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 
 namespace Assets.Agent.Sensors {
-    internal class NavLayerSensor : Sensor {
+    public class NavLayerSensor : Sensor {
         public static Gearbox gb;
         protected float offSet = 0.5f;
         private Vector2 targetNode;

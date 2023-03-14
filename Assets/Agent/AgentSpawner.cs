@@ -39,8 +39,6 @@ namespace Assets.Agent {
             };
 
             Sensor.peers = sensors.SelectMany(a => a).ToArray();
-            //LayerSensor.gb = GetComponent<Gearbox>();
-            NavLayerSensor.gb = GetComponent<Gearbox>();
         }
 
         private Sensor[] CreateLayerSensors(int agentCount) {
