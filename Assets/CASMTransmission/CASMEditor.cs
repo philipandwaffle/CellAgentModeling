@@ -1,6 +1,7 @@
 ﻿using Assets.Agent;
 using Assets.UI;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using TMPro;
 using UnityEngine;
@@ -32,8 +33,8 @@ namespace Assets.Environment {
             Camera.main.transform.position = newPos;
 
             // Load default layers
-            string path = Application.dataPath + "/Layers/default/";
-            //string path = Application.dataPath + "/Layers/single_grenfell_53x53/";
+            //string path = Application.dataPath + "/Layers/default/";
+            string path = Application.dataPath + "/Layers/single_grenfell_53x53/";
             Debug.Log(path);
             DirectoryInfo d = new DirectoryInfo(path);
             LoadLayers(d.GetFiles("*.layer"), d.GetFiles("*.nav"));
@@ -110,13 +111,6 @@ namespace Assets.Environment {
             return paused;
         }
 
-        public void LoadLayer(string layerpath, string navPath) {
-            layerTicker.LoadLayer(z, layerpath, navPath);
-        }
-        public void SaveLayer(string layerpath, string navPath) {
-            layerTicker.GetLayer(z).Save(layerpath, navPath);
-        }
-
         public void LoadLayers(FileInfo[] layerFiles, FileInfo[] navFiles) {
             int numNavs = navFiles.Length;
             int numLayers = layerFiles.Length;
@@ -129,14 +123,17 @@ namespace Assets.Environment {
             this.numLayers = numLayers;
             layerTicker.SetNumLayers(numLayers);
 
+            Queue<Vector2>[] spawnsLocations = new Queue<Vector2>[numLayers];
+
             for (int i = 0; i < numLayers; i++) {
                 string layerPath = layerFiles[i].FullName;
                 string navPath = navFiles[i].FullName;
                 Debug.Log("loading layer: " + i + " <- " + layerPath);
                 Debug.Log("loading nav: " + i + " <- " + navPath);
 
-                layerTicker.LoadLayer(i, layerPath, navPath);
+                spawnsLocations[i] = layerTicker.LoadLayer(i, layerPath, navPath);
             }
+            agentTicker.SetSpawnLocations(spawnsLocations);
         }
         public void SaveLayers(string path) {
             for (int i = 0; i < layerTicker.GetNumLayers(); i++) {

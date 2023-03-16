@@ -24,8 +24,8 @@ namespace Assets.Agent.Sensors {
         public void MoveLayer(int deltaZ) {
             z = Math.Clamp(z + deltaZ, 0, maxZ);
             gameObject.layer = 6 + z;
-            con.gameObject.layer = 6 + z;
-            col.gameObject.layer = 6 + z;
+            contactCol.gameObject.layer = 6 + z;
+            collisionCol.gameObject.layer = 6 + z;
 
             Vector3 newPos = transform.position;
             newPos.z = (z * -CASMEditor.layerSep) - 1;

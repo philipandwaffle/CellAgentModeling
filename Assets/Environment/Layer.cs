@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
@@ -65,6 +66,19 @@ namespace Assets.Environment {
                     }
                 }
             }
+        }
+
+        public Queue<Vector2> GetSpawnLocations() {
+            List<Vector2> spawns = new List<Vector2>();
+
+            for (int y = 0; y < h; y++) {
+                for (int x = 0; x < w; x++) {
+                    if (data[y, x] >= 0) spawns.Add(new Vector2(x, y));
+                }
+            }
+            spawns.Shuffle();
+
+            return new Queue<Vector2>(spawns);
         }
 
         public Color GetDisplayData(int y, int x) {

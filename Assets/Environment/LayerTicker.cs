@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Assets.Agent.Sensors;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -18,18 +19,20 @@ namespace Assets.Environment {
             if (display != null) {
 
                 // destroy the previous environment
-                for (int curLayer = 0; curLayer < z; curLayer++) {
+                for (int curLayer = 0; curLayer < displayContainers.Length; curLayer++) {
                     // Destroy container 
                     Destroy(displayContainers[curLayer]);
 
-                    for (int y = 0; y < display[curLayer].GetLength(0); y++) {
+                    /*for (int y = 0; y < display[curLayer].GetLength(0); y++) {
                         for (int x = 0; x < display[curLayer].GetLength(1); x++) {
                             // Destroy cell
                             Destroy(display[curLayer][y, x]);
                         }
-                    }
+                    }*/
                 }
             }
+
+            NavLayerSensor.maxZ = z;
 
             // Set the lenght of the display
             display = new GameObject[z][,];
@@ -57,7 +60,10 @@ namespace Assets.Environment {
 
 
             // Create display cell
-            GameObject dis = new GameObject();
+            GameObject dis = new GameObject {
+                tag = "layer"
+            };
+
             display[z] = new GameObject[layers[z].h, layers[z].w];
 
             for (int x = 0; x < layers[z].w; x++) {
@@ -83,43 +89,43 @@ namespace Assets.Environment {
                 }
             }
 
-            /* // Debug to display nav graph nodes and connections
-             if (layers[z].navGraph is not null) {
-                 Vector2Int[] nodeCoords = layers[z].navGraph.nodeCoords;
-                 for (int i = 0; i < nodeCoords.Length; i++) {
-                     GameObject instance = Instantiate(dis);
-                     instance.name = i.ToString();
-                     instance.layer = 6 + z;
-                     instance.transform.parent = container.transform;
-                     instance.transform.localScale = Vector3.one;
-                     instance.transform.position = new Vector3(
-                         transform.localScale.x * nodeCoords[i].x,
-                         transform.localScale.y * nodeCoords[i].y,
-                         z * -LayerEditor.layerSep);
+            // Debug to display nav graph nodes and connections
+            /*if (layers[z].navGraph is not null) {
+                Vector2Int[] nodeCoords = layers[z].navGraph.nodeCoords;
+                for (int i = 0; i < nodeCoords.Length; i++) {
+                    GameObject instance = Instantiate(dis);
+                    instance.name = i.ToString();
+                    instance.layer = 6 + z;
+                    instance.transform.parent = container.transform;
+                    instance.transform.localScale = Vector3.one;
+                    instance.transform.position = new Vector3(
+                        transform.localScale.x * nodeCoords[i].x,
+                        transform.localScale.y * nodeCoords[i].y,
+                        z * -CASMEditor.layerSep);
 
-                     SpriteRenderer sr = instance.AddComponent<SpriteRenderer>();
-                     sr.sprite = displaySprite;
-                     sr.color = Color.blue;
-                 }
-                 foreach (Vector2Int[] edge in layers[z].navGraph.edgeCoords) {
-                     if (edge is null) continue;
-                     foreach (Vector2Int ec in edge) {
-                         GameObject instance = Instantiate(dis);
-                         instance.layer = 6 + z;
-                         instance.transform.parent = container.transform;
-                         instance.transform.localScale = Vector3.one;
-                         instance.transform.position = new Vector3(
-                             transform.localScale.x * ec.x,
-                             transform.localScale.y * ec.y,
-                             z * -LayerEditor.layerSep);
+                    SpriteRenderer sr = instance.AddComponent<SpriteRenderer>();
+                    sr.sprite = displaySprite;
+                    sr.color = Color.blue;
+                }
+                foreach (Vector2Int[] edge in layers[z].navGraph.edgeCoords) {
+                    if (edge is null) continue;
+                    foreach (Vector2Int ec in edge) {
+                        GameObject instance = Instantiate(dis);
+                        instance.layer = 6 + z;
+                        instance.transform.parent = container.transform;
+                        instance.transform.localScale = Vector3.one;
+                        instance.transform.position = new Vector3(
+                            transform.localScale.x * ec.x,
+                            transform.localScale.y * ec.y,
+                            z * -CASMEditor.layerSep);
 
-                         SpriteRenderer sr = instance.AddComponent<SpriteRenderer>();
-                         sr.sprite = displaySprite;
-                         sr.color = Color.yellow;
-                     }
-                 }
-             }
- */
+                        SpriteRenderer sr = instance.AddComponent<SpriteRenderer>();
+                        sr.sprite = displaySprite;
+                        sr.color = Color.yellow;
+                    }
+                }
+            }*/
+
             Destroy(dis);
         }
 
@@ -130,9 +136,11 @@ namespace Assets.Environment {
             go.GetComponent<BoxCollider2D>().enabled = val == -1;
         }
 
-        public void LoadLayer(int z, string layerPath, string navPath) {
-            layers[z] = Layer.LoadLayer(layerPath, navPath);
+        public Queue<Vector2> LoadLayer(int z, string layerPath, string navPath) {
+            Layer l = Layer.LoadLayer(layerPath, navPath);
+            layers[z] = l;
             SetDisplay(z);
+            return l.GetSpawnLocations();
         }
 
         public void AdvanceLayersGPU() {

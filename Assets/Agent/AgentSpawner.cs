@@ -2,42 +2,75 @@
 using Assets.Agent.StateMachine;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Mathematics;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
 namespace Assets.Agent {
     public class AgentSpawner : MonoBehaviour {
-        AgentTicker ticker;
-
         [SerializeField] Sprite agentSprite;
-        [SerializeField] private int[] agentCount = new int[] { 100, 100 };
+        [SerializeField] private int[] agentCounts;
         [SerializeField] float spawnPoint = 50f;
         [SerializeField] float spawnRange = 10f;
+        private Queue<Vector2>[] spawnLocations;
+        private int numLayerSpawns;
 
-        private IStateMachine[] stateMachines;
-        private Sensor[][] sensors;
+        public void InitAgents(ref IStateMachine sm, ref BaseSensor[] baseSensors, Queue<Vector2>[] spawnLocations) {
+            BaseSensor.nextId = 0;
+            if (baseSensors is not null) {
+                for (int i = 0; i < baseSensors.Length; i++) {
+                    Destroy(baseSensors[i].gameObject);
+                }
+            }
 
-        private void Start() {
-            ticker = GetComponent<AgentTicker>();
-            InitAgents();
-            ticker.SetAgents(sensors, stateMachines);
+            Debug.Log("Spawning agents");
+            bool spawnable = true;
+
+            numLayerSpawns = math.min(spawnLocations.Length, agentCounts.Length);
+            for (int z = 0;z < numLayerSpawns; z++) {
+                if (agentCounts[z] > spawnLocations[z].Count) {
+                    Debug.LogError("Insufficent spawn locations on layer " + z);
+                    spawnable = false;
+                }
+            }
+            if (!spawnable) { 
+                Debug.Log("Not spawning agents");
+                return; 
+            }
+
+            this.spawnLocations = spawnLocations;
+
+            sm = GetNavAgent();
+
+            baseSensors = SpawnAgents(agentCounts);
+
+            //Sensor.peers = (Sensor[])baseSensors.SelectMany(bs => bs).Where(bs => bs is Sensor).ToArray();
         }
 
-        private void InitAgents() {
-            stateMachines = new IStateMachine[] {
-                //GetHCPC()
-                GetNavAgent()
-            };
+        private BaseSensor[] SpawnAgents(int[] agentCounts) {
+            List<BaseSensor> baseSensors = new List<BaseSensor>();
 
-            sensors = new Sensor[][] {
-                CreateNavSensors(agentCount[0]),
-            };
+            GameObject prefab = new GameObject();
+            SpriteRenderer sr =  prefab.AddComponent<SpriteRenderer>();
+            sr.sprite = agentSprite;
 
-            Sensor.peers = sensors.SelectMany(a => a).ToArray();
+            for (int z = 0; z < numLayerSpawns; z++) {
+                for (int i = 0; i < agentCounts[z]; i++) {
+                    GameObject instance = Instantiate(prefab, spawnLocations[z].Dequeue(), Quaternion.identity, transform);
+                    NavLayerSensor sen = instance.AddComponent<NavLayerSensor>();
+                    instance.transform.localScale = new Vector3(.5f, .5f, .5f);
+                    sen.MoveLayer(z);
+
+                    baseSensors.Add(sen);
+                }
+            }
+            Destroy(prefab);
+
+            return baseSensors.ToArray();
         }
 
-        private Sensor[] CreateLayerSensors(int agentCount) {
-            Sensor[] sensors = new Sensor[agentCount];
+        private BaseSensor[] CreateLayerSensors(int agentCount) {
+            BaseSensor[] sensors = new BaseSensor[agentCount];
             for (int i = 0; i < agentCount; i++) {
 
                 GameObject go = new GameObject();
@@ -60,8 +93,8 @@ namespace Assets.Agent {
             return sensors;
         }
 
-        private Sensor[] CreateNavSensors(int agentCount) {
-            Sensor[] sensors = new Sensor[agentCount];
+        private BaseSensor[] CreateNavSensors(int agentCount) {
+            BaseSensor[] sensors = new BaseSensor[agentCount];
             for (int i = 0; i < agentCount; i++) {
 
                 GameObject go = new GameObject();
@@ -76,7 +109,6 @@ namespace Assets.Agent {
                 //sensor.MoveLayer(4);
                 go.name = sensor.id.ToString();
 
-                sensor.SetConRadius(1f);
                 sensor.SetColRadius(0.5f);
 
                 sensors[i] = sensor;
@@ -179,25 +211,23 @@ namespace Assets.Agent {
         }
 
         private IStateMachine<NavLayerSensor> GetNavAgent() {
-            float dirModifier = 10f;
+            float dirModifier = 2f;
             State<NavLayerSensor> findPath = new(
                 (s) => {
-                    Debug.Log("find path");
                     s.UpdatePath();
                 }
             );
             State<NavLayerSensor> escape = new(
                 (s) => {
-                    //Debug.Log("moving");
                     s.ApplyForce(dirModifier * s.GetDir());
                 }
             );
 
-            Input<NavLayerSensor> finishSetup = new((s) => { return s.HasPath(); });
+            Input<NavLayerSensor> hasPath = new((s) => { return s.HasPath(); });
 
             return new StateMachine<NavLayerSensor>(
                 new IState<NavLayerSensor>[] { findPath, escape },
-                new IInput<NavLayerSensor>[] { finishSetup },
+                new IInput<NavLayerSensor>[] { hasPath },
                 new Dictionary<int, (int, int)[]>() {
                     { 0, new (int, int)[] { (0, 1) } },
                 }

@@ -1,6 +1,7 @@
 ﻿using Assets.Agent.Sensors;
 using Assets.Environment;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace Assets.CASMTransmission {
@@ -45,23 +46,39 @@ namespace Assets.CASMTransmission {
             return dir;
         }
 
-        public Queue<Vector2> GetPath(int z, int y, int x) {
+        public Queue<Vector2> GetPath(int z, float y, float x) {
             Debug.Log("Getting path");
             float minDist = float.MaxValue;
-            Vector2Int pos = new Vector2Int(x, y);
+            Vector2 pos = new Vector2(x, y);
             Vector2Int[] nodeCoords = layerTicker.GetLayer(z).navGraph.nodeCoords;
 
-            int curNode = 0;
+            int curNode = -1;
             for (int i = 0; i < nodeCoords.Length; i++) {
-                float curDist = Mathf.Abs(pos.sqrMagnitude - nodeCoords[i].sqrMagnitude);
-                if (minDist > curDist) {
-                    curNode = i;
-                    minDist = curDist;
+                Vector3 dir = nodeCoords[i] - pos;
+                float curDist = dir.magnitude;
+                if (minDist < curDist) continue;
+
+                RaycastHit2D[] hits = Physics2D.RaycastAll(pos, dir, curDist);
+                bool hasLineOfSight = true;
+
+                for (int j = 0; j < hits.Length; j++) { 
+                    if (hits[j].collider.enabled && hits[j].collider.CompareTag("layer")) {
+                        hasLineOfSight = false;
+                    }
                 }
+                if (!hasLineOfSight) continue;
+
+                curNode = i;
+                minDist = curDist;                
+            }
+
+            Queue<Vector2> path = new Queue<Vector2>();
+            if (curNode == -1) {
+                Debug.LogError("No node in sight");
+                return path;
             }
 
             int[] nodePath = layerTicker.GetLayer(z).navGraph.paths[curNode];
-            Queue<Vector2> path = new Queue<Vector2>();
             if (nodePath.Length == 0) return path;
 
             for (int i = nodePath.Length - 1; i >= 0; i--) {

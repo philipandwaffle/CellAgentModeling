@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Random = UnityEngine.Random;
 
 namespace Assets.Agent.StateMachine {
-    public class StateMachine<T> : IStateMachine<T> where T : Sensor {
+    public class StateMachine<T> : IStateMachine<T> where T : BaseSensor {
         private IState<T>[] states;
         private IInput<T>[] inputs;
         // Key being the source state
