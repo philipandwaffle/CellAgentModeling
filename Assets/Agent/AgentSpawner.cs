@@ -222,14 +222,23 @@ namespace Assets.Agent {
                     s.ApplyForce(dirModifier * s.GetDir());
                 }
             );
+            State<NavLayerSensor> takeSteps = new(
+                (s) => {
+                    s.MoveLayer(-1);
+                }    
+            );
 
             Input<NavLayerSensor> hasPath = new((s) => { return s.HasPath(); });
+            Input<NavLayerSensor> onSteps = new((s) => { return s.ReadValue() == -2; });
+            Input<NavLayerSensor> offSteps = new((s) => { return s.ReadValue() != -2; });
 
             return new StateMachine<NavLayerSensor>(
-                new IState<NavLayerSensor>[] { findPath, escape },
-                new IInput<NavLayerSensor>[] { hasPath },
+                new IState<NavLayerSensor>[] { findPath, takeSteps, escape },
+                new IInput<NavLayerSensor>[] { hasPath, onSteps, offSteps },
                 new Dictionary<int, (int, int)[]>() {
-                    { 0, new (int, int)[] { (0, 1) } },
+                    { 0, new (int, int)[] { (0, 2), (1, 1) } },
+                    { 1, new (int, int)[] { (2, 2) } },
+                    { 2, new (int, int)[] { (1, 1) } },
                 }
             );
         }
