@@ -90,7 +90,7 @@ namespace Assets.Environment {
             }
 
             // Debug to display nav graph nodes and connections
-            /*if (layers[z].navGraph is not null) {
+            if (layers[z].navGraph is not null) {
                 Vector2Int[] nodeCoords = layers[z].navGraph.nodeCoords;
                 for (int i = 0; i < nodeCoords.Length; i++) {
                     GameObject instance = Instantiate(dis);
@@ -101,7 +101,7 @@ namespace Assets.Environment {
                     instance.transform.position = new Vector3(
                         transform.localScale.x * nodeCoords[i].x,
                         transform.localScale.y * nodeCoords[i].y,
-                        z * -CASMEditor.layerSep);
+                        (z + 0.01f) * -CASMEditor.layerSep);
 
                     SpriteRenderer sr = instance.AddComponent<SpriteRenderer>();
                     sr.sprite = displaySprite;
@@ -117,14 +117,14 @@ namespace Assets.Environment {
                         instance.transform.position = new Vector3(
                             transform.localScale.x * ec.x,
                             transform.localScale.y * ec.y,
-                            z * -CASMEditor.layerSep);
+                            (z+0.01f) * -CASMEditor.layerSep);
 
                         SpriteRenderer sr = instance.AddComponent<SpriteRenderer>();
                         sr.sprite = displaySprite;
                         sr.color = Color.yellow;
                     }
                 }
-            }*/
+            }
 
             Destroy(dis);
         }
