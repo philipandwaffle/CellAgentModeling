@@ -1,7 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using Unity.VisualScripting;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 namespace Assets.Agent.Sensors {
@@ -9,57 +6,29 @@ namespace Assets.Agent.Sensors {
     /// A sensor is the body of an agent, it represents the agent's presence in relation to other agents.
     /// It can also be can be extended through inheritence.
     /// </summary>
-    public class Sensor : MonoBehaviour {
-        public int curState { get; set; }
-        public int id;
-        protected static int nextId = 0;
+    public class Sensor : BaseSensor {
         // Every sensor in the scene
         public static Sensor[] peers;
 
-        
-        private Rigidbody2D rb;
         // The collider trigger belonging to this sensor used to handle the contact list
-        protected CircleCollider2D con;
-        // The collider belonging to this sensor used for collision
-        protected CircleCollider2D col;
-        private float conR, colR;
+        protected CircleCollider2D contactCol;
+
         // A list of peers who are in range of this sensor
         public List<Collider2D> contacts = new List<Collider2D>();
 
         // Use this for initialization
         void Awake() {
+            // Contact collider
             GameObject sensorColGo = new GameObject("contactCol");
             sensorColGo.transform.position = transform.position;
             sensorColGo.transform.parent = transform;
-            con = sensorColGo.AddComponent<CircleCollider2D>();
-            con.tag = "contactCol";
-            con.isTrigger = true;
-
-            GameObject colliderGO = new GameObject("col");
-            colliderGO.transform.position = transform.position;
-            colliderGO.transform.parent = transform;
-            col = colliderGO.AddComponent<CircleCollider2D>();
-
-            rb = gameObject.AddComponent<Rigidbody2D>();
-            rb.isKinematic = false;
-            rb.gravityScale = 0f;
-            rb.drag = 1;
-            
-
-            id = nextId;
-            nextId++;
-        }
-
-        private void Start() {
-            col.radius = colR;
-            con.radius = conR;
+            contactCol = sensorColGo.AddComponent<CircleCollider2D>();
+            contactCol.tag = "contactCol";
+            contactCol.isTrigger = true;
         }
 
         public virtual void SetConRadius(float radius) {
-            conR = radius;
-        }
-        public virtual void SetColRadius(float radius) {
-            colR = radius;
+            contactCol.radius = radius;
         }
 
         /// <summary>
@@ -108,16 +77,12 @@ namespace Assets.Agent.Sensors {
             return index;
         }
 
-        public void ApplyForce(Vector2 force) {
-            rb.AddForce(force);
+        protected void OnTriggerEnter2D(Collider2D collision) {
+            if (collision.CompareTag("contactCol") && !contacts.Contains(collision)) {
+                contacts.Add(collision);
+            }
         }
-
-        protected void OnTriggerEnter2D(Collider2D collision) {            
-            if (collision.CompareTag("contactCol") && !contacts.Contains(collision)) { 
-                contacts.Add(collision); 
-            }            
-        }
-        protected void OnTriggerExit2D(Collider2D collision) {      
+        protected void OnTriggerExit2D(Collider2D collision) {
             contacts.Remove(collision);
         }
     }

@@ -1,11 +1,8 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
-using Newtonsoft.Json;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Collections.Generic;
-using System.Linq;
-using Unity.VisualScripting;
 
 namespace Assets.Environment {
     [JsonObject(MemberSerialization.OptIn)]
@@ -17,13 +14,13 @@ namespace Assets.Environment {
         public NavGraph navGraph;
 
         public int w { get; private set; }
-        public int h {get; private set;}
+        public int h { get; private set; }
 
         private Color Display(float val) {
             if (val == -1) return Color.black;
             else if (val == -2) return Color.green;
 
-            return Color.HSVToRGB((1-val /4f) - 0.75f, 0.7f, 0.5f);
+            return Color.HSVToRGB((1 - val / 4f) - 0.75f, 0.7f, 0.5f);
         }
 
         private float Constrain(float val) {
@@ -61,12 +58,6 @@ namespace Assets.Environment {
             this.data = data;
         }
 
-        public Layer(int w, int h) {
-            this.w = w;
-            this.h = h;
-            data = new float[h, w];
-        }
-
         public void SetBorder(float val) {
             for (int y = 0; y < h; y++) {
                 for (int x = 0; x < w; x++) {
@@ -77,16 +68,18 @@ namespace Assets.Environment {
             }
         }
 
-        public static Layer LoadLayer(string layerPath, string navPath) {
-            using (StreamReader lr = new StreamReader(layerPath))
-            using (StreamReader nr = new StreamReader(navPath)) {
-                string layerJson = lr.ReadToEnd();
-                string navJson = nr.ReadToEnd();
-                Layer l = JsonConvert.DeserializeObject<Layer>(layerJson);
-                l.navGraph = JsonConvert.DeserializeObject<NavGraph>(navJson);
-                return l;
+        public Queue<Vector2> GetSpawnLocations() {
+            List<Vector2> spawns = new List<Vector2>();
+
+            for (int y = 0; y < h; y++) {
+                for (int x = 0; x < w; x++) {
+                    if (data[y, x] >= 0) spawns.Add(new Vector2(x, y));
+                }
             }
-        }        
+            spawns.Shuffle();
+
+            return new Queue<Vector2>(spawns);
+        }
 
         public Color GetDisplayData(int y, int x) {
             return Display(data[y, x]);
@@ -173,8 +166,6 @@ namespace Assets.Environment {
             cs.SetInt("pw", w + 2);
             cs.SetInt("ph", h + 2);
 
-            //cs.SetInt("bleedIndex", 0);
-
             cs.Dispatch(0, padLayerData.Length / 64, 1, 1);
 
             // Get the new layer data
@@ -198,20 +189,41 @@ namespace Assets.Environment {
             return bleed;
         }
 
-        public void Save(string path, Formatting format = Formatting.None) {
-            string json = JsonConvert.SerializeObject(this, format);            
-            using (StreamWriter sr = new StreamWriter(path, false)) { 
-                sr.WriteLine(json);
-            }
+        public void UpdateNavGraph() {
+            navGraph.UpdateAdjMatrix(ref data);
+            navGraph.UpdatePaths();
         }
 
-        public Layer DeepClone() {
-            using (var ms = new MemoryStream()) {
-                var formatter = new BinaryFormatter();
-                formatter.Serialize(ms, this);
-                ms.Position = 0;
+        public static Layer LoadLayer(string layerPath, string navPath) {
+            try {
+                using (StreamReader lr = new StreamReader(layerPath))
+                using (StreamReader nr = new StreamReader(navPath)) {
+                    string layerJson = lr.ReadToEnd();
+                    string navJson = nr.ReadToEnd();
+                    Layer l = JsonConvert.DeserializeObject<Layer>(layerJson);
+                    l.navGraph = JsonConvert.DeserializeObject<NavGraph>(navJson);
+                    l.navGraph.UpdateAdjMatrix(ref l.data);
+                    return l;
+                }
+            } catch (Exception ex) {
+                // TODO: better error handling 
+                Debug.LogError("Error loading file(s) " + ex.ToString());
+                return null;
+            }
+        }
+        public void Save(string layerPath, string navPath, Formatting format = Formatting.None) {
+            string layerJson = JsonConvert.SerializeObject(this, format);
+            string navJson = JsonConvert.SerializeObject(navGraph, format);
 
-                return (Layer)formatter.Deserialize(ms);
+            try {
+                using (StreamWriter lw = new StreamWriter(layerPath))
+                using (StreamWriter nw = new StreamWriter(navPath)) {
+                    lw.WriteLine(layerJson);
+                    nw.WriteLine(navJson);
+                }
+            } catch (Exception ex) {
+                // TODO: better error handling 
+                Debug.LogError("Error saving file(s) " + ex.ToString());
             }
         }
     }

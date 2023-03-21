@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Random = UnityEngine.Random;
 
 namespace Assets.Agent.StateMachine {
-    public class StateMachine<T> : IStateMachine<T> where T : Sensor {
+    public class StateMachine<T> : IStateMachine<T> where T : BaseSensor {
         private IState<T>[] states;
         private IInput<T>[] inputs;
         // Key being the source state
@@ -27,6 +27,11 @@ namespace Assets.Agent.StateMachine {
 
         public void AdvanceSensor(T sensor) {
             // The transitions possible for the current state
+            if (!transitions.ContainsKey(sensor.curState)) {
+                states[sensor.curState].Act(sensor);
+                return;
+            }
+
             (int, int)[] possibleTrans = transitions[sensor.curState];
 
             List<int> finalStates = new List<int>();
@@ -55,7 +60,7 @@ namespace Assets.Agent.StateMachine {
             if (count != 0) {
                 sensor.curState = finalStates[Random.Range(0, count - 1)];
             }
-            
+
             // Preform the action of the state
             states[sensor.curState].Act(sensor);
         }

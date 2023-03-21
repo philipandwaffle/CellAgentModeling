@@ -2,8 +2,7 @@ using Assets.UI;
 using TMPro;
 using UnityEngine;
 
-public class ToggleText : MonoBehaviour
-{
+public class ToggleText : MonoBehaviour {
     [SerializeField] private MonoBehaviour target;
     [SerializeField] private TMP_Text text;
     [SerializeField] private string trueString;

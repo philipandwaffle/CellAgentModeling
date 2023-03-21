@@ -1,5 +1,8 @@
 ﻿using Assets.Agent.Sensors;
 using Assets.Agent.StateMachine;
+using Ookii.Dialogs;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Assets.Agent {
@@ -7,46 +10,50 @@ namespace Assets.Agent {
     /// Advances each agent every tick
     /// </summary>
     public class AgentTicker : MonoBehaviour {
-        private Sensor[][] sensors;
-        private IStateMachine[] stateMachines;
-        [SerializeField] private bool isPaused = true;
+        private BaseSensor[] sensors;
+        private IStateMachine sm;
 
-        public void SetAgents(Sensor[][] sensors, IStateMachine[] stateMachines) {
-            this.sensors = sensors;
-            this.stateMachines = stateMachines;
-        }
-        public void TogglePaused() {
-            isPaused = !isPaused;
-        }
+        private AgentSpawner agentSpawner;
+        private Queue<Vector2>[] spawnLocations;
 
-        private void Update() {
-            // If the sim isn't paused and there are sensors set
-            if (!isPaused && sensors != null) {
-                AdvanceSensors();
-            }
+        public void SetSpawnLocations(Queue<Vector2>[] spawnLocations) {
+            this.spawnLocations = spawnLocations;
+            agentSpawner.InitAgents(ref sm, ref sensors, spawnLocations);
+        }
+        
+        void Awake() {
+            agentSpawner = GetComponent<AgentSpawner>();
         }
 
-        private void AdvanceSensors() {
-            for (int i = 0; i < sensors.Length; i++) {
-                // Cast the state machine to the correct type
-                switch (stateMachines[i]) {
-                    case IStateMachine<MultiLayerSensor> sm:
-                        for (int j = 0; j < sensors[i].Length; j++) {
-                            sm.AdvanceSensor((MultiLayerSensor)sensors[i][j]);
-                        }
-                        break;
-                    case IStateMachine<LayerSensor> sm:
-                        for (int j = 0; j < sensors[i].Length; j++) {
-                            sm.AdvanceSensor((LayerSensor)sensors[i][j]);
-                        }
-                    break;
-                    case IStateMachine<Sensor> sm:
-                        for (int j = 0; j < sensors[i].Length; j++) {
-                            sm.AdvanceSensor(sensors[i][j]);
-                        }
-                    break;
+        public void AdvanceSensors() {
+            // Cast the state machine to the correct type
+            switch (sm) {
+                case IStateMachine<NavLayerSensor> sm:
+                for (int i = 0; i < sensors.Length; i++) {
+                    sm.AdvanceSensor((NavLayerSensor)sensors[i]);
                 }
+                break;
+                case IStateMachine<MultiLayerSensor> sm:
+                for (int i = 0; i < sensors.Length; i++) {
+                    sm.AdvanceSensor((MultiLayerSensor)sensors[i]);
+                }
+                break;
+                case IStateMachine<LayerSensor> sm:
+                for (int i = 0; i < sensors.Length; i++) {
+                    sm.AdvanceSensor((LayerSensor)sensors[i]);
+                }
+                break;
+                case IStateMachine<Sensor> sm:
+                for (int i = 0; i < sensors.Length; i++) {
+                    sm.AdvanceSensor((Sensor)sensors[i]);
+                }
+                break;
+                default:
+                Debug.LogError("Advance call not implemented for SM of type :" + sm.GetType().Name);
+                break;
+
             }
+            
         }
     }
 }
