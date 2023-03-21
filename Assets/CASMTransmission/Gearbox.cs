@@ -47,7 +47,6 @@ namespace Assets.CASMTransmission {
         }
 
         public Queue<Vector2> GetPath(int z, float y, float x) {
-            Debug.Log("Getting path");
             float minDist = float.MaxValue;
             Vector2 pos = new Vector2(x, y);
             Vector2Int[] nodeCoords = layerTicker.GetLayer(z).navGraph.nodeCoords;

@@ -28,7 +28,6 @@ namespace Assets.Environment {
         }
 
         public void UpdatePaths() {
-            Debug.Log("Updating Path");
             paths = new int[numVerts][];
 
             float[] shortestDist = new float[numVerts];
@@ -90,7 +89,6 @@ namespace Assets.Environment {
         }
 
         public void UpdateAdjMatrix(ref float[,] layer) {
-            Debug.Log("Updating adj matrix");
             adjMatrix = new float[numVerts, numVerts];
             for (int src = 0; src < numVerts; src++) {
                 for (int dest = 0; dest < numVerts; dest++) {
@@ -104,6 +102,10 @@ namespace Assets.Environment {
                     for (int i = 0; i < edgeCoords[src, dest].Length; i++) {
                         Vector2Int pos = edgeCoords[src, dest][i];
                         float val = layer[pos.y, pos.x];
+
+                        if (val == -2) {
+                            val = 0;
+                        }
 
                         // Set to infinite when too hot
                         adjMatrix[src, dest] += 1 + (val * 15f);

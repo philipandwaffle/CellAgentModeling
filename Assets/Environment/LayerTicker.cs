@@ -90,7 +90,7 @@ namespace Assets.Environment {
             }
 
             // Debug to display nav graph nodes and connections
-            if (layers[z].navGraph is not null) {
+            /*if (layers[z].navGraph is not null) {
                 Vector2Int[] nodeCoords = layers[z].navGraph.nodeCoords;
                 for (int i = 0; i < nodeCoords.Length; i++) {
                     GameObject instance = Instantiate(dis);
@@ -124,7 +124,7 @@ namespace Assets.Environment {
                         sr.color = Color.yellow;
                     }
                 }
-            }
+            }*/
 
             Destroy(dis);
         }
