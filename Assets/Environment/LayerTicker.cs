@@ -72,7 +72,7 @@ namespace Assets.Environment {
                     instance.name = z + " " + x + "," + y;
 
                     BoxCollider2D bc = instance.AddComponent<BoxCollider2D>();
-                    bc.enabled = layers[z][y, x] == -1;
+                    bc.enabled = layers[z].data[y, x] == -1;
 
                     SpriteRenderer sr = instance.AddComponent<SpriteRenderer>();
                     sr.sprite = displaySprite;

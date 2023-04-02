@@ -30,7 +30,7 @@ namespace Assets.Environment {
             return Mathf.Clamp(val, 0f, 1f);
         }
 
-        public float this[int y, int x] {
+        /*public float this[int y, int x] {
             get {
                 x = x <= 0 ? (x % w) + (w) : x % w;
                 x = x == w ? 0 : x;
@@ -49,7 +49,7 @@ namespace Assets.Environment {
 
                 data[y, x] = value;
             }
-        }
+        }*/
 
         [JsonConstructor]
         public Layer(float[,] data) {
@@ -62,7 +62,7 @@ namespace Assets.Environment {
             for (int y = 0; y < h; y++) {
                 for (int x = 0; x < w; x++) {
                     if (y == 0 || y == w - 1 || x == 0 || x == h - 1) {
-                        this[y, x] = val;
+                        data[y, x] = val;
                     }
                 }
             }

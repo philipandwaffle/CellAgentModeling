@@ -15,13 +15,13 @@ namespace Assets.CASMTransmission {
         }
 
         public void WriteValue(float val, int z, int y, int x) {
-            layerTicker.GetLayer(z)[y, x] = val;
+            layerTicker.GetLayer(z).data[y, x] = val;
         }
 
         public float ReadVaue(int z, int y, int x) {
             x = (int)(x / layerTicker.transform.localScale.x);
             y = (int)(y / layerTicker.transform.localScale.y);
-            return layerTicker.GetLayer(z)[y, x];
+            return layerTicker.GetLayer(z).data[y, x];
         }
 
         public Vector2 DirectionOfLowest(int z, int y, int x) {
@@ -31,7 +31,7 @@ namespace Assets.CASMTransmission {
             float lowestValid = float.PositiveInfinity;
             for (int i = -1; i < 2; i++) {
                 for (int j = -1; j < 2; j++) {
-                    float val = layerTicker.GetLayer(z)[y + j, x + i];
+                    float val = layerTicker.GetLayer(z).data[y + j, x + i];
                     if (val != -1 && val < lowestValid) {
                         lowestValid = val;
                         dir = new Vector2(i, j);
