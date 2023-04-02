@@ -34,10 +34,10 @@ namespace Assets.Environment {
 
             // Load default layers
             //string path = Application.dataPath + "/Layers/default/";
-            string path = Application.dataPath + "/Layers/single_grenfell_53x53/";
+            string path = Application.dataPath + "/Layers/dyn_pathfinding/";
             Debug.Log(path);
-            DirectoryInfo d = new DirectoryInfo(path);
-            LoadLayers(d.GetFiles("*.layer"), d.GetFiles("*.nav"));
+            DirectoryInfo environment = new DirectoryInfo(path);
+            LoadLayers(environment);
         }
 
         int navGraphUpdates = 0;
@@ -111,20 +111,44 @@ namespace Assets.Environment {
             return paused;
         }
 
-        public void LoadLayers(FileInfo[] layerFiles, FileInfo[] navFiles) {
-            int numNavs = navFiles.Length;
-            int numLayers = layerFiles.Length;
+        public void LoadLayers(DirectoryInfo environment) {
+            List<FileInfo> navFiles = new List<FileInfo>();
+            List<FileInfo> layerFiles = new List<FileInfo>();
 
-            if (numNavs != numLayers) {
-                Debug.LogError(".layer and .nav file count mismatch");
-                return;
-            } else if (numLayers == 0) Debug.LogError("No layers were loaded");
+            DirectoryInfo[] dirs = environment.GetDirectories();
+            numLayers = dirs.Length;
 
-            this.numLayers = numLayers;
+            bool validEnv = true;
+
+            // Load environment config
+            FileInfo[] envCfg = environment.GetFiles("*.envcfg");
+            if (envCfg.Length != 1) {
+                validEnv = false;
+                Debug.LogError("There should be only 1 .envcfg file in " + environment.FullName);
+            } else {
+                EnvironmentConfig.GetInstance(envCfg[0].FullName);
+            }
+
+            // Load layer and nav files
+            for (int i = 0; i < numLayers; i++) {
+                FileInfo[] nav = dirs[i].GetFiles("*.nav");
+                FileInfo[] layer = dirs[i].GetFiles("*.layer");
+
+                if(nav.Length != 1 || layer.Length != 1) {
+                    validEnv = false;
+                    Debug.LogError("There should be only 1 .layer and .nav file in " + dirs[i].FullName);
+                    continue;
+                }
+
+                navFiles.Add(nav[0]);
+                layerFiles.Add(layer[0]);
+            }
+            if (!validEnv) return;
+
             layerTicker.SetNumLayers(numLayers);
 
+            // Calc valid spawn locations for each layer
             Queue<Vector2>[] spawnsLocations = new Queue<Vector2>[numLayers];
-
             for (int i = 0; i < numLayers; i++) {
                 string layerPath = layerFiles[i].FullName;
                 string navPath = navFiles[i].FullName;
@@ -136,9 +160,20 @@ namespace Assets.Environment {
             agentTicker.SetSpawnLocations(spawnsLocations);
         }
         public void SaveLayers(string path) {
+            // Clearing old dir if exists
+            if (Directory.Exists(path)) Directory.Delete(path, true);
+            Directory.CreateDirectory(path);
+
+            // Save environment config
+            EnvironmentConfig.SaveInstance(path + "/settings.envcfg");
+
+            // Save each .layer and .nav files
             for (int i = 0; i < layerTicker.GetNumLayers(); i++) {
-                string layerPath = path + "/" + i + ".layer";
-                string navpath = path + "/" + i + ".layer";
+                string curPath = path + "/" + i;
+
+                Directory.CreateDirectory(curPath);
+                string layerPath = curPath + "/" + i + ".layer";
+                string navpath = curPath + "/" + i + ".nav";
                 Debug.Log("saving layer: " + i + " -> " + layerPath);
                 Debug.Log("saving nav: " + i + " -> " + navpath);
 

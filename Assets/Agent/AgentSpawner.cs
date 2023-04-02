@@ -211,19 +211,26 @@ namespace Assets.Agent {
         }
 
         private IStateMachine<NavLayerSensor> GetNavAgent() {
-            float dirModifier = 2f;
-            State<NavLayerSensor> findPath = new(
+            float dirModifier = 0.5f;
+            State<NavLayerSensor> initPath = new(
+                (s) => {
+                    s.InitPath();
+                }
+            );
+            State<NavLayerSensor> updatePath = new(
                 (s) => {
                     s.UpdatePath();
                 }
             );
             State<NavLayerSensor> escape = new(
                 (s) => {
+                    s.moveCounter++;
                     s.ApplyForce(dirModifier * s.GetDir());
                 }
             );
             State<NavLayerSensor> takeSteps = new(
                 (s) => {
+                    s.moveCounter++;
                     s.MoveLayer(-1);
                 }    
             );
@@ -231,15 +238,25 @@ namespace Assets.Agent {
             Input<NavLayerSensor> hasPath = new((s) => { return s.HasPath(); });
             Input<NavLayerSensor> onSteps = new((s) => { return s.ReadValue() == -2; });
             Input<NavLayerSensor> offSteps = new((s) => { return s.ReadValue() != -2; });
+            Input<NavLayerSensor> needsUpdate = new((s) => {
+                if (s.moveCounter % 300 == 0) {
+                    s.moveCounter = 1;
+                    return true;
+                } else {
+                    return false;
+                }
+            });
 
             return new StateMachine<NavLayerSensor>(
-                new IState<NavLayerSensor>[] { findPath, escape, takeSteps },
-                new IInput<NavLayerSensor>[] { hasPath, onSteps, offSteps },
+                new IState<NavLayerSensor>[] { initPath, updatePath, escape, takeSteps },
+                new IInput<NavLayerSensor>[] { hasPath, needsUpdate, onSteps, offSteps },
                 new Dictionary<int, (int, int)[]>() {
-                    { 0, new (int, int)[] { (0, 1), (1, 2) } },
-                    { 1, new (int, int)[] { (1, 2) } },
-                    { 2, new (int, int)[] { (1, 2), (2, 0) } },
-                }
+                    { 0, new (int, int)[] { (0, 2)} },
+                    { 1, new (int, int)[] { (0, 2) } },
+                    { 2, new (int, int)[] { (1, 1), (2, 3) } },
+                    { 3, new (int, int)[] { (2, 3), (3, 0) } },
+                },
+                true
             );
         }
     }

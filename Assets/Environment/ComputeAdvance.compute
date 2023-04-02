@@ -13,7 +13,7 @@ struct Bleed
 RWStructuredBuffer<Bleed> layerBleed;
 float bleedModifier;
 groupshared uint bleedindex = 0;
-
+float convolveModifier;
 uint w;
 uint h;
 
@@ -57,7 +57,7 @@ void CSMain (uint3 id : SV_DispatchThreadID)
             }
         }
     }
-    newVal /= divisor * 0.99;
+    newVal /= divisor * convolveModifier;
     newVal = clamp(newVal, 0.0, 1.0);
 
     // if the current cell bleeds

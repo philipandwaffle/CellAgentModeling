@@ -29,11 +29,9 @@ namespace Assets.UI {
                 Debug.Log("Folder panel exited, cancelling load");
                 return;
             }
-            DirectoryInfo d = new DirectoryInfo(path[0]);
-            FileInfo[] layerFiles = d.GetFiles("*.layer");
-            FileInfo[] navFiles = d.GetFiles("*.nav");
+            DirectoryInfo environment = new DirectoryInfo(path[0]);
 
-            casm.LoadLayers(layerFiles, navFiles);
+            casm.LoadLayers(environment);
         }
         public void SaveLayers() {
             string[] path = StandaloneFileBrowser.OpenFolderPanel(

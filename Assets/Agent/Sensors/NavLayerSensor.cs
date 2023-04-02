@@ -12,29 +12,49 @@ namespace Assets.Agent.Sensors {
 
         public static Gearbox gb;
         protected float offSet = 0.5f;
-        private Vector2 targetNode;
+        private Vector2 targetPos;
         private Queue<Vector2> path;
-        public void UpdatePath() {
+
+        // agents have different counter so that a lag spike doesn't occur 
+        private static int nextMoveCounter = 1;
+        public int moveCounter = nextMoveCounter++;
+
+        public void InitPath() {
             path = gb.GetPath(z, transform.position.y, transform.position.x);
             if (path.Count == 0 ) return; 
-            targetNode = path.Dequeue();
+            targetPos = path.Dequeue();
         }
+
+        public void UpdatePath() {
+            Queue<Vector2> newPath = gb.GetPath(z, transform.position.y, transform.position.x);
+            if (newPath is null || newPath.Count - 1 == path.Count) return;
+
+            Vector2 oldTargetPos = targetPos;
+            while (newPath.Contains(oldTargetPos)) {
+                targetPos = newPath.Dequeue();
+            }
+
+            path = newPath;
+        }
+
         public Vector2 GetDir() {
-            Vector2 dir = targetNode - (Vector2)transform.position;
+
+            Vector2 dir = targetPos - (Vector2)transform.position;
             float mag = dir.magnitude;
             if (path.Count > 0) {
-                if (mag < 1f) {
-                    targetNode = path.Dequeue();
+                if (mag < 0.5f) {
+                    targetPos = path.Dequeue();
                 }
             }
 
             dir.Normalize();
             dir *= math.clamp(mag, 1, 10);
+
             return dir;
         }
 
         public bool HasPath() {
-            return path is not null && path.Count > 0;
+            return path is not null;
         }
 
         public virtual float ReadValue() {
@@ -50,6 +70,7 @@ namespace Assets.Agent.Sensors {
             newPos.z = (z * -CASMEditor.layerSep) - 1;
 
             transform.position = newPos;
+            path = null;
         }
     }
 }

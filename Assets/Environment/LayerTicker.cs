@@ -22,13 +22,6 @@ namespace Assets.Environment {
                 for (int curLayer = 0; curLayer < displayContainers.Length; curLayer++) {
                     // Destroy container 
                     Destroy(displayContainers[curLayer]);
-
-                    /*for (int y = 0; y < display[curLayer].GetLength(0); y++) {
-                        for (int x = 0; x < display[curLayer].GetLength(1); x++) {
-                            // Destroy cell
-                            Destroy(display[curLayer][y, x]);
-                        }
-                    }*/
                 }
             }
 

@@ -26,12 +26,16 @@ namespace Assets.Agent.StateMachine {
         }
 
         public void AdvanceSensor(T sensor) {
-            // The transitions possible for the current state
+            // Check that the current state is escapable
             if (!transitions.ContainsKey(sensor.curState)) {
                 states[sensor.curState].Act(sensor);
                 return;
             }
 
+            // Preform the action of the current state
+            states[sensor.curState].Act(sensor);
+
+            // The transitions possible for the current state
             (int, int)[] possibleTrans = transitions[sensor.curState];
 
             List<int> finalStates = new List<int>();
@@ -60,9 +64,6 @@ namespace Assets.Agent.StateMachine {
             if (count != 0) {
                 sensor.curState = finalStates[Random.Range(0, count - 1)];
             }
-
-            // Preform the action of the state
-            states[sensor.curState].Act(sensor);
         }
     }
 }
