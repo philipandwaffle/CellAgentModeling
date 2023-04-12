@@ -15,7 +15,7 @@ namespace Assets.Agent.Sensors {
         private Vector2 targetPos;
         private Queue<Vector2> path;
 
-        // agents have different counter so that a lag spike doesn't occur 
+        // agents start on a different counter so that a lag spike doesn't occur 
         private static int nextMoveCounter = 1;
         public int moveCounter = nextMoveCounter++;
 
@@ -67,7 +67,8 @@ namespace Assets.Agent.Sensors {
             collisionCol.gameObject.layer = 6 + z;
 
             Vector3 newPos = transform.position;
-            newPos.z = (z * -CASMEditor.layerSep) - 1;
+            // Small number used to prevent z fighting with layer
+            newPos.z = (z * -CASMEditor.layerSep) - 0.001f;
 
             transform.position = newPos;
             path = null;

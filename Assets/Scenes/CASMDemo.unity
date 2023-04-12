@@ -1380,7 +1380,7 @@ GameObject:
   - component: {fileID: 1680201995}
   - component: {fileID: 1680201992}
   m_Layer: 3
-  m_Name: StateMachines
+  m_Name: Agents
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1426,7 +1426,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   agentSprite: {fileID: -2413806693520163455, guid: 2e89c149b567951459606f0243d761a6, type: 3}
-  agentCounts: 3200000032000000140000001400000014000000140000001400000014000000140000001400000014000000140000001400000014000000140000001400000014000000140000001400000014000000
+  agentCounts: 3200000014000000140000001400000014000000140000001400000014000000140000001400000014000000140000001400000014000000140000001400000014000000140000001400000014000000
   spawnPoint: 25
   spawnRange: 20
 --- !u!1 &1833341747
@@ -2068,7 +2068,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 20734c6b4f4b019428a7946b18115dcc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  layerTicker: {fileID: 1874806019}
+  environmentController: {fileID: 1874806019}
 --- !u!114 &2107755193
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2081,8 +2081,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5d83cccc6a069af44a65ad9d81029b1b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  layerTicker: {fileID: 1874806019}
-  agentTicker: {fileID: 1680201992}
+  environmentController: {fileID: 1874806019}
+  agentController: {fileID: 1680201992}
   brushRadius: 0
   paused: 1
   text: {fileID: 447385751}

@@ -8,8 +8,8 @@ using UnityEngine;
 
 namespace Assets.Environment {
     public class CASMEditor : MonoBehaviour, IToggleable {
-        [SerializeField] private LayerTicker layerTicker;
-        [SerializeField] private AgentTicker agentTicker;
+        [SerializeField] private EnvironmentController environmentController;
+        [SerializeField] private AgentController agentController;
 
         private float brushVal = -1;
         private int z = 0;
@@ -18,18 +18,20 @@ namespace Assets.Environment {
         [SerializeField] private bool paused = true;
         [SerializeField] private TMP_Text text;
 
-        public static int layerSep = 50;
+        public static int layerSep = 2;
 
         private void Awake() {
-            if (layerTicker is null) Debug.LogError("A layer ticker hasn't been assigned to the editor");
+            if (environmentController is null) Debug.LogError("An environment controller hasn't been assigned to the editor");
+            if (agentController is null) Debug.LogError("An agent controller hasn't been assigned to the editor");
         }
 
         // Use this for initialization
         void Start() {
             // Camera setup
             Vector3 newPos = Camera.main.transform.position;
-            newPos.z = z * Camera.main.transform.localScale.z * -layerSep;
-            newPos.z -= layerSep / 2;
+            /*newPos.z = z * Camera.main.transform.localScale.z * -layerSep;
+            newPos.z -= layerSep / 2;*/
+            newPos.z = -layerSep / 2f;
             Camera.main.transform.position = newPos;
 
             // Load default layers
@@ -45,15 +47,15 @@ namespace Assets.Environment {
         void Update() {
             if (!paused) {
                 if (navGraphUpdates % 10 == 0) {
-                    layerTicker.UpdateNavGraphs();
+                    environmentController.UpdateNavGraphs();
                     navGraphUpdates = 0;
                 }
                 navGraphUpdates++;
 
-                layerTicker.AdvanceLayersGPU();
-                agentTicker.AdvanceSensors();
+                environmentController.AdvanceLayersGPU();
+                agentController.AdvanceSensors();
 
-                layerTicker.UpdateDisplay(z);
+                environmentController.UpdateDisplay(z);
             }
 
             if (Input.GetMouseButton(0)) {
@@ -63,7 +65,7 @@ namespace Assets.Environment {
                 float xScale = transform.localScale.x;
                 float yScale = transform.localScale.y;
                 // Guard clause if mouse is outside of bounds
-                if (mPos.x < 0 || mPos.x > layerTicker.GetLayer(z).w * xScale || mPos.y < 0 || mPos.y > layerTicker.GetLayer(z).h * yScale) {
+                if (mPos.x < 0 || mPos.x > environmentController.GetLayer(z).w * xScale || mPos.y < 0 || mPos.y > environmentController.GetLayer(z).h * yScale) {
                     return;
                 }
 
@@ -71,7 +73,7 @@ namespace Assets.Environment {
                 Vector2Int curEditPos = new Vector2Int((int)(mPos.x / xScale), (int)(mPos.y / yScale));
                 for (int x = -brushRadius; x < brushRadius + 1; x++) {
                     for (int y = -brushRadius; y < brushRadius + 1; y++) {
-                        layerTicker.SetValue(z, curEditPos.y + y, curEditPos.x + x, brushVal);
+                        environmentController.SetValue(z, curEditPos.y + y, curEditPos.x + x, brushVal);
                     }
                 }
             }
@@ -96,7 +98,7 @@ namespace Assets.Environment {
             Camera.main.transform.position = newPos;
             int mask = 1 << (6 + z);
             Camera.main.cullingMask = mask;
-            layerTicker.UpdateDisplay(z);
+            environmentController.UpdateDisplay(z);
         }
 
 
@@ -145,7 +147,7 @@ namespace Assets.Environment {
             }
             if (!validEnv) return;
 
-            layerTicker.SetNumLayers(numLayers);
+            environmentController.SetNumLayers(numLayers);
 
             // Calc valid spawn locations for each layer
             Queue<Vector2>[] spawnsLocations = new Queue<Vector2>[numLayers];
@@ -155,9 +157,9 @@ namespace Assets.Environment {
                 Debug.Log("loading layer: " + i + " <- " + layerPath);
                 Debug.Log("loading nav: " + i + " <- " + navPath);
 
-                spawnsLocations[i] = layerTicker.LoadLayer(i, layerPath, navPath);
+                spawnsLocations[i] = environmentController.LoadLayer(i, layerPath, navPath);
             }
-            agentTicker.SetSpawnLocations(spawnsLocations);
+            agentController.SetSpawnLocations(spawnsLocations);
         }
         public void SaveLayers(string path) {
             // Clearing old dir if exists
@@ -168,7 +170,7 @@ namespace Assets.Environment {
             EnvironmentConfig.SaveInstance(path + "/settings.envcfg");
 
             // Save each .layer and .nav files
-            for (int i = 0; i < layerTicker.GetNumLayers(); i++) {
+            for (int i = 0; i < environmentController.GetNumLayers(); i++) {
                 string curPath = path + "/" + i;
 
                 Directory.CreateDirectory(curPath);
@@ -177,7 +179,7 @@ namespace Assets.Environment {
                 Debug.Log("saving layer: " + i + " -> " + layerPath);
                 Debug.Log("saving nav: " + i + " -> " + navpath);
 
-                layerTicker.GetLayer(i).Save(layerPath, navpath);
+                environmentController.GetLayer(i).Save(layerPath, navpath);
             }
         }
     }

@@ -7,18 +7,18 @@ using UnityEngine;
 namespace Assets.Environment {
     [JsonObject(MemberSerialization.OptIn)]
     [Serializable]
-    public class NavGraph {
+    public class DijkstraNavGraph : INavGraph {
         public Vector2Int[,][] edgeCoords;
         public Vector2Int[] nodeCoords;
         //public Dictionary<Vector2Int, int>
         private int numVerts;
-        public float[,] adjMatrix;
+        private float[,] adjMatrix;
 
-        public int[][] paths { get; private set; }
+        private int[][] paths;
         int srcNode;
 
         [JsonConstructor]
-        public NavGraph(int[,] graph) {
+        public DijkstraNavGraph(int[,] graph) {
             CC cc = new CC(graph);
             edgeCoords = cc.CalcEdgeCoords();
             nodeCoords = cc.nodeCoords;
@@ -88,7 +88,7 @@ namespace Assets.Environment {
             path.Add(dest);
         }
 
-        public void UpdateAdjMatrix(ref float[,] layer) {
+        public void UpdateEdges(ref float[,] layer) {
             adjMatrix = new float[numVerts, numVerts];
             for (int src = 0; src < numVerts; src++) {
                 for (int dest = 0; dest < numVerts; dest++) {
@@ -112,6 +112,14 @@ namespace Assets.Environment {
                     }
                 }
             }
+        }
+
+        public Vector2Int[] GetNodeCoords() {
+            return nodeCoords;
+        }
+
+        public int[][] Getpaths() {
+            return paths;
         }
     }
 

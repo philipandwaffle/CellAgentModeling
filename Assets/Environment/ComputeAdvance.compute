@@ -10,9 +10,10 @@ struct Bleed
    uint y;
    float val;
 };
-RWStructuredBuffer<Bleed> layerBleed;
-float bleedModifier;
 groupshared uint bleedindex = 0;
+RWStructuredBuffer<Bleed> layerBleed;
+
+float bleedModifier;
 float convolveModifier;
 uint w;
 uint h;
@@ -20,7 +21,7 @@ uint h;
 uint pw;
 uint ph;
 
-[numthreads(64,1,1)]
+[numthreads(9,1,1)]
 void CSMain (uint3 id : SV_DispatchThreadID)
 {
     // the 'normal index' is the index in the unpadded flattened layer

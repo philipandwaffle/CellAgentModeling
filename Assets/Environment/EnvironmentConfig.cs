@@ -48,7 +48,7 @@ namespace Assets.Environment {
 
             try {
                 string cfgJson = JsonConvert.SerializeObject(instance, format);
-                using (StreamWriter writer = new StreamWriter(path)) {
+                using (StreamWriter writer = new StreamWriter(path+"")) {
                     writer.WriteLine(cfgJson);
                 }
             } catch (Exception ex) {

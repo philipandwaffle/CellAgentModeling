@@ -1,6 +1,7 @@
 ﻿using Assets.Agent.Sensors;
 using Assets.Agent.StateMachine;
 using Ookii.Dialogs;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -9,16 +10,18 @@ namespace Assets.Agent {
     /// <summary>
     /// Advances each agent every tick
     /// </summary>
-    public class AgentTicker : MonoBehaviour {
+    public class AgentController : MonoBehaviour {
         private BaseSensor[] sensors;
         private IStateMachine sm;
 
         private AgentSpawner agentSpawner;
-        private Queue<Vector2>[] spawnLocations;
 
         public void SetSpawnLocations(Queue<Vector2>[] spawnLocations) {
-            this.spawnLocations = spawnLocations;
             agentSpawner.InitAgents(ref sm, ref sensors, spawnLocations);
+        }
+        public void SetSpawnLocations(Vector2[] spawnLocations) {
+            throw new NotImplementedException();
+            //agentSpawner.InitAgents(ref sm, ref sensors, spawnLocations);
         }
         
         void Awake() {
@@ -26,6 +29,7 @@ namespace Assets.Agent {
         }
 
         public void AdvanceSensors() {
+            if (sensors is null) return;
             // Cast the state machine to the correct type
             switch (sm) {
                 case IStateMachine<NavLayerSensor> sm:

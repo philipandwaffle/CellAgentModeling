@@ -11,7 +11,7 @@ namespace Assets.Environment {
         [JsonProperty]
         public float[,] data;
 
-        public NavGraph navGraph;
+        public INavGraph navGraph;
 
         public int w { get; private set; }
         public int h { get; private set; }
@@ -167,7 +167,7 @@ namespace Assets.Environment {
             cs.SetInt("pw", w + 2);
             cs.SetInt("ph", h + 2);
 
-            cs.Dispatch(0, padLayerData.Length / 64, 1, 1);
+            cs.Dispatch(0, padLayerData.Length / 9, 1, 1);
 
             // Get the new layer data
             newLayerBuf.GetData(newLayerData);
@@ -191,7 +191,7 @@ namespace Assets.Environment {
         }
 
         public void UpdateNavGraph() {
-            navGraph.UpdateAdjMatrix(ref data);
+            navGraph.UpdateEdges(ref data);
             navGraph.UpdatePaths();
         }
 
@@ -202,8 +202,8 @@ namespace Assets.Environment {
                     string layerJson = lr.ReadToEnd();
                     string navJson = nr.ReadToEnd();
                     Layer l = JsonConvert.DeserializeObject<Layer>(layerJson);
-                    l.navGraph = JsonConvert.DeserializeObject<NavGraph>(navJson);
-                    l.navGraph.UpdateAdjMatrix(ref l.data);
+                    l.navGraph = JsonConvert.DeserializeObject<DijkstraNavGraph>(navJson);
+                    l.navGraph.UpdateEdges(ref l.data);
                     return l;
                 }
             } catch (Exception ex) {

@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Assets.Environment {
-    public class LayerTicker : MonoBehaviour {
+    public class EnvironmentController : MonoBehaviour {
         [SerializeField] private Sprite displaySprite;
 
         private Layer[] layers;

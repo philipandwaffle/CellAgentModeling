@@ -40,7 +40,7 @@ namespace Assets.Agent {
 
             this.spawnLocations = spawnLocations;
 
-            sm = GetNavAgent();
+            sm = GetNavSM();
 
             baseSensors = SpawnAgents(agentCounts);
 
@@ -210,7 +210,7 @@ namespace Assets.Agent {
             );
         }
 
-        private IStateMachine<NavLayerSensor> GetNavAgent() {
+        private IStateMachine<NavLayerSensor> GetNavSM() {
             float dirModifier = 0.5f;
             State<NavLayerSensor> initPath = new(
                 (s) => {

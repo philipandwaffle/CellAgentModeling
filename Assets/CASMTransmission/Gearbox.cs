@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Assets.CASMTransmission {
     public class Gearbox : MonoBehaviour {
-        [SerializeField] private LayerTicker layerTicker;
+        [SerializeField] private EnvironmentController environmentController;
 
         // Put a refrence of me into the agents
         private void Awake() {
@@ -15,23 +15,23 @@ namespace Assets.CASMTransmission {
         }
 
         public void WriteValue(float val, int z, int y, int x) {
-            layerTicker.GetLayer(z).data[y, x] = val;
+            environmentController.GetLayer(z).data[y, x] = val;
         }
 
         public float ReadVaue(int z, int y, int x) {
-            x = (int)(x / layerTicker.transform.localScale.x);
-            y = (int)(y / layerTicker.transform.localScale.y);
-            return layerTicker.GetLayer(z).data[y, x];
+            x = (int)(x / environmentController.transform.localScale.x);
+            y = (int)(y / environmentController.transform.localScale.y);
+            return environmentController.GetLayer(z).data[y, x];
         }
 
         public Vector2 DirectionOfLowest(int z, int y, int x) {
-            x = (int)(x / layerTicker.transform.localScale.x);
-            y = (int)(y / layerTicker.transform.localScale.y);
+            x = (int)(x / environmentController.transform.localScale.x);
+            y = (int)(y / environmentController.transform.localScale.y);
             Vector2 dir = Vector2.zero;
             float lowestValid = float.PositiveInfinity;
             for (int i = -1; i < 2; i++) {
                 for (int j = -1; j < 2; j++) {
-                    float val = layerTicker.GetLayer(z).data[y + j, x + i];
+                    float val = environmentController.GetLayer(z).data[y + j, x + i];
                     if (val != -1 && val < lowestValid) {
                         lowestValid = val;
                         dir = new Vector2(i, j);
@@ -49,7 +49,7 @@ namespace Assets.CASMTransmission {
         public Queue<Vector2> GetPath(int z, float y, float x) {
             float minDist = float.MaxValue;
             Vector2 pos = new Vector2(x, y);
-            Vector2Int[] nodeCoords = layerTicker.GetLayer(z).navGraph.nodeCoords;
+            Vector2Int[] nodeCoords = environmentController.GetLayer(z).navGraph.GetNodeCoords();
 
             int curNode = -1;
             for (int i = 0; i < nodeCoords.Length; i++) {
@@ -77,11 +77,11 @@ namespace Assets.CASMTransmission {
                 return path;
             }
 
-            int[] nodePath = layerTicker.GetLayer(z).navGraph.paths[curNode];
+            int[] nodePath = environmentController.GetLayer(z).navGraph.Getpaths()[curNode];
             if (nodePath.Length == 0) return path;
 
             for (int i = nodePath.Length - 1; i >= 0; i--) {
-                path.Enqueue(layerTicker.GetLayer(z).navGraph.nodeCoords[nodePath[i]]);
+                path.Enqueue(environmentController.GetLayer(z).navGraph.GetNodeCoords()[nodePath[i]]);
             }
             return path;
         }
