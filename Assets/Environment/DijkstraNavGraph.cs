@@ -8,14 +8,14 @@ namespace Assets.Environment {
     [JsonObject(MemberSerialization.OptIn)]
     [Serializable]
     public class DijkstraNavGraph : INavGraph {
-        public Vector2Int[,][] edgeCoords;
-        public Vector2Int[] nodeCoords;
-        //public Dictionary<Vector2Int, int>
+        private Vector2Int[,][] edgeCoords;
+        private Vector2Int[] nodeCoords;
+        
         private int numVerts;
         private float[,] adjMatrix;
 
         private int[][] paths;
-        int srcNode;
+        private int srcNode;
 
         [JsonConstructor]
         public DijkstraNavGraph(int[,] graph) {
