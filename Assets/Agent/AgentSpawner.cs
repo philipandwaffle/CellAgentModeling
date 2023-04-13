@@ -12,16 +12,10 @@ namespace Assets.Agent {
         [SerializeField] private int[] agentCounts;
         [SerializeField] float spawnPoint = 50f;
         [SerializeField] float spawnRange = 10f;
-        private Queue<Vector2>[] spawnLocations;
         private int numLayerSpawns;
 
         public void InitAgents(ref IStateMachine sm, ref BaseSensor[] baseSensors, Queue<Vector2>[] spawnLocations) {
-            BaseSensor.nextId = 0;
-            if (baseSensors is not null) {
-                for (int i = 0; i < baseSensors.Length; i++) {
-                    Destroy(baseSensors[i].gameObject);
-                }
-            }
+            DestroySensors(ref baseSensors);
 
             Debug.Log("Spawning agents");
             bool spawnable = true;
@@ -38,16 +32,31 @@ namespace Assets.Agent {
                 return; 
             }
 
-            this.spawnLocations = spawnLocations;
-
             sm = GetNavSM();
 
-            baseSensors = SpawnAgents(agentCounts);
+            baseSensors = SpawnAgents(agentCounts, spawnLocations);
+        }
+        public void InitAgents(ref IStateMachine sm, ref BaseSensor[] baseSensors, SerializableVector3[] spawnLocations) {
+            DestroySensors(ref baseSensors);
 
-            //Sensor.peers = (Sensor[])baseSensors.SelectMany(bs => bs).Where(bs => bs is Sensor).ToArray();
+            Debug.Log("Spawning agents");
+            sm = GetNavSM();
+
+            baseSensors = SpawnAgents(spawnLocations);
         }
 
-        private BaseSensor[] SpawnAgents(int[] agentCounts) {
+        // Destroy currently loaded sensors
+        private void DestroySensors(ref BaseSensor[] baseSensors) {
+            BaseSensor.nextId = 0;
+            if (baseSensors is not null) {
+                for (int i = 0; i < baseSensors.Length; i++) {
+                    Destroy(baseSensors[i].gameObject);
+                }
+            }
+        }
+
+        // Spawn agents from randomised queue
+        private BaseSensor[] SpawnAgents(int[] agentCounts, Queue<Vector2>[] spawnLocations) {
             List<BaseSensor> baseSensors = new List<BaseSensor>();
 
             GameObject prefab = new GameObject();
@@ -63,6 +72,28 @@ namespace Assets.Agent {
 
                     baseSensors.Add(sen);
                 }
+            }
+            Destroy(prefab);
+
+            return baseSensors.ToArray();
+        }
+        // Spawn agents from saved locations
+        private BaseSensor[] SpawnAgents(SerializableVector3[] spawnLocations) {
+            List<BaseSensor> baseSensors = new List<BaseSensor>();
+
+            GameObject prefab = new GameObject();
+            SpriteRenderer sr = prefab.AddComponent<SpriteRenderer>();
+            sr.sprite = agentSprite;
+
+            for (int i = 0; i < spawnLocations.Length; i++) {
+                SerializableVector3 pos = spawnLocations[i];
+
+                GameObject instance = Instantiate(prefab, new Vector2(pos.x, pos.y), Quaternion.identity, transform);
+                NavLayerSensor sen = instance.AddComponent<NavLayerSensor>();   
+                instance.transform.localScale = new Vector3(.5f, .5f, .5f);
+                sen.MoveLayer(pos.z);
+
+                baseSensors.Add(sen);
             }
             Destroy(prefab);
 

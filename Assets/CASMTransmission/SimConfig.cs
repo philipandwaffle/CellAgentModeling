@@ -3,10 +3,10 @@ using System;
 using System.IO;
 using UnityEngine;
 
-namespace Assets.CASMTransmission {
+namespace Assets.Environment {
     [JsonObject(MemberSerialization.OptIn)]
     [Serializable]
-    public class EnvironmentConfig {
+    public class SimConfig {
         [JsonProperty]
         public int bleedCount;
         [JsonProperty]
@@ -16,18 +16,18 @@ namespace Assets.CASMTransmission {
         [JsonProperty]
         public bool loadAgentCoords;
 
-        private static EnvironmentConfig instance;
-        public static EnvironmentConfig GetInstance(string path = "") {
-            if (instance is null) {
+        private static SimConfig instance;
+        public static SimConfig GetInstance(string path = "") {
+            if (instance is null || path != "") {
                 if (path == "") {
                     Debug.LogError("Attempted to access environment config without it being loaded");
                     return null;
                 }
 
                 try {
-                    using (StreamReader reader = new StreamReader(path)) {
-                        string cfgJson = reader.ReadToEnd();
-                        instance = JsonConvert.DeserializeObject<EnvironmentConfig>(cfgJson);
+                    using (StreamReader sr = new StreamReader(path)) {
+                        string cfgJson = sr.ReadToEnd();
+                        instance = JsonConvert.DeserializeObject<SimConfig>(cfgJson);
                     }
                 } catch (Exception ex) {
                     // TODO: better error handling 
@@ -44,8 +44,8 @@ namespace Assets.CASMTransmission {
 
             try {
                 string cfgJson = JsonConvert.SerializeObject(instance, format);
-                using (StreamWriter writer = new StreamWriter(path+"")) {
-                    writer.WriteLine(cfgJson);
+                using (StreamWriter sw = new StreamWriter(path)) {
+                    sw.WriteLine(cfgJson);
                 }
             } catch (Exception ex) {
                 // TODO: better error handling 
@@ -54,11 +54,11 @@ namespace Assets.CASMTransmission {
         }
 
         [JsonConstructor]
-        private EnvironmentConfig(int bleedCount, float bleedModifier, float convolveModifier) {
+        private SimConfig(int bleedCount, float bleedModifier, float convolveModifier, bool loadAgentCoords) {
             this.bleedCount = bleedCount;
             this.bleedModifier = bleedModifier;
             this.convolveModifier = convolveModifier;
-
+            this.loadAgentCoords = loadAgentCoords;
         }
     }
 }

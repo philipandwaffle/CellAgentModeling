@@ -11,7 +11,7 @@ namespace Assets.Environment {
         [JsonProperty]
         public float[,] data;
 
-        public INavGraph navGraph;
+        public NavGraph navGraph;
 
         public int w { get; private set; }
         public int h { get; private set; }
@@ -29,27 +29,6 @@ namespace Assets.Environment {
 
             return Mathf.Clamp(val, 0f, 1f);
         }
-
-        /*public float this[int y, int x] {
-            get {
-                x = x <= 0 ? (x % w) + (w) : x % w;
-                x = x == w ? 0 : x;
-
-                y = y <= 0 ? (y % h) + (h) : y % h;
-                y = y == h ? 0 : y;
-
-                return data[y, x];
-            }
-            set {
-                x = x <= 0 ? (x % w) + (w) : x % w;
-                x = x == w ? 0 : x;
-
-                y = y <= 0 ? (y % h) + (h) : y % h;
-                y = y == h ? 0 : y;
-
-                data[y, x] = value;
-            }
-        }*/
 
         [JsonConstructor]
         public Layer(float[,] data) {
@@ -145,7 +124,7 @@ namespace Assets.Environment {
             ComputeBuffer newLayerBuf = new ComputeBuffer(layerLen, sizeof(float));
 
             // Allocate a buffer for the advanced layer
-            int bleedCount = EnvironmentConfig.GetInstance().bleedCount;
+            int bleedCount = SimConfig.GetInstance().bleedCount;
             Bleed[] bleed = Bleed.GetDataHolder(bleedCount);
             ComputeBuffer bleedBuf = new ComputeBuffer(bleedCount, sizeof(float) + (2 * sizeof(int)));
             bleedBuf.SetData(bleed);
@@ -156,8 +135,8 @@ namespace Assets.Environment {
             cs.SetBuffer(0, "layerBleed", bleedBuf);
 
             // Set modifiers
-            cs.SetFloat("bleedModifier", EnvironmentConfig.GetInstance().bleedModifier);
-            cs.SetFloat("convolveModifier", EnvironmentConfig.GetInstance().convolveModifier);
+            cs.SetFloat("bleedModifier", SimConfig.GetInstance().bleedModifier);
+            cs.SetFloat("convolveModifier", SimConfig.GetInstance().convolveModifier);
 
             // Set the width and height
             cs.SetInt("w", w);
@@ -202,7 +181,7 @@ namespace Assets.Environment {
                     string layerJson = lr.ReadToEnd();
                     string navJson = nr.ReadToEnd();
                     Layer l = JsonConvert.DeserializeObject<Layer>(layerJson);
-                    l.navGraph = JsonConvert.DeserializeObject<DijkstraNavGraph>(navJson);
+                    l.navGraph = JsonConvert.DeserializeObject<NavGraph>(navJson);
                     l.navGraph.UpdateEdges(ref l.data);
                     return l;
                 }

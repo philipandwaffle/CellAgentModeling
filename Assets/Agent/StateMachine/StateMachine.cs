@@ -24,8 +24,7 @@ namespace Assets.Agent.StateMachine {
                 AdvanceSensor(sensors[i]);
             }
         }
-
-        public void AdvanceSensor(T sensor) {
+        private void AdvanceSensor(T sensor) {
             // Check that the current state is escapable
             if (!transitions.ContainsKey(sensor.curState)) {
                 states[sensor.curState].Act(sensor);

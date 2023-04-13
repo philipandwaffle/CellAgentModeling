@@ -1,5 +1,6 @@
 ﻿using Assets.Agent.Sensors;
 using Assets.Agent.StateMachine;
+using Newtonsoft.Json.Linq;
 using Ookii.Dialogs;
 using System;
 using System.Collections;
@@ -19,45 +20,52 @@ namespace Assets.Agent {
         public void SetSpawnLocations(Queue<Vector2>[] spawnLocations) {
             agentSpawner.InitAgents(ref sm, ref sensors, spawnLocations);
         }
-        public void SetSpawnLocations(Vector2[] spawnLocations) {
-            throw new NotImplementedException();
-            //agentSpawner.InitAgents(ref sm, ref sensors, spawnLocations);
+        public void SetSpawnLocations(SerializableVector3[] spawnLocations) {            
+            agentSpawner.InitAgents(ref sm, ref sensors, spawnLocations);
         }
-        
+
+        public void SaveAgentPos(string filePath) {
+            AgentCoords ac = new AgentCoords(sensors);
+            ac.Save(filePath);
+        }
+
         void Awake() {
             agentSpawner = GetComponent<AgentSpawner>();
         }
 
         public void AdvanceSensors() {
             if (sensors is null) return;
+
             // Cast the state machine to the correct type
             switch (sm) {
                 case IStateMachine<NavLayerSensor> sm:
-                for (int i = 0; i < sensors.Length; i++) {
-                    sm.AdvanceSensor((NavLayerSensor)sensors[i]);
-                }
-                break;
+                    sm.AdvanceSensors(Array.ConvertAll(sensors, sen => (NavLayerSensor)sen));
+                    break;
                 case IStateMachine<MultiLayerSensor> sm:
-                for (int i = 0; i < sensors.Length; i++) {
-                    sm.AdvanceSensor((MultiLayerSensor)sensors[i]);
-                }
-                break;
+                    sm.AdvanceSensors(Array.ConvertAll(sensors, sen => (MultiLayerSensor)sen));
+                    break;
                 case IStateMachine<LayerSensor> sm:
-                for (int i = 0; i < sensors.Length; i++) {
-                    sm.AdvanceSensor((LayerSensor)sensors[i]);
-                }
-                break;
+                    sm.AdvanceSensors(Array.ConvertAll(sensors, sen => (LayerSensor)sen));
+                    break;
                 case IStateMachine<Sensor> sm:
-                for (int i = 0; i < sensors.Length; i++) {
-                    sm.AdvanceSensor((Sensor)sensors[i]);
-                }
-                break;
+                    sm.AdvanceSensors(Array.ConvertAll(sensors, sen => (Sensor)sen));
+                    break;
                 default:
-                Debug.LogError("Advance call not implemented for SM of type :" + sm.GetType().Name);
-                break;
+                    Debug.LogError("Advance call not implemented for SM of type :" + sm.GetType().Name);
+                    break;
 
+            }            
+        }
+
+        public void Pause() {
+            foreach (BaseSensor sen in sensors) {
+                sen.Pause();
             }
-            
+        }
+        public void Play() {
+            foreach (BaseSensor sen in sensors) {
+                sen.Play();
+            }
         }
     }
 }

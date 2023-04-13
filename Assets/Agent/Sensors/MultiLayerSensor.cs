@@ -9,7 +9,6 @@ namespace Assets.Agent.Sensors {
     /// </summary>
     public class MultiLayerSensor : LayerSensor {
         public static int maxZ { set; private get; }
-        private int z = 0;
 
         public override void WriteValue(float val) {
             gb.WriteValue(val, z, (int)(transform.position.y + offSet), (int)(transform.position.x + offSet));

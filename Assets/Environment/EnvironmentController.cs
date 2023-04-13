@@ -38,10 +38,6 @@ namespace Assets.Environment {
         public int GetNumLayers() {
             return layers.Length;
         }
-        public void SetLayer(int z, Layer layer) {
-            layers[z] = layer;
-            SetDisplay(z);
-        }
 
         private void SetDisplay(int z) {
             // Create new display container

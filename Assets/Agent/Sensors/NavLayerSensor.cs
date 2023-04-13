@@ -8,7 +8,6 @@ using UnityEngine;
 namespace Assets.Agent.Sensors {
     public class NavLayerSensor : BaseSensor {
         public static int maxZ { set; private get; }
-        private int z = 0;
 
         public static Gearbox gb;
         protected float offSet = 0.5f;

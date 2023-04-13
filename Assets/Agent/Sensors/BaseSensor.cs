@@ -8,12 +8,14 @@ using UnityEngine;
 
 namespace Assets.Agent.Sensors {
     public abstract class BaseSensor : MonoBehaviour {
-        public int curState { get; set; }
+        public int curState;
         public int id;
+        public int z;
         public static int nextId = 0;
 
-        protected Rigidbody2D rb;
+        protected Vector2 pausedVelocity;
 
+        protected Rigidbody2D rb;
         // The collider belonging to this sensor used for collision
         protected CircleCollider2D collisionCol;
 
@@ -41,6 +43,19 @@ namespace Assets.Agent.Sensors {
 
         public void ApplyForce(Vector2 force) {
             rb.AddForce(force);
+        }
+        private void Update() {
+            if (rb != null) {
+                Debug.Log(rb.velocity);
+            }
+        }
+
+        public void Pause() {
+            pausedVelocity = rb.velocity;
+            rb.velocity = Vector2.zero;
+        }
+        public void Play() {
+            rb.velocity = pausedVelocity;
         }
     }
 }

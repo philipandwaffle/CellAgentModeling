@@ -19,7 +19,7 @@ namespace Assets.UI {
         public void TogglePaused() {
             casm.TogglePaused();
         }
-        public void LoadLayers() {
+        public void LoadSim() {
             string[] path = StandaloneFileBrowser.OpenFolderPanel(
                 "Load Layer",
                 Application.dataPath + "/Layers",
@@ -31,9 +31,9 @@ namespace Assets.UI {
             }
             DirectoryInfo environment = new DirectoryInfo(path[0]);
 
-            casm.LoadLayers(environment);
+            casm.LoadSim(environment);
         }
-        public void SaveLayers() {
+        public void SaveSim() {
             string[] path = StandaloneFileBrowser.OpenFolderPanel(
                 "Load Layer",
                 Application.dataPath + "/Layers",
@@ -44,7 +44,7 @@ namespace Assets.UI {
                 return;
             }
 
-            casm.SaveLayers(path[0]);
+            casm.SaveSim(path[0]);
         }
     }
 }

@@ -39,7 +39,7 @@ namespace Assets.Environment {
             string path = Application.dataPath + "/Layers/dyn_pathfinding/";
             Debug.Log(path);
             DirectoryInfo environment = new DirectoryInfo(path);
-            LoadLayers(environment);
+            LoadSim(environment);
         }
 
         int navGraphUpdates = 0;
@@ -108,12 +108,17 @@ namespace Assets.Environment {
 
         public void TogglePaused() {
             paused = !paused;
+            if (paused) {
+                agentController.Pause();
+            }else {
+                agentController.Play();
+            }
         }
         public bool GetState() {
             return paused;
         }
 
-        public void LoadLayers(DirectoryInfo environment) {
+        public void LoadSim(DirectoryInfo environment) {
             List<FileInfo> navFiles = new List<FileInfo>();
             List<FileInfo> layerFiles = new List<FileInfo>();
 
@@ -123,12 +128,12 @@ namespace Assets.Environment {
             bool validEnv = true;
 
             // Load environment config
-            FileInfo[] envCfg = environment.GetFiles("*.envcfg");
+            FileInfo[] envCfg = environment.GetFiles("*.cfg");
             if (envCfg.Length != 1) {
                 validEnv = false;
-                Debug.LogError("There should be only 1 .envcfg file in " + environment.FullName);
+                Debug.LogError("There should be only 1 .cfg file in " + environment.FullName);
             } else {
-                EnvironmentConfig.GetInstance(envCfg[0].FullName);
+                SimConfig.GetInstance(envCfg[0].FullName);
             }
 
             // Load layer and nav files
@@ -145,29 +150,58 @@ namespace Assets.Environment {
                 navFiles.Add(nav[0]);
                 layerFiles.Add(layer[0]);
             }
-            if (!validEnv) return;
-
             environmentController.SetNumLayers(numLayers);
 
-            // Calc valid spawn locations for each layer
-            Queue<Vector2>[] spawnsLocations = new Queue<Vector2>[numLayers];
-            for (int i = 0; i < numLayers; i++) {
-                string layerPath = layerFiles[i].FullName;
-                string navPath = navFiles[i].FullName;
-                Debug.Log("loading layer: " + i + " <- " + layerPath);
-                Debug.Log("loading nav: " + i + " <- " + navPath);
+            // Check if agent positions are to be loaded from a file or not
+            if (SimConfig.GetInstance().loadAgentCoords) {
+                // Load agent positions
+                FileInfo[] agentCoords = environment.GetFiles("*.coords");
+                if (envCfg.Length != 1) {
+                    validEnv = false;
+                    Debug.LogError("There should be only 1 .coords file in " + environment.FullName);
+                } else {
+                    AgentCoords ac = AgentCoords.Load(agentCoords[0].FullName);
 
-                spawnsLocations[i] = environmentController.LoadLayer(i, layerPath, navPath);
+                    for (int i = 0; i < numLayers; i++) {
+                        string layerPath = layerFiles[i].FullName;
+                        string navPath = navFiles[i].FullName;
+                        Debug.Log("loading layer: " + i + " <- " + layerPath);
+                        Debug.Log("loading nav: " + i + " <- " + navPath);
+
+                        environmentController.LoadLayer(i, layerPath, navPath);
+                    }
+                    agentController.SetSpawnLocations(ac.coords);
+                }
+
+            } else {
+                // Calc valid spawn locations for each layer
+                Queue<Vector2>[] spawnsLocations = new Queue<Vector2>[numLayers];
+                for (int i = 0; i < numLayers; i++) {
+                    string layerPath = layerFiles[i].FullName;
+                    string navPath = navFiles[i].FullName;
+                    Debug.Log("loading layer: " + i + " <- " + layerPath);
+                    Debug.Log("loading nav: " + i + " <- " + navPath);
+
+                    spawnsLocations[i] = environmentController.LoadLayer(i, layerPath, navPath);
+                }
+                agentController.SetSpawnLocations(spawnsLocations);
             }
-            agentController.SetSpawnLocations(spawnsLocations);
+
+            if (!validEnv) {
+                Debug.LogError("There are problems with loading the simultion, loaded as much as possible anyway but issues may occur");
+            }
         }
-        public void SaveLayers(string path) {
+
+        public void SaveSim(string path) {
             // Clearing old dir if exists
             if (Directory.Exists(path)) Directory.Delete(path, true);
             Directory.CreateDirectory(path);
 
             // Save environment config
-            EnvironmentConfig.SaveInstance(path + "/settings.envcfg");
+            SimConfig.SaveInstance(path + "/settings.cfg");
+
+            // Save agent coords
+            agentController.SaveAgentPos(path + "/agents.coords");
 
             // Save each .layer and .nav files
             for (int i = 0; i < environmentController.GetNumLayers(); i++) {
