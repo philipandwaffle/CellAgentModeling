@@ -44,11 +44,6 @@ namespace Assets.Agent.Sensors {
         public void ApplyForce(Vector2 force) {
             rb.AddForce(force);
         }
-        private void Update() {
-            if (rb != null) {
-                Debug.Log(rb.velocity);
-            }
-        }
 
         public void Pause() {
             pausedVelocity = rb.velocity;

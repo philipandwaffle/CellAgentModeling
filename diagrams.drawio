@@ -1,6 +1,6 @@
 <mxfile host="65bd71144e">
     <diagram id="ma74hijiuDZRGCtGPLLQ" name="Page-1">
-        <mxGraphModel dx="2017" dy="3578" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="0" fold="1" page="0" pageScale="1" pageWidth="827" pageHeight="1169" background="#ffffff" math="0" shadow="0">
+        <mxGraphModel dx="1324" dy="3073" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="0" fold="1" page="0" pageScale="1" pageWidth="827" pageHeight="1169" background="#ffffff" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -2474,6 +2474,104 @@
                 </mxCell>
                 <mxCell id="1257" value="agents.coords" style="verticalLabelPosition=bottom;html=1;verticalAlign=top;align=center;strokeColor=none;fillColor=#00BEF2;shape=mxgraph.azure.cloud_services_configuration_file;pointerEvents=1;fontColor=#000000;" vertex="1" parent="1">
                     <mxGeometry x="1762.5" y="-1210" width="47.5" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="1262" style="edgeStyle=none;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;fontColor=#000000;strokeColor=#000000;endArrow=block;endFill=0;" edge="1" parent="1" source="1279" target="1287">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="40" y="640" as="sourcePoint"/>
+                        <mxPoint x="40" y="610" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="1267" style="edgeStyle=none;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;strokeColor=#000000;fontColor=#000000;endArrow=block;endFill=0;" edge="1" parent="1" source="1287" target="1266">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="40" y="720" as="sourcePoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="1263" style="edgeStyle=none;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;fontColor=#000000;strokeColor=#000000;endArrow=block;endFill=0;" edge="1" parent="1" source="1302" target="1309">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="250" y="1048.0000000000005" as="sourcePoint"/>
+                        <mxPoint x="250" y="998.0000000000005" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="1266" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;i&gt;&amp;lt;&amp;lt;Interface&amp;gt;&amp;gt;&lt;/i&gt;&lt;b&gt;&lt;br&gt;&lt;/b&gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;IStateMachine&lt;/b&gt;&lt;/p&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=12;fontFamily=Helvetica;html=1;fillColor=none;fontColor=#000000;strokeColor=#000000;" vertex="1" parent="1">
+                    <mxGeometry x="-20" y="650" width="120" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="1279" value="StateMachine&lt;T&gt;&#10;where T : BaseSensor&#10;" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=none;fontColor=#000000;strokeColor=#000000;" vertex="1" parent="1">
+                    <mxGeometry x="-80" y="840" width="240" height="178" as="geometry"/>
+                </mxCell>
+                <mxCell id="1280" value="-states: IState&lt;T&gt;[]" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontColor=#000000;" vertex="1" parent="1279">
+                    <mxGeometry y="40" width="240" height="26" as="geometry"/>
+                </mxCell>
+                <mxCell id="1283" value="-inputs: IInputs&lt;T&gt;[]" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontColor=#000000;" vertex="1" parent="1279">
+                    <mxGeometry y="66" width="240" height="26" as="geometry"/>
+                </mxCell>
+                <mxCell id="1285" value="-deterministic: bool" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontColor=#000000;" vertex="1" parent="1279">
+                    <mxGeometry y="92" width="240" height="26" as="geometry"/>
+                </mxCell>
+                <mxCell id="1286" value="-transitions: Dictionary&lt;int, (int, int)[]&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontColor=#000000;" vertex="1" parent="1279">
+                    <mxGeometry y="118" width="240" height="26" as="geometry"/>
+                </mxCell>
+                <mxCell id="1281" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;fontColor=#000000;" vertex="1" parent="1279">
+                    <mxGeometry y="144" width="240" height="8" as="geometry"/>
+                </mxCell>
+                <mxCell id="1284" value="-AdvanceSensor(T sensor): void" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontColor=#000000;" vertex="1" parent="1279">
+                    <mxGeometry y="152" width="240" height="26" as="geometry"/>
+                </mxCell>
+                <mxCell id="1287" value="&lt;&lt;Interface&gt;&gt;&#10;IStateMachine&lt;T&gt; " style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=none;fontColor=#000000;strokeColor=#000000;" vertex="1" parent="1">
+                    <mxGeometry x="-80" y="730" width="240" height="66" as="geometry"/>
+                </mxCell>
+                <mxCell id="1288" value="+AdvanceSensors(T[] sensors): void" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontColor=#000000;" vertex="1" parent="1287">
+                    <mxGeometry y="40" width="240" height="26" as="geometry"/>
+                </mxCell>
+                <mxCell id="1302" value="Input&lt;T&gt;&#10;where T : BaseSensor" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=none;fontColor=#000000;strokeColor=#000000;" vertex="1" parent="1">
+                    <mxGeometry x="200" y="1060" width="160" height="66" as="geometry"/>
+                </mxCell>
+                <mxCell id="1303" value="-activation: Func&lt;T, bool&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontColor=#000000;" vertex="1" parent="1302">
+                    <mxGeometry y="40" width="160" height="26" as="geometry"/>
+                </mxCell>
+                <mxCell id="1309" value="&lt;&lt;Interface&gt;&gt;&#10;IInput&lt;T&gt;" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=none;fontColor=#000000;strokeColor=#000000;" vertex="1" parent="1">
+                    <mxGeometry x="200" y="958" width="160" height="66" as="geometry"/>
+                </mxCell>
+                <mxCell id="1310" value="+Activated(T sensor): bool" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontColor=#000000;" vertex="1" parent="1309">
+                    <mxGeometry y="40" width="160" height="26" as="geometry"/>
+                </mxCell>
+                <mxCell id="1313" style="edgeStyle=none;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;fontColor=#000000;strokeColor=#000000;endArrow=block;endFill=0;" edge="1" parent="1" source="1314" target="1318">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="630" y="982.0000000000005" as="sourcePoint"/>
+                        <mxPoint x="630" y="932.0000000000005" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="1314" value="State&lt;T&gt;&#10;where T : BaseSensor" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=none;fontColor=#000000;strokeColor=#000000;" vertex="1" parent="1">
+                    <mxGeometry x="400" y="1060" width="160" height="66" as="geometry"/>
+                </mxCell>
+                <mxCell id="1315" value="-act: Action&lt;T&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontColor=#000000;" vertex="1" parent="1314">
+                    <mxGeometry y="40" width="160" height="26" as="geometry"/>
+                </mxCell>
+                <mxCell id="1318" value="&lt;&lt;Interface&gt;&gt;&#10;IState&lt;T&gt;" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=none;fontColor=#000000;strokeColor=#000000;" vertex="1" parent="1">
+                    <mxGeometry x="400" y="958" width="160" height="66" as="geometry"/>
+                </mxCell>
+                <mxCell id="1319" value="+Act(T sensor): bool" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontColor=#000000;" vertex="1" parent="1318">
+                    <mxGeometry y="40" width="160" height="26" as="geometry"/>
+                </mxCell>
+                <mxCell id="1320" value="has a" style="edgeStyle=elbowEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;endArrow=open;endFill=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;startArrow=diamondThin;startFill=0;labelBackgroundColor=none;" edge="1" parent="1" source="1280" target="1318">
+                    <mxGeometry x="-0.8961" y="13" relative="1" as="geometry">
+                        <mxPoint x="550" y="840" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="480" y="930"/>
+                        </Array>
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="1321" value="has a" style="edgeStyle=elbowEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;endArrow=open;endFill=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;startArrow=diamondThin;startFill=0;labelBackgroundColor=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1" source="1283" target="1309">
+                    <mxGeometry x="-0.7297" y="10" relative="1" as="geometry">
+                        <mxPoint x="220" y="919" as="sourcePoint"/>
+                        <Array as="points">
+                            <mxPoint x="280" y="930"/>
+                        </Array>
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="1322" value="BaseSensor" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#FFFFFF;fontColor=#000000;strokeColor=#000000;" vertex="1" parent="1">
+                    <mxGeometry x="120" y="830" width="100" height="30" as="geometry"/>
                 </mxCell>
             </root>
         </mxGraphModel>

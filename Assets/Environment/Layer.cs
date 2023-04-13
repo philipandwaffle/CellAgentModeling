@@ -32,8 +32,8 @@ namespace Assets.Environment {
 
         [JsonConstructor]
         public Layer(float[,] data) {
-            w = data.GetLength(0);
-            h = data.GetLength(1);
+            h = data.GetLength(0);
+            w = data.GetLength(1);
             this.data = data;
         }
 
