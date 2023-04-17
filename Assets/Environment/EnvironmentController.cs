@@ -79,8 +79,8 @@ namespace Assets.Environment {
             }
 
             // Debug to display nav graph nodes and connections
-            /*if (layers[z].navGraph is not null) {
-                Vector2Int[] nodeCoords = layers[z].navGraph.nodeCoords;
+/*            if (layers[z].navGraph is not null) {
+                Vector2Int[] nodeCoords = layers[z].navGraph.GetNodeCoords();
                 for (int i = 0; i < nodeCoords.Length; i++) {
                     GameObject instance = Instantiate(dis);
                     instance.name = i.ToString();
@@ -96,7 +96,7 @@ namespace Assets.Environment {
                     sr.sprite = displaySprite;
                     sr.color = Color.blue;
                 }
-                foreach (Vector2Int[] edge in layers[z].navGraph.edgeCoords) {
+                foreach (Vector2Int[] edge in layers[z].navGraph.GetEdgeCoords()) {
                     if (edge is null) continue;
                     foreach (Vector2Int ec in edge) {
                         GameObject instance = Instantiate(dis);
@@ -106,7 +106,7 @@ namespace Assets.Environment {
                         instance.transform.position = new Vector3(
                             transform.localScale.x * ec.x,
                             transform.localScale.y * ec.y,
-                            (z+0.01f) * -CASMEditor.layerSep);
+                            (z + 0.01f) * -CASMEditor.layerSep);
 
                         SpriteRenderer sr = instance.AddComponent<SpriteRenderer>();
                         sr.sprite = displaySprite;

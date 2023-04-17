@@ -34,7 +34,7 @@ namespace Assets.Agent {
         }
 
         public void AdvanceSensors() {
-            if (sensors is null) return;
+            if (sensors is null || sm is null) return;
 
             // Cast the state machine to the correct type
             switch (sm) {

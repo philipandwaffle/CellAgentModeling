@@ -36,12 +36,23 @@ namespace Assets.Agent.Sensors {
             path = newPath;
         }
 
-        public Vector2 GetDir() {
+        public void UpdateToShorterPath() {
+            Queue<Vector2> newPath = gb.GetPath(z, transform.position.y, transform.position.x);
+            if (newPath is null || newPath.Count - 1 < path.Count) return;
+            targetPos  = newPath.Dequeue();
+            if (newPath.Count > 0) {
+                targetPos = newPath.Dequeue();
+            }
+
+            path = newPath;
+        }
+
+        public Vector2 GetDir(float nodeDist) {
 
             Vector2 dir = targetPos - (Vector2)transform.position;
             float mag = dir.magnitude;
             if (path.Count > 0) {
-                if (mag < 0.5f) {
+                if (mag < nodeDist) {
                     targetPos = path.Dequeue();
                 }
             }

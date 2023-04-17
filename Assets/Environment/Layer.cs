@@ -146,7 +146,7 @@ namespace Assets.Environment {
             cs.SetInt("pw", w + 2);
             cs.SetInt("ph", h + 2);
 
-            cs.Dispatch(0, padLayerData.Length / 9, 1, 1);
+            cs.Dispatch(0, padLayerData.Length / 25, 1, 1);
 
             // Get the new layer data
             newLayerBuf.GetData(newLayerData);

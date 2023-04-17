@@ -107,7 +107,7 @@ namespace Assets.Environment {
                         Vector2Int pos = edgeCoords[src, dest][i];
                         float val = layer[pos.y, pos.x];
 
-                        if (val == -2) {
+                        if (val < 0f) {
                             val = 0;
                         }
 
@@ -120,6 +120,10 @@ namespace Assets.Environment {
 
         public Vector2Int[] GetNodeCoords() {
             return nodeCoords;
+        }
+
+        public Vector2Int[,][] GetEdgeCoords() {
+            return edgeCoords;
         }
 
         public int[][] Getpaths() {

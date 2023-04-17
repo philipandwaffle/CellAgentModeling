@@ -21,7 +21,7 @@ uint h;
 uint pw;
 uint ph;
 
-[numthreads(9,1,1)]
+[numthreads(25,1,1)]
 void CSMain (uint3 id : SV_DispatchThreadID)
 {
     // the 'normal index' is the index in the unpadded flattened layer

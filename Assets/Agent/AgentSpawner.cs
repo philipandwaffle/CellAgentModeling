@@ -1,5 +1,7 @@
 ﻿using Assets.Agent.Sensors;
 using Assets.Agent.StateMachine;
+using Assets.Environment;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.Mathematics;
@@ -13,6 +15,14 @@ namespace Assets.Agent {
         [SerializeField] float spawnPoint = 50f;
         [SerializeField] float spawnRange = 10f;
         private int numLayerSpawns;
+
+        private Dictionary<string, Func<IStateMachine>> stateMachineDict = new Dictionary<string, Func<IStateMachine>>() {
+            { "None", () => { return null; } },
+            { "Test", () => { return GetTestSM(); } },
+            { "CrowdFlow", () => { return GetCrowdFlowSM(); } },
+            { "DynPathfinding", () => { return GetNavSM(); } },
+            { "Evacuation", () => { return GetEvacSM(); } }
+        };
 
         public void InitAgents(ref IStateMachine sm, ref BaseSensor[] baseSensors, Queue<Vector2>[] spawnLocations) {
             DestroySensors(ref baseSensors);
@@ -32,7 +42,7 @@ namespace Assets.Agent {
                 return; 
             }
 
-            sm = GetNavSM();
+            sm = LoadStateMachine();
 
             baseSensors = SpawnAgents(agentCounts, spawnLocations);
         }
@@ -40,9 +50,19 @@ namespace Assets.Agent {
             DestroySensors(ref baseSensors);
 
             Debug.Log("Spawning agents");
-            sm = GetNavSM();
+            sm = LoadStateMachine();
 
             baseSensors = SpawnAgents(spawnLocations);
+        }
+
+        private IStateMachine LoadStateMachine() {
+            string smKey = SimConfig.GetInstance().stateMachine;
+            if (smKey is not null && stateMachineDict.ContainsKey(smKey)) {
+                return stateMachineDict[smKey].Invoke();
+            } else {
+                Debug.LogError("Tried to load " + smKey + ", but it doesn't exist");
+                return null;
+            }
         }
 
         // Destroy currently loaded sensors
@@ -77,6 +97,7 @@ namespace Assets.Agent {
 
             return baseSensors.ToArray();
         }
+
         // Spawn agents from saved locations
         private BaseSensor[] SpawnAgents(SerializableVector3[] spawnLocations) {
             List<BaseSensor> baseSensors = new List<BaseSensor>();
@@ -89,8 +110,8 @@ namespace Assets.Agent {
                 SerializableVector3 pos = spawnLocations[i];
 
                 GameObject instance = Instantiate(prefab, new Vector2(pos.x, pos.y), Quaternion.identity, transform);
-                NavLayerSensor sen = instance.AddComponent<NavLayerSensor>();   
-                instance.transform.localScale = new Vector3(.5f, .5f, .5f);
+                NavLayerSensor sen = instance.AddComponent<NavLayerSensor>();
+                instance.transform.localScale = new Vector3(SimConfig.GetInstance().agentSize, SimConfig.GetInstance().agentSize, .5f);
                 sen.MoveLayer(pos.z);
 
                 baseSensors.Add(sen);
@@ -147,7 +168,8 @@ namespace Assets.Agent {
             return sensors;
         }
 
-        // Generates and gets the hot cold panic calm state machine
+        // Generates and gets the hot cold panic calm state machine 
+        // LEGACY CODE: kept in so you can see how other sensors and SMs could be implemented
         private IStateMachine<MultiLayerSensor> GetHCPC() {
             float dirModifier = 10f;
             MultiLayerSensor.maxZ = 5;
@@ -241,8 +263,52 @@ namespace Assets.Agent {
             );
         }
 
-        private IStateMachine<NavLayerSensor> GetNavSM() {
+        private static IStateMachine<NavLayerSensor> GetTestSM() {
+
+            State<NavLayerSensor> red = new(
+                (s) => {
+                    s.GetComponent<SpriteRenderer>().color = Color.red;
+                    s.moveCounter++;
+                }
+            );
+            State<NavLayerSensor> green = new(
+                (s) => {
+                    s.GetComponent<SpriteRenderer>().color = Color.green;
+                    s.moveCounter++;
+                }
+            );
+            State<NavLayerSensor> blue = new(
+                (s) => {
+                    s.GetComponent<SpriteRenderer>().color = Color.blue;
+                    s.moveCounter++;
+                }
+            );
+
+            Input<NavLayerSensor> changeColour = new((s) => {
+                if (s.moveCounter % 300 == 0) {
+                    s.moveCounter = 1;
+                    return true;
+                } else {
+                    return false;
+                }
+            });
+
+            return new StateMachine<NavLayerSensor>(
+                new IState<NavLayerSensor>[] { red, green, blue },
+                new IInput<NavLayerSensor>[] { changeColour },
+                new Dictionary<int, (int, int)[]>() {
+                    { 0, new (int, int)[] { (0, 1)} },
+                    { 1, new (int, int)[] { (0, 2) } },
+                    { 2, new (int, int)[] { (0, 0) } },
+                },
+                true
+            );
+        }
+
+        private static IStateMachine<NavLayerSensor> GetCrowdFlowSM() {
             float dirModifier = 0.5f;
+            float nodeDist = 1.5f;
+
             State<NavLayerSensor> initPath = new(
                 (s) => {
                     s.InitPath();
@@ -250,27 +316,30 @@ namespace Assets.Agent {
             );
             State<NavLayerSensor> updatePath = new(
                 (s) => {
-                    s.UpdatePath();
+                    s.GetComponent<SpriteRenderer>().color = Color.red;
+                    s.UpdateToShorterPath();
                 }
             );
             State<NavLayerSensor> escape = new(
                 (s) => {
+                    s.GetComponent<SpriteRenderer>().color = Color.blue;
                     s.moveCounter++;
-                    s.ApplyForce(dirModifier * s.GetDir());
+                    s.ApplyForce(dirModifier * s.GetDir(nodeDist));
                 }
             );
             State<NavLayerSensor> takeSteps = new(
                 (s) => {
+                    s.GetComponent<SpriteRenderer>().color = Color.magenta;
                     s.moveCounter++;
                     s.MoveLayer(-1);
-                }    
+                }
             );
 
             Input<NavLayerSensor> hasPath = new((s) => { return s.HasPath(); });
             Input<NavLayerSensor> onSteps = new((s) => { return s.ReadValue() == -2; });
             Input<NavLayerSensor> offSteps = new((s) => { return s.ReadValue() != -2; });
             Input<NavLayerSensor> needsUpdate = new((s) => {
-                if (s.moveCounter % 300 == 0) {
+                if (s.moveCounter % 30 == 0) {
                     s.moveCounter = 1;
                     return true;
                 } else {
@@ -286,6 +355,123 @@ namespace Assets.Agent {
                     { 1, new (int, int)[] { (0, 2) } },
                     { 2, new (int, int)[] { (1, 1), (2, 3) } },
                     { 3, new (int, int)[] { (2, 3), (3, 0) } },
+                },
+                true
+            );
+        }
+
+        private static IStateMachine<NavLayerSensor> GetNavSM() {
+            float dirModifier = 0.7f;
+            float nodeDist = 1.5f;
+
+            State<NavLayerSensor> initPath = new(
+                (s) => {
+                    s.InitPath();
+                }
+            );
+            State<NavLayerSensor> updatePath = new(
+                (s) => {
+                    s.GetComponent<SpriteRenderer>().color = Color.red;
+                    s.UpdatePath();
+                }
+            );
+            State<NavLayerSensor> escape = new(
+                (s) => {
+                    s.GetComponent<SpriteRenderer>().color = Color.blue;
+                    s.moveCounter++;
+                    s.ApplyForce(dirModifier * s.GetDir(nodeDist));
+                }
+            );
+            State<NavLayerSensor> takeSteps = new(
+                (s) => {
+                    s.GetComponent<SpriteRenderer>().color = Color.magenta;
+                    s.moveCounter++;
+                    s.MoveLayer(-1);
+                }    
+            );
+
+            Input<NavLayerSensor> hasPath = new((s) => { return s.HasPath(); });
+            Input<NavLayerSensor> onSteps = new((s) => { return s.ReadValue() == -2; });
+            Input<NavLayerSensor> offSteps = new((s) => { return s.ReadValue() != -2; });
+            Input<NavLayerSensor> needsUpdate = new((s) => {
+                if (s.moveCounter % 30 == 0) {
+                    s.moveCounter = 1;
+                    return true;
+                } else {
+                    return false;
+                }
+            });
+
+            return new StateMachine<NavLayerSensor>(
+                new IState<NavLayerSensor>[] { initPath, updatePath, escape, takeSteps },
+                new IInput<NavLayerSensor>[] { hasPath, needsUpdate, onSteps, offSteps },
+                new Dictionary<int, (int, int)[]>() {
+                    { 0, new (int, int)[] { (0, 2)} },
+                    { 1, new (int, int)[] { (0, 2) } },
+                    { 2, new (int, int)[] { (1, 1), (2, 3) } },
+                    { 3, new (int, int)[] { (2, 3), (3, 0) } },
+                },
+                true
+            );
+        }
+
+        private static IStateMachine<NavLayerSensor> GetEvacSM() {
+            float dirModifier = 0.7f;
+            float nodeDist = 1f;
+
+            State<NavLayerSensor> initPath = new(
+                (s) => {
+                    s.InitPath();
+                }
+            );
+            State<NavLayerSensor> updatePath = new(
+                (s) => {
+                    s.GetComponent<SpriteRenderer>().color = Color.red;
+                    s.UpdatePath();
+                }
+            );
+            State<NavLayerSensor> escape = new(
+                (s) => {
+                    s.GetComponent<SpriteRenderer>().color = Color.blue;
+                    s.moveCounter++;
+                    s.ApplyForce(dirModifier * s.GetDir(nodeDist));
+                }
+            );
+            State<NavLayerSensor> takeSteps = new(
+                (s) => {
+                    s.GetComponent<SpriteRenderer>().color = Color.magenta;
+                    s.moveCounter++;
+                    s.MoveLayer(-1);
+                }
+            );
+            State<NavLayerSensor> dead = new(
+                (s) => {
+                    s.GetComponent<SpriteRenderer>().color = Color.black;
+                }
+            );
+
+            Input<NavLayerSensor> hasPath = new((s) => { return s.HasPath(); });
+            Input<NavLayerSensor> onSteps = new((s) => { return s.ReadValue() == -2; });
+            Input<NavLayerSensor> offSteps = new((s) => { return s.ReadValue() != -2; });
+            Input<NavLayerSensor> needsUpdate = new((s) => {
+                if (s.moveCounter % 30 == 0) {
+                    s.moveCounter = 1;
+                    return true;
+                } else {
+                    return false;
+                }
+            });
+            Input<NavLayerSensor> isDead = new((s) => { return s.ReadValue() > 0.5f; });
+
+            return new StateMachine<NavLayerSensor>(
+                new IState<NavLayerSensor>[] { initPath, updatePath, escape, takeSteps, dead },
+                new IInput<NavLayerSensor>[] { hasPath, needsUpdate, onSteps, offSteps, isDead },
+                new Dictionary<int, (int, int)[]>() {
+                    { 0, new (int, int)[] { (0, 2), (4,4) } },
+                    { 1, new (int, int)[] { (0, 2), (4, 4) } },
+                    { 2, new (int, int)[] { (1, 1), (2, 3), (4, 4) } },
+                    { 3, new (int, int)[] { (2, 3), (3, 0), (4, 4) } },
+                    { 4, new (int, int)[] { } },
                 },
                 true
             );

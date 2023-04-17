@@ -14,6 +14,10 @@ namespace Assets.Environment {
         [JsonProperty]
         public float convolveModifier;
         [JsonProperty]
+        public string stateMachine;
+        [JsonProperty]
+        public float agentSize;
+        [JsonProperty]
         public bool loadAgentCoords;
 
         private static SimConfig instance;
@@ -54,10 +58,12 @@ namespace Assets.Environment {
         }
 
         [JsonConstructor]
-        private SimConfig(int bleedCount, float bleedModifier, float convolveModifier, bool loadAgentCoords) {
+        private SimConfig(int bleedCount, float bleedModifier, float convolveModifier, string stateMachine, float agentSize, bool loadAgentCoords) {
             this.bleedCount = bleedCount;
             this.bleedModifier = bleedModifier;
             this.convolveModifier = convolveModifier;
+            this.stateMachine = stateMachine;
+            this.agentSize = agentSize;
             this.loadAgentCoords = loadAgentCoords;
         }
     }

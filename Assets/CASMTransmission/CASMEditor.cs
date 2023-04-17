@@ -29,14 +29,12 @@ namespace Assets.Environment {
         void Start() {
             // Camera setup
             Vector3 newPos = Camera.main.transform.position;
-            /*newPos.z = z * Camera.main.transform.localScale.z * -layerSep;
-            newPos.z -= layerSep / 2;*/
             newPos.z = -layerSep / 2f;
             Camera.main.transform.position = newPos;
 
             // Load default layers
-            //string path = Application.dataPath + "/Layers/default/";
-            string path = Application.dataPath + "/Layers/dyn_pathfinding/";
+            string path = Application.dataPath + "/Layers/default/";
+            
             Debug.Log(path);
             DirectoryInfo environment = new DirectoryInfo(path);
             LoadSim(environment);
@@ -70,7 +68,7 @@ namespace Assets.Environment {
                 }
 
                 // Convert mouse position to an integer
-                Vector2Int curEditPos = new Vector2Int((int)(mPos.x / xScale), (int)(mPos.y / yScale));
+                Vector2Int curEditPos = new Vector2Int((int)(mPos.x+0.5 / xScale), (int)(mPos.y+0.5/ yScale));
                 for (int x = -brushRadius; x < brushRadius + 1; x++) {
                     for (int y = -brushRadius; y < brushRadius + 1; y++) {
                         environmentController.SetValue(z, curEditPos.y + y, curEditPos.x + x, brushVal);
